@@ -1,47 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>ROBOT Q0</title>
-    <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; background: white; }
-        .label { font-size: 20px; color: #666; margin-bottom: 10px; }
-        .price { font-size: 120px; font-weight: bold; color: black; }
-    </style>
+<title>Simco Price</title>
+<style>
+
+body{
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-size:60px;
+}
+
+</style>
 </head>
+
 <body>
-    <div class="label">ROBOTLAR Q0 FİYATI</div>
-    <div id="fiyat" class="price">...</div>
+
+<div id="price">Loading...</div>
 
 <script>
-    const URL = "https://script.google.com/macros/s/AKfycbweuwUcMcvFUsYdBMSvjL_FoT7fPJxBbHxG_9sUs5gYkkJjxkO1K-AIQ8-EkRTxGJer/exec";
 
-    async function fiyatCek() {
-        try {
-            const res = await fetch(URL);
-            const text = await res.text(); // Veriyi önce düz metin olarak al
-            const data = JSON.parse(text);
-            
-            // Eğer Google veriyi 'contents' içine koyduysa onu çıkar
-            let hamListe = data.contents ? JSON.parse(data.contents) : data;
-            if (typeof hamListe === 'string') hamListe = JSON.parse(hamListe);
+async function getPrice(){
 
-            // Filtre: resourceId 114 ve quality 0
-            const robot = hamListe.find(i => i.resourceId == 114 && i.quality == 0);
+const res = await fetch("/api/price");
+const data = await res.json();
 
-            if (robot) {
-                document.getElementById('fiyat').innerText = "$" + robot.price;
-            } else {
-                document.getElementById('fiyat').innerText = "BULUNAMADI";
-            }
-        } catch (e) {
-            document.getElementById('fiyat').innerText = "HATA";
-            console.log(e);
-        }
-    }
+document.getElementById("price").innerText = data.price;
 
-    fiyatCek();
-    setInterval(fiyatCek, 30000);
+}
+
+getPrice();
+
 </script>
+
 </body>
 </html>
