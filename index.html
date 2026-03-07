@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | Stratejik Avcı v28</title>
+    <title>SAB | Stratejik Avcı v29</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; --warn: #ff3e3e; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
@@ -14,7 +14,7 @@
         .alert { background: rgba(255, 62, 62, 0.5); color: white; border-color: var(--warn); animation: pulse 0.8s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         .stats { margin-top: 25px; font-size: 0.9em; color: #777; display: flex; justify-content: space-around; border-top: 1px solid #333; padding-top: 20px; }
-        #log { font-size: 0.75em; color: #666; margin-top: 20px; }
+        #log { font-size: 0.75em; color: #666; margin-top: 20px; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -22,12 +22,12 @@
 <div class="terminal">
     <div class="robot-label">ROBOTLAR (ID: 114) Q0</div>
     <div id="price" class="price-display">...</div>
-    <div id="status-box" class="analysis-box normal">SİSTEM BAĞLANILIYOR</div>
+    <div id="status-box" class="analysis-box normal">VERİ AYIKLANIYOR...</div>
     <div class="stats">
         <div>BAZ: <span id="base-p" style="color:#00ffff;">$800.00</span></div>
         <div>ALARM (+%3): <span id="thresh-p" style="color:#ffcc00;">$824.00</span></div>
     </div>
-    <div id="log">Radar başlatılıyor...</div>
+    <div id="log">Veri yapısı inceleniyor...</div>
 </div>
 
 <script>
@@ -46,29 +46,30 @@
 
         try {
             const response = await fetch(GOOGLE_URL);
-            let data = await response.json();
+            let rawData = await response.json();
             
-            // VERİ AYIKLAMA MOTORU (Filtreleme hatasını önlemek için)
-            let finalData = null;
+            // VERİ AYIKLAMA MOTORU (ZIRHLI)
+            let list = null;
 
-            if (Array.isArray(data)) {
-                finalData = data;
-            } else if (typeof data === 'string') {
-                finalData = JSON.parse(data);
-            } else if (data.contents) {
-                // Eğer veri bir nesne içindeyse (AllOrigins vb. gibi)
-                finalData = typeof data.contents === 'string' ? JSON.parse(data.contents) : data.contents;
+            if (Array.isArray(rawData)) {
+                list = rawData;
+            } else if (rawData.contents && Array.isArray(rawData.contents)) {
+                list = rawData.contents;
+            } else if (typeof rawData.contents === 'string') {
+                list = JSON.parse(rawData.contents);
+            } else if (typeof rawData === 'string') {
+                list = JSON.parse(rawData);
             }
 
-            if (finalData && Array.isArray(finalData)) {
-                const robot = finalData.find(item => item.resourceId === 114 && item.quality === 0);
+            if (list && Array.isArray(list)) {
+                const robot = list.find(item => (item.resourceId === 114 || item.id === 114) && (item.quality === 0 || item.q === 0));
 
                 if (robot) {
-                    const anlik = robot.price;
-                    priceEl.innerText = "$" + anlik.toFixed(2);
-                    logEl.innerText = "VERİ AKTİF: " + new Date().toLocaleTimeString();
+                    const price = robot.price;
+                    priceEl.innerText = "$" + price.toFixed(2);
+                    logEl.innerText = "VERİ ALINDI | GÜNCEL: " + new Date().toLocaleTimeString();
 
-                    if (anlik >= limit) {
+                    if (price >= limit) {
                         boxEl.innerHTML = "🚨 FİYAT YÜKSEK: İHALE GELEBİLİR!";
                         boxEl.className = "analysis-box alert";
                     } else {
@@ -79,10 +80,10 @@
                     logEl.innerText = "Robot 114 listede bulunamadı.";
                 }
             } else {
-                logEl.innerText = "Hata: Gelen veri formatı liste değil.";
+                logEl.innerText = "Hata: Liste ayıklanamadı. Veri Tipi: " + (typeof rawData);
             }
         } catch (e) {
-            logEl.innerText = "HATA: Veri işlenemedi. (Tip: " + typeof data + ")";
+            logEl.innerText = "Hata: " + e.message;
             boxEl.innerText = "YENİDEN DENENİYOR...";
         }
     }
