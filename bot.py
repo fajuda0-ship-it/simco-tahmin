@@ -1,35 +1,45 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import json
+import time
 
-def get_price():
-    url = "https://api.simcotools.com/v1/realms/0/market/prices"
-    headers = {"User-Agent": "Mozilla/5.0"}
+def get_price_with_selenium():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless") # Ekran açmadan çalışması için şart
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    
+    driver = webdriver.Chrome(options=chrome_options)
     
     try:
-        response = requests.get(url, headers=headers, timeout=15)
-        # Yanıt boş mu veya hatalı mı kontrol et
-        if response.status_code != 200:
-            return f"Simco Hatası: {response.status_code}"
-            
-        data = response.json()
+        # Fiyatın olduğu asıl sayfa linkini buraya koy (API değil, normal web sayfası)
+        url = "https://www.simcotools.com/market/prices" 
+        driver.get(url)
         
-        # Hatanın sebebi burası: Verinin liste olduğundan emin olmalıyız
-        if isinstance(data, list):
-            for item in data:
-                # 'item' bir sözlük (dictionary) mi kontrol et
-                if isinstance(item, dict):
-                    if str(item.get("resourceId")) == "114" and str(item.get("quality")) == "0":
-                        return item.get("price")
-            return "Robot 114 Bulunamadı"
-        else:
-            return "Veri Formatı Hatalı (Liste Değil)"
-            
+        # Sayfanın yüklenmesi için 5 saniye bekle
+        time.sleep(5) 
+        
+        # BURASI KRİTİK: Sayfadaki fiyatın olduğu yerin 'ID'sini veya 'Class'ını bulmalıyız.
+        # Örnek: Eğer fiyat <span class="price">895</span> içindeyse:
+        # price_element = driver.find_element(By.CLASS_NAME, "price")
+        
+        # Şimdilik debug için sayfa kaynağında 114'ü arayalım:
+        page_content = driver.page_source
+        # (Burada fiyatı çekmek için sayfanın HTML yapısını bilmemiz lazım)
+        
+        # Örnek sabit değer (Sayfayı inceleyip CSS Selector yazacağız):
+        price = "895" # Burayı selector ile bağlayacağız
+        
+        return price
     except Exception as e:
-        return f"Sistem Hatası: {str(e)[:50]}"
+        return f"Selenium Hatası: {str(e)[:50]}"
+    finally:
+        driver.quit()
 
-# Fiyatı al ve 'data.json' dosyasına güvenli bir şekilde kaydet
-current_price = get_price()
-with open("data.json", "w", encoding="utf-8") as f:
-    json.dump({"price": current_price}, f, ensure_ascii=False)
-
-print(f"İşlem Sonucu: {current_price}")
+# Kaydet
+current_price = get_price_with_selenium()
+with open("data.json", "w") as f:
+    json.dump({"price": current_price}, f)
