@@ -2,42 +2,46 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | Stratejik Robot Analizör</title>
+    <title>SAB | Stratejik Avcı v26</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; --warn: #ff3e3e; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; border-radius: 15px; width: 460px; text-align: center; box-shadow: 0 0 30px rgba(0,255,65,0.2); }
-        .robot-id { font-size: 1.1em; color: #00ffff; margin-bottom: 10px; letter-spacing: 1px; }
-        .price-display { font-size: 5.5em; font-weight: bold; color: white; margin: 10px 0; text-shadow: 0 0 20px var(--neon); }
-        .analysis-box { margin-top: 20px; padding: 25px; border-radius: 10px; font-size: 1.4em; font-weight: bold; transition: 0.5s; border: 1px solid #333; }
+        .terminal { border: 2px solid var(--neon); padding: 35px; background: #111; border-radius: 15px; width: 480px; text-align: center; box-shadow: 0 0 35px rgba(0,255,65,0.25); }
+        .robot-label { font-size: 1.2em; color: #00ffff; border: 1px solid #00ffff; padding: 8px 15px; margin-bottom: 25px; display: inline-block; letter-spacing: 2px; }
+        .price-display { font-size: 5.5em; font-weight: bold; color: white; margin: 15px 0; text-shadow: 0 0 25px var(--neon); }
+        .analysis-box { margin-top: 20px; padding: 25px; border-radius: 12px; font-size: 1.5em; font-weight: bold; border: 1px solid #333; transition: 0.4s; }
         .normal { background: rgba(0, 255, 65, 0.05); color: var(--neon); }
-        .alert { background: rgba(255, 62, 62, 0.4); color: white; border-color: var(--warn); animation: flash 0.6s infinite; }
-        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        .stats { margin-top: 25px; font-size: 0.85em; color: #666; display: flex; justify-content: space-around; border-top: 1px solid #333; padding-top: 15px; }
-        .log { font-size: 0.7em; color: #444; margin-top: 15px; }
+        .alert { background: rgba(255, 62, 62, 0.5); color: white; border-color: var(--warn); animation: pulse 0.8s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        .stats { margin-top: 25px; font-size: 0.9em; color: #777; display: flex; justify-content: space-around; border-top: 1px solid #333; padding-top: 20px; }
+        #log { font-size: 0.75em; color: #444; margin-top: 20px; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div class="robot-id">ROBOTLAR (ID: 114) | QUALITY: 0</div>
+    <div class="robot-label">ROBOTLAR (ID: 114) Q0</div>
     <div id="price" class="price-display">...</div>
-    <div id="status-box" class="analysis-box normal">VERİ BEKLENİYOR</div>
+    
+    <div id="status-box" class="analysis-box normal">
+        SİSTEM BAĞLANILIYOR
+    </div>
 
     <div class="stats">
         <div>BAZ: <span id="base-p" style="color:#00ffff;">$800.00</span></div>
-        <div>EŞİK (%3): <span id="thresh-p" style="color:#ffcc00;">$824.00</span></div>
+        <div>ALARM (+%3): <span id="thresh-p" style="color:#ffcc00;">$824.00</span></div>
     </div>
-    <div id="log" class="log">Sistem hazır, bağlantı kuruluyor...</div>
+    
+    <div id="log">Veri kanalı sorgulanıyor...</div>
 </div>
 
 <script>
-    // --- STRATEJİK AYARLAR ---
+    // --- KULLANICI AYARLARI ---
     const BAZ_FIYAT = 800.00; 
-    const ESIK_ORANI = 1.03; // %3 artış uyarısı
-    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz5oB7vPmvChcyVy41Zxr7JMqrUGwjXDYeHIvDXX5luMhXmHY83jCpw1SjrYcebvIuS/exec";
+    const ESIK_ORANI = 1.03; // %3 lük artış eşiği
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbweuwUcMcvFUsYdBMSvjL_FoT7fPJxBbHxG_9sUs5gYkkJjxkO1K-AIQ8-EkRTxGJer/exec";
 
-    async function sabAnalizYap() {
+    async function sabAnaliz() {
         const priceEl = document.getElementById('price');
         const boxEl = document.getElementById('status-box');
         const logEl = document.getElementById('log');
@@ -47,9 +51,9 @@
         document.getElementById('thresh-p').innerText = "$" + limit.toFixed(2);
 
         try {
-            // Google Script üzerinden Simco verisini çek
+            // Google Script (GAS) üzerinden veriyi çekiyoruz
             const response = await fetch(GOOGLE_URL);
-            if (!response.ok) throw new Error("Ağ hatası");
+            if (!response.ok) throw new Error("Google yanıt vermedi");
             
             const data = await response.json();
             
@@ -57,12 +61,12 @@
             const robot = data.find(item => item.resourceId === 114 && item.quality === 0);
 
             if (robot) {
-                const anlikFiyat = robot.price;
-                priceEl.innerText = "$" + anlikFiyat.toFixed(2);
-                logEl.innerText = "SON SENKRONİZASYON: " + new Date().toLocaleTimeString();
+                const anlik = robot.price;
+                priceEl.innerText = "$" + anlik.toFixed(2);
+                logEl.innerText = "VERİ ALINDI: " + new Date().toLocaleTimeString();
 
-                // %3 HESAPLAMA VE ALARM
-                if (anlikFiyat >= limit) {
+                // %3 STRATEJİ KONTROLÜ
+                if (anlik >= limit) {
                     boxEl.innerHTML = "🚨 FİYAT YÜKSEK: İHALE GELEBİLİR!";
                     boxEl.className = "analysis-box alert";
                 } else {
@@ -74,14 +78,16 @@
             }
         } catch (e) {
             console.error(e);
-            logEl.innerText = "BAĞLANTI HATASI: Google Script'e ulaşılamıyor.";
+            logEl.innerText = "HATA: " + e.message;
             boxEl.innerText = "YENİDEN DENENİYOR...";
         }
     }
 
-    // 30 saniyede bir otomatik tazeleme
-    sabAnalizYap();
-    setInterval(sabAnalizYap, 30000);
+    // İlk çalıştırma
+    sabAnaliz();
+    // Her 30 saniyede bir otomatik döngü
+    setInterval(sabAnaliz, 30000);
 </script>
+
 </body>
 </html>
