@@ -2,86 +2,82 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Simco Tahmin Terminali v8.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAB | Simco Robot Terminal</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; flex-direction: column; }
-        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 20px rgba(0,255,65,0.2); border-radius: 10px; width: 420px; text-align: center; }
-        .price-label { font-size: 1.1em; color: #aaa; margin-bottom: 5px; }
-        .price-value { font-size: 4.5em; font-weight: bold; color: white; text-shadow: 0 0 15px var(--neon); }
-        .prediction { margin-top: 20px; font-size: 1.5em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 15px; }
-        .status { margin-top: 15px; font-size: 0.75em; color: #666; }
-        .footer { margin-top: 25px; font-size: 0.9em; color: #008f11; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; }
-        .blink { animation: blinker 1.5s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 25px rgba(0,255,65,0.3); border-radius: 12px; width: 400px; text-align: center; position: relative; }
+        .price-label { font-size: 1.2em; color: #aaa; margin-bottom: 10px; letter-spacing: 1px; }
+        .price-value { font-size: 4.8em; font-weight: bold; color: white; text-shadow: 0 0 20px var(--neon); margin: 10px 0; }
+        .prediction { margin-top: 25px; font-size: 1.6em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 20px; text-transform: uppercase; }
+        .status { margin-top: 20px; font-size: 0.8em; color: #555; font-weight: normal; }
+        .footer { margin-top: 30px; font-size: 0.95em; color: #008f11; letter-spacing: 3px; font-weight: bold; border-top: 1px dashed #444; padding-top: 15px; width: 100%; }
+        .blink { animation: blinker 1.2s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.3; } }
+        .glitch { animation: glitch-effect 3s infinite; }
+        @keyframes glitch-effect { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div class="price-label">🤖 ROBOT Q0 CANLI BORSA</div>
-    <div id="robot-price" class="price-value">...</div>
+    <div class="price-label">🤖 ROBOT Q0 ANALİZ</div>
+    <div id="price" class="price-value">...</div>
     
-    <div id="prediction" class="prediction">ANALİZ YAPILIYOR</div>
+    <div id="prediction" class="prediction">SAB SİSTEMİ ÇEVRİMİÇİ</div>
     
     <div class="status">
-        <span id="dot" class="blink">●</span> 
-        <span id="log">Sistem başlatılıyor...</span>
+        <span class="blink" style="color:red">●</span> 
+        <span id="log">Veri çekiliyor...</span>
     </div>
 
     <div class="footer">SAB TARAFINDAN GELİŞTİRİLİR</div>
 </div>
 
 <script>
-    const TARGET = 'https://api.simcotools.com/v1/realms/0/market/prices';
-    const PROXIES = [
-        `https://api.allorigins.win/get?url=${encodeURIComponent(TARGET)}`,
-        `https://corsproxy.io/?${encodeURIComponent(TARGET)}`,
-        `https://thingproxy.freeboard.io/fetch/${TARGET}`
-    ];
+    // Google Script Köprüsü
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyI3eCkTkQVMdftx3txBYDvsI4lIvu1hPAHXnYskVgP2I1oxSKgW1BzibBkh0Nx_ZAO/exec";
 
-    async function updateStats(idx = 0) {
-        const log = document.getElementById('log');
-        const priceEl = document.getElementById('robot-price');
+    async function updateDashboard() {
+        const priceEl = document.getElementById('price');
+        const logEl = document.getElementById('log');
         const predEl = document.getElementById('prediction');
 
-        if (idx >= PROXIES.length) {
-            log.innerText = "YOĞUNLUK VAR, 30sn BEKLE...";
-            return;
-        }
-
         try {
-            log.innerText = `Kanal ${idx + 1} üzerinden bağlanılıyor...`;
-            const res = await fetch(PROXIES[idx]);
-            const json = await res.json();
-            const data = json.contents ? JSON.parse(json.contents) : json;
+            const response = await fetch(GOOGLE_URL);
+            const data = await response.json();
             
+            // Robot Q0 verisini bul (ID: 102)
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
-                const p = robot.price;
-                priceEl.innerText = "$" + p.toFixed(2);
-                log.innerText = "VERİ ALINDI | " + new Date().toLocaleTimeString();
+                const currentPrice = robot.price;
+                priceEl.innerText = "$" + currentPrice.toFixed(2);
+                logEl.innerText = "GÜNCEL: " + new Date().toLocaleTimeString();
                 
-                // İHALE TAHMİN MANTIĞI
-                if (p < 613) {
-                    predEl.innerHTML = "🚨 <span style='color:red'>İHALE GELİYOR!</span>";
+                // SAB ANALİZ ALGORİTMASI
+                // 200 ihale verisine göre eşik değerleri
+                if (currentPrice < 615) {
+                    predEl.innerHTML = "<span style='color:red'>🚨 İHALE ALARMI! 🚨</span>";
                     predEl.classList.add('blink');
-                } else if (p < 626) {
-                    predEl.innerText = "⚠️ TAHMİN: HAZIRLIKLI OL";
+                } else if (currentPrice < 628) {
+                    predEl.innerText = "⚠️ TAHMİN: YAKLAŞIYOR";
                     predEl.classList.remove('blink');
                 } else {
-                    predEl.innerText = "✅ DURUM: SAKİN";
+                    predEl.innerText = "✅ BORSA SAKİN";
                     predEl.classList.remove('blink');
                 }
             }
-        } catch (e) {
-            updateStats(idx + 1); // Başarısız olursa sonraki kanalı dene
+        } catch (error) {
+            logEl.innerText = "Bağlantı hatası, tekrar deneniyor...";
+            console.error(error);
         }
     }
 
-    updateStats();
-    setInterval(updateStats, 45000);
+    // İlk çalıştırma ve her 30 saniyede bir güncelleme
+    updateDashboard();
+    setInterval(updateDashboard, 30000);
 </script>
 
 </body>
