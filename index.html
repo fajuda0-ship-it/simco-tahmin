@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | Robot Terminal v13</title>
+    <title>SAB | Sunucu v14</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; flex-direction: column; }
@@ -11,58 +11,41 @@
         .price-value { font-size: 5em; font-weight: bold; color: white; text-shadow: 0 0 20px var(--neon); margin: 15px 0; }
         .prediction { margin-top: 20px; font-size: 1.6em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 20px; }
         .footer { margin-top: 30px; font-size: 0.9em; color: #008f11; letter-spacing: 3px; font-weight: bold; border-top: 1px dashed #444; padding-top: 15px; width: 100%; }
-        .status { font-size: 0.7em; margin-top: 10px; color: #555; }
-        .blink { animation: blinker 1.5s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        .status { font-size: 0.75em; margin-top: 10px; color: #666; }
     </style>
 </head>
 <body>
 
 <div class="terminal">
     <div class="robot-count">ROBOTLAR: 10</div>
-    <div style="color:#aaa; font-size: 0.9em; margin-top: 10px;">Q0 MARKET DEĞERİ</div>
     <div id="price" class="price-value">...</div>
-    <div id="prediction" class="prediction">VERİ ARANIYOR</div>
+    <div id="prediction" class="prediction">SUNUCUYA BAĞLANILIYOR</div>
     
     <div class="status">
-        <span class="blink" style="color:red">●</span> 
-        <span id="log">Google Hattı Sorgulanıyor...</span>
+        <span id="log">SAB v14 Sistem Hazırlanıyor...</span>
     </div>
 
     <div class="footer">SAB TARAFINDAN GELİŞTİRİLİR</div>
 </div>
 
 <script>
-    // SENİN GOOGLE LİNKİN (Lütfen linkin tam olduğundan emin ol)
-    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyI3eCkTkQVMdftx3txBYDvsI4lIvu1hPAHXnYskVgP2I1oxSKgW1BzibBkh0Nx_ZAO/exec";
-
-    async function fetchSAB() {
+    async function updateSAB() {
         const priceEl = document.getElementById('price');
         const logEl = document.getElementById('log');
         const predEl = document.getElementById('prediction');
 
         try {
-            // Vercel'in engellemesini aşmak için eklenen özel ayarlar:
-            const response = await fetch(GOOGLE_URL, {
-                method: 'GET',
-                mode: 'cors', // Google ile konuşmak için şart
-                cache: 'no-cache',
-                redirect: 'follow'
-            });
-
-            if (!response.ok) throw new Error("Ağ Yanıt Vermedi");
-
+            // Dış link yok! Kendi Vercel sunucumuzdan çekiyoruz.
+            const response = await fetch('/api/get-prices');
             const data = await response.json();
             
-            // Robot Q0 bulma (ID: 102)
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
                 const p = robot.price;
                 priceEl.innerText = "$" + p.toFixed(2);
-                logEl.innerText = "SON SENKRONİZASYON: " + new Date().toLocaleTimeString();
+                logEl.innerText = "SAB SUNUCUSU AKTİF | " + new Date().toLocaleTimeString();
                 
-                // ANALİZ MOTORU
                 if (p < 614) {
                     predEl.innerHTML = "🚨 <span style='color:red'>İHALE GELİYOR!</span>";
                 } else if (p < 627) {
@@ -70,19 +53,15 @@
                 } else {
                     predEl.innerText = "✅ BORSA SAKİN";
                 }
-            } else {
-                logEl.innerText = "Robot verisi listede bulunamadı!";
             }
         } catch (e) {
-            console.error("Hata Detayı:", e);
-            logEl.innerText = "Hata: Google bağlantısı kurulamadı.";
-            predEl.innerText = "YENİDEN DENENİYOR...";
+            logEl.innerText = "Sunucu yanıt vermedi, tekrar deneniyor...";
+            predEl.innerText = "BAĞLANTI BEKLENİYOR";
         }
     }
 
-    // Hemen çalıştır ve her 40 saniyede bir güncelle
-    fetchSAB();
-    setInterval(fetchSAB, 40000);
+    updateSAB();
+    setInterval(updateSAB, 30000);
 </script>
 
 </body>
