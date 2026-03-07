@@ -14,7 +14,7 @@
             background-color: #ffffff;
         }
         #price { 
-            font-size: 180px; 
+            font-size: 200px; 
             font-weight: bold; 
             color: #1a1a1a;
         }
@@ -22,33 +22,32 @@
 </head>
 <body>
 
-    <div id="price">YÜKLENİYOR...</div>
+    <div id="price">...</div>
 
     <script>
         async function updatePrice() {
             try {
-                // Senin en son verdiğin güncel Google Script linki
-                const url = 'https://script.google.com/macros/s/AKfycbxuJQoPZ2sI-aIqzp6fbkIZY5Azokl-DXMqu_5OUVoNdzNwy2jli_MAbP6d7w8uCKQt/exec';
+                // TIKIR TIKIR ÇALIŞAN YENİ LİNKİN:
+                const url = 'https://script.google.com/macros/s/AKfycby5ggcmOiX-UuDFJb2daypbsc6QVRWeFd0QBtpOjMVEwADZCokFcZjIOxX35ddOUORM/exec';
                 
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (data.price !== undefined) {
-                    // Rakamı bulduysak ekrana bas
+                if (data.price !== undefined && data.price !== null) {
                     document.getElementById('price').innerText = "$" + data.price;
                 } else {
-                    document.getElementById('price').innerText = "VERI YOK";
+                    document.getElementById('price').innerText = "YOK";
                 }
             } catch (e) {
-                document.getElementById('price').innerText = "BAGLANTI HATASI";
-                console.error("Hata:", e);
+                document.getElementById('price').innerText = "HATA";
+                console.error("Bağlantı sorunu:", e);
             }
         }
 
-        // Sayfa açılır açılmaz çalıştır
+        // Sayfa açıldığında çalıştır
         updatePrice();
         
-        // 30 saniyede bir otomatik tazele
+        // 30 saniyede bir fiyatı tazele
         setInterval(updatePrice, 30000);
     </script>
 </body>
