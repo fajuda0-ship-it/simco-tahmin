@@ -1,29 +1,36 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  
   try {
+    // Simco'yu kandırmak için gerçek bir tarayıcı gibi davranıyoruz (User-Agent)
     const response = await fetch('https://api.simcotools.com/v1/realms/0/market/prices', {
-      headers: { 'Cache-Control': 'no-cache' }
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
     });
-    const data = await response.json();
 
-    // Veri bazen bir objenin içindeki 'contents'te olabilir, onu sağlama alıyoruz
+    if (!response.ok) {
+      return res.status(200).json({ price: "Erişim Engellendi", code: response.status });
+    }
+
+    const data = await response.json();
     const list = Array.isArray(data) ? data : (data.contents || []);
 
-    // FİLTRE: Hem sayı hem metin ihtimaline karşı tırnaksız kontrol (==)
-    // Ayrıca verinin içinde 114 var mı diye konsola da yazdıralım (debug için)
+    if (list.length === 0) {
+      return res.status(200).json({ price: "Veri Gelmedi", debug: "Simco bos liste yolladi" });
+    }
+
     const item = list.find(i => String(i.resourceId) === "114" && String(i.quality) === "0");
 
     if (item) {
-      // 895 rakamını yakaladık!
       res.status(200).json({ price: item.price });
     } else {
-      // Eğer hala bulamazsa, listenin ilk elemanını gönder ki ne geldiğini görelim
-      res.status(200).json({ 
-        price: "Bulunamadı", 
-        debug: list.length > 0 ? "Liste dolu ama 114 yok" : "Liste tamamen boş" 
-      });
+      res.status(200).json({ price: "Bulunamadı" });
     }
   } catch (e) {
-    res.status(500).json({ price: "Bağlantı Hatası" });
+    res.status(200).json({ price: "Hata", detail: e.message });
   }
 }
