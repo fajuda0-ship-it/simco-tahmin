@@ -2,56 +2,81 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB Fiyat Takip</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAB Canlı Fiyat Takip</title>
     <style>
+        /* Modern ve temiz bir görünüm */
         body { 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             height: 100vh; 
             margin: 0; 
-            font-family: sans-serif; 
-            background-color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        #container {
+            text-align: center;
+        }
+        #label {
+            font-size: 24px;
+            color: #6c757d;
+            margin-bottom: -20px;
         }
         #price { 
-            font-size: 200px; 
-            font-weight: bold; 
-            color: #1a1a1a;
+            font-size: clamp(80px, 20vw, 250px); /* Ekran boyutuna göre büyür/küçülür */
+            font-weight: 900; 
+            letter-spacing: -5px;
+        }
+        #status {
+            font-size: 14px;
+            color: #adb5bd;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div id="price">YÜKLENİYOR...</div>
+    <div id="container">
+        <div id="label">SAB GÜNCEL FİYAT</div>
+        <div id="price">...</div>
+        <div id="status">Son güncelleme: <span id="time">Kontrol ediliyor...</span></div>
+    </div>
 
     <script>
         async function updatePrice() {
             try {
-                // En son verdiğin kusursuz çalışan link
-                const url = 'https://script.google.com/macros/s/AKfycbwnFcuhbnsGRvpXD511OMHEl2-vG6WptFLUHLADOUFblOxJiwrpRzIvNAJ7ZePvCzrR/exec';
+                // GitHub Actions'ın oluşturduğu yerel json dosyasını okuyoruz.
+                // 'cache: no-store' ekleyerek tarayıcının eski fiyatı göstermesini engelliyoruz.
+                const response = await fetch('data.json', { cache: 'no-store' });
                 
-                // Google yönlendirmelerini (redirect) kabul etmesi için mode: 'cors' ve redirect: 'follow' ekledik
-                const response = await fetch(url, {
-                    method: 'GET',
-                    mode: 'cors',
-                    redirect: 'follow'
-                });
+                if (!response.ok) throw new Error('Veri dosyası henüz oluşmadı');
                 
                 const data = await response.json();
                 
-                if (data && data.price !== undefined && data.price !== null) {
+                if (data && data.price) {
+                    // Fiyatı ekrana bas
                     document.getElementById('price').innerText = "$" + data.price;
+                    
+                    // Güncelleme saatini göster
+                    const simdi = new Date();
+                    document.getElementById('time').innerText = simdi.toLocaleTimeString('tr-TR');
                 } else {
                     document.getElementById('price').innerText = "YOK";
                 }
             } catch (e) {
+                console.error("Hata:", e);
                 document.getElementById('price').innerText = "HATA";
-                console.error("Detaylı Hata:", e);
+                document.getElementById('time').innerText = "Veri bekleniyor...";
             }
         }
 
+        // Sayfa açıldığında çalıştır
         updatePrice();
-        setInterval(updatePrice, 30000);
+        
+        // Her 5 dakikada bir kontrol et (Zaten Actions 15 dk bir güncelliyor)
+        setInterval(updatePrice, 300000);
     </script>
 </body>
 </html>
