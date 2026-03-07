@@ -2,30 +2,28 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB | Kesin Çözüm v11</title>
+    <title>SAB | Terminal v12</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; flex-direction: column; }
-        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 25px rgba(0,255,65,0.3); border-radius: 12px; width: 400px; text-align: center; }
-        .price-label { font-size: 1.2em; color: #aaa; margin-bottom: 10px; }
-        .price-value { font-size: 4.8em; font-weight: bold; color: white; text-shadow: 0 0 20px var(--neon); margin: 10px 0; }
-        .prediction { margin-top: 25px; font-size: 1.6em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 20px; text-transform: uppercase; }
-        .status { margin-top: 20px; font-size: 0.8em; color: #555; }
-        .footer { margin-top: 30px; font-size: 0.95em; color: #008f11; letter-spacing: 3px; font-weight: bold; border-top: 1px dashed #444; padding-top: 15px; width: 100%; }
-        .blink { animation: blinker 1.2s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.3; } }
+        .terminal { border: 2px solid var(--neon); padding: 35px; background: #111; box-shadow: 0 0 30px rgba(0,255,65,0.4); border-radius: 15px; width: 400px; text-align: center; }
+        .price-value { font-size: 5em; font-weight: bold; color: white; text-shadow: 0 0 20px var(--neon); margin: 15px 0; }
+        .prediction { margin-top: 25px; font-size: 1.6em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 20px; }
+        .status { margin-top: 15px; font-size: 0.8em; color: #666; }
+        .footer { margin-top: 30px; font-size: 0.9em; color: #008f11; letter-spacing: 3px; font-weight: bold; border-top: 1px dashed #444; padding-top: 15px; width: 100%; }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div class="price-label">🤖 ROBOT Q0 ANALİZ</div>
+    <div style="color:#aaa;">🤖 ROBOT Q0 ANALİZÖRÜ</div>
     <div id="price" class="price-value">...</div>
-    <div id="prediction" class="prediction">SAB SİSTEMİ ÇEVRİMİÇİ</div>
+    <div id="prediction" class="prediction">SAB AKTİF</div>
     <div class="status">
         <span class="blink" style="color:red">●</span> 
-        <span id="log">Veri çekiliyor...</span>
+        <span id="log">Veri köprüsü kuruluyor...</span>
     </div>
     <div class="footer">SAB TARAFINDAN GELİŞTİRİLİR</div>
 </div>
@@ -33,48 +31,41 @@
 <script>
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyI3eCkTkQVMdftx3txBYDvsI4lIvu1hPAHXnYskVgP2I1oxSKgW1BzibBkh0Nx_ZAO/exec";
 
-    async function updateDashboard() {
+    async function getSABData() {
         const priceEl = document.getElementById('price');
         const logEl = document.getElementById('log');
         const predEl = document.getElementById('prediction');
 
         try {
-            // KRİTİK AYAR: redirect: 'follow' ekledik
-            const response = await fetch(GOOGLE_URL, { 
-                method: 'GET',
-                redirect: 'follow' 
-            });
-
-            if (!response.ok) throw new Error("Ağ hatası");
-            
+            // Google yönlendirmesini takip eden en temiz istek
+            const response = await fetch(GOOGLE_URL);
             const data = await response.json();
+            
+            // Robot Q0 bulma (ID: 102)
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
-                const currentPrice = robot.price;
-                priceEl.innerText = "$" + currentPrice.toFixed(2);
+                const p = robot.price;
+                priceEl.innerText = "$" + p.toFixed(2);
                 logEl.innerText = "GÜNCEL: " + new Date().toLocaleTimeString();
                 
-                if (currentPrice < 615) {
-                    predEl.innerHTML = "<span style='color:red'>🚨 İHALE ALARMI! 🚨</span>";
-                    predEl.classList.add('blink');
-                } else if (currentPrice < 628) {
-                    predEl.innerText = "⚠️ TAHMİN: YAKLAŞIYOR";
-                    predEl.classList.remove('blink');
+                // İHALE TAHMİNİ
+                if (p < 613) {
+                    predEl.innerHTML = "🚨 <span style='color:red'>İHALE GELİYOR!</span>";
+                } else if (p < 626) {
+                    predEl.innerText = "⚠️ TAHMİN: HAZIR OL";
                 } else {
                     predEl.innerText = "✅ BORSA SAKİN";
-                    predEl.classList.remove('blink');
                 }
             }
-        } catch (error) {
-            logEl.innerText = "Hata: Google yanıt vermedi. Yeniden deneniyor...";
-            console.error(error);
+        } catch (e) {
+            logEl.innerText = "Yeniden deneniyor...";
+            console.error("Hata:", e);
         }
     }
 
-    updateDashboard();
-    setInterval(updateDashboard, 30000); // 30 saniyede bir güncelle
+    getSABData();
+    setInterval(getSABData, 30000);
 </script>
-
 </body>
 </html>
