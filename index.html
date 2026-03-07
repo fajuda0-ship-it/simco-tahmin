@@ -2,19 +2,19 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | Stratejik Avcı v27</title>
+    <title>SAB | Stratejik Avcı v28</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; --warn: #ff3e3e; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .terminal { border: 2px solid var(--neon); padding: 35px; background: #111; border-radius: 15px; width: 480px; text-align: center; box-shadow: 0 0 35px rgba(0,255,65,0.25); }
-        .robot-label { font-size: 1.2em; color: #00ffff; border: 1px solid #00ffff; padding: 8px 15px; margin-bottom: 25px; display: inline-block; letter-spacing: 2px; }
+        .robot-label { font-size: 1.2em; color: #00ffff; border: 1px solid #00ffff; padding: 8px 15px; margin-bottom: 25px; display: inline-block; }
         .price-display { font-size: 5.5em; font-weight: bold; color: white; margin: 15px 0; text-shadow: 0 0 25px var(--neon); }
         .analysis-box { margin-top: 20px; padding: 25px; border-radius: 12px; font-size: 1.5em; font-weight: bold; border: 1px solid #333; transition: 0.4s; }
         .normal { background: rgba(0, 255, 65, 0.05); color: var(--neon); }
         .alert { background: rgba(255, 62, 62, 0.5); color: white; border-color: var(--warn); animation: pulse 0.8s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         .stats { margin-top: 25px; font-size: 0.9em; color: #777; display: flex; justify-content: space-around; border-top: 1px solid #333; padding-top: 20px; }
-        #log { font-size: 0.75em; color: #444; margin-top: 20px; font-style: italic; }
+        #log { font-size: 0.75em; color: #666; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -22,15 +22,12 @@
 <div class="terminal">
     <div class="robot-label">ROBOTLAR (ID: 114) Q0</div>
     <div id="price" class="price-display">...</div>
-    
     <div id="status-box" class="analysis-box normal">SİSTEM BAĞLANILIYOR</div>
-
     <div class="stats">
         <div>BAZ: <span id="base-p" style="color:#00ffff;">$800.00</span></div>
         <div>ALARM (+%3): <span id="thresh-p" style="color:#ffcc00;">$824.00</span></div>
     </div>
-    
-    <div id="log">Veri kanalı sorgulanıyor...</div>
+    <div id="log">Radar başlatılıyor...</div>
 </div>
 
 <script>
@@ -49,32 +46,43 @@
 
         try {
             const response = await fetch(GOOGLE_URL);
-            let rawData = await response.json();
+            let data = await response.json();
             
-            // KRİTİK DÜZELTME: Eğer veri yazı olarak geldiyse listeye çevir
-            let data = (typeof rawData === 'string') ? JSON.parse(rawData) : rawData;
-            
-            // Şimdi gönül rahatlığıyla .find kullanabiliriz
-            const robot = data.find(item => item.resourceId === 114 && item.quality === 0);
+            // VERİ AYIKLAMA MOTORU (Filtreleme hatasını önlemek için)
+            let finalData = null;
 
-            if (robot) {
-                const anlik = robot.price;
-                priceEl.innerText = "$" + anlik.toFixed(2);
-                logEl.innerText = "GÜNCEL: " + new Date().toLocaleTimeString();
+            if (Array.isArray(data)) {
+                finalData = data;
+            } else if (typeof data === 'string') {
+                finalData = JSON.parse(data);
+            } else if (data.contents) {
+                // Eğer veri bir nesne içindeyse (AllOrigins vb. gibi)
+                finalData = typeof data.contents === 'string' ? JSON.parse(data.contents) : data.contents;
+            }
 
-                if (anlik >= limit) {
-                    boxEl.innerHTML = "🚨 FİYAT YÜKSEK: İHALE GELEBİLİR!";
-                    boxEl.className = "analysis-box alert";
+            if (finalData && Array.isArray(finalData)) {
+                const robot = finalData.find(item => item.resourceId === 114 && item.quality === 0);
+
+                if (robot) {
+                    const anlik = robot.price;
+                    priceEl.innerText = "$" + anlik.toFixed(2);
+                    logEl.innerText = "VERİ AKTİF: " + new Date().toLocaleTimeString();
+
+                    if (anlik >= limit) {
+                        boxEl.innerHTML = "🚨 FİYAT YÜKSEK: İHALE GELEBİLİR!";
+                        boxEl.className = "analysis-box alert";
+                    } else {
+                        boxEl.innerHTML = "✅ PİYASA SEYRİ NORMAL";
+                        boxEl.className = "analysis-box normal";
+                    }
                 } else {
-                    boxEl.innerHTML = "✅ PİYASA SEYRİ NORMAL";
-                    boxEl.className = "analysis-box normal";
+                    logEl.innerText = "Robot 114 listede bulunamadı.";
                 }
             } else {
-                logEl.innerText = "Robot (ID 114) listede bulunamadı.";
+                logEl.innerText = "Hata: Gelen veri formatı liste değil.";
             }
         } catch (e) {
-            console.error("Hata Detayı:", e);
-            logEl.innerText = "HATA: " + e.message;
+            logEl.innerText = "HATA: Veri işlenemedi. (Tip: " + typeof data + ")";
             boxEl.innerText = "YENİDEN DENENİYOR...";
         }
     }
@@ -82,6 +90,5 @@
     sabAnaliz();
     setInterval(sabAnaliz, 30000);
 </script>
-
 </body>
 </html>
