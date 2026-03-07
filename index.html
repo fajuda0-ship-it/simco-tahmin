@@ -1,27 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <title>SAB Fiyat Takip</title>
     <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
-        #display { font-size: 150px; font-weight: bold; }
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f4f4;
+        }
+        #price { 
+            font-size: 180px; 
+            font-weight: bold; 
+            color: #2c3e50;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
-    <div id="display">YÜKLENİYOR...</div>
+
+    <div id="price">YÜKLENİYOR...</div>
+
     <script>
-        async function get() {
+        async function updatePrice() {
             try {
-                // Kendi sitenin API ucuna git
-                const r = await fetch('/api/price');
-                const d = await r.json();
-                document.getElementById('display').innerText = d.price ? "$" + d.price : "VERİ YOK";
+                // Senin yeni Google Script linkin
+                const url = 'https://script.google.com/macros/s/AKfycbyCRmM5on64hveJVNClRqHeoKe6DbpvLw01SrUdB1IhNuFp5i8baqxrMcuSH_jP6HHX/exec';
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.price !== undefined) {
+                    document.getElementById('price').innerText = "$" + data.price;
+                } else if (data.error) {
+                    document.getElementById('price').innerText = "BULUNAMADI";
+                }
             } catch (e) {
-                document.getElementById('display').innerText = "HATA";
+                document.getElementById('price').innerText = "BAĞLANTI YOK";
+                console.error("Hata:", e);
             }
         }
-        get();
-        setInterval(get, 30000);
+
+        // İlk çalıştırma
+        updatePrice();
+        
+        // 30 saniyede bir otomatik yenileme
+        setInterval(updatePrice, 30000);
     </script>
 </body>
 </html>
