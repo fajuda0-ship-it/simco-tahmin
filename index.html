@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | Sunucu v14</title>
+    <title>SAB | Robot Terminal v15</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; flex-direction: column; }
@@ -12,6 +12,8 @@
         .prediction { margin-top: 20px; font-size: 1.6em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 20px; }
         .footer { margin-top: 30px; font-size: 0.9em; color: #008f11; letter-spacing: 3px; font-weight: bold; border-top: 1px dashed #444; padding-top: 15px; width: 100%; }
         .status { font-size: 0.75em; margin-top: 10px; color: #666; }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
@@ -19,32 +21,47 @@
 <div class="terminal">
     <div class="robot-count">ROBOTLAR: 10</div>
     <div id="price" class="price-value">...</div>
-    <div id="prediction" class="prediction">SUNUCUYA BAĞLANILIYOR</div>
-    
+    <div id="prediction" class="prediction">VERİ ARANIYOR</div>
     <div class="status">
-        <span id="log">SAB v14 Sistem Hazırlanıyor...</span>
+        <span class="blink" style="color:red">●</span> 
+        <span id="log">SAB v15 Başlatılıyor...</span>
     </div>
-
     <div class="footer">SAB TARAFINDAN GELİŞTİRİLİR</div>
 </div>
 
 <script>
-    async function updateSAB() {
+    const target = 'https://api.simcotools.com/v1/realms/0/market/prices';
+    // Dünyanın en hızlı 3 proxy kanalı
+    const proxies = [
+        `https://api.allorigins.win/get?url=${encodeURIComponent(target)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${target}`,
+        `https://corsproxy.io/?${encodeURIComponent(target)}`
+    ];
+
+    async function tryFetch(index = 0) {
         const priceEl = document.getElementById('price');
         const logEl = document.getElementById('log');
         const predEl = document.getElementById('prediction');
 
+        if (index >= proxies.length) {
+            logEl.innerText = "TÜM KANALLAR MEŞGUL, 10sn SONRA TEKRAR...";
+            setTimeout(() => tryFetch(0), 10000);
+            return;
+        }
+
         try {
-            // Dış link yok! Kendi Vercel sunucumuzdan çekiyoruz.
-            const response = await fetch('/api/get-prices');
-            const data = await response.json();
+            logEl.innerText = `Kanal ${index + 1} üzerinden çekiliyor...`;
+            const response = await fetch(proxies[index]);
+            const raw = await response.json();
             
+            // Veri yapısı AllOrigins için "contents", diğerleri için direkt kendisidir
+            const data = raw.contents ? JSON.parse(raw.contents) : raw;
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
                 const p = robot.price;
                 priceEl.innerText = "$" + p.toFixed(2);
-                logEl.innerText = "SAB SUNUCUSU AKTİF | " + new Date().toLocaleTimeString();
+                logEl.innerText = "BAĞLANTI BAŞARILI | " + new Date().toLocaleTimeString();
                 
                 if (p < 614) {
                     predEl.innerHTML = "🚨 <span style='color:red'>İHALE GELİYOR!</span>";
@@ -55,13 +72,13 @@
                 }
             }
         } catch (e) {
-            logEl.innerText = "Sunucu yanıt vermedi, tekrar deneniyor...";
-            predEl.innerText = "BAĞLANTI BEKLENİYOR";
+            console.warn(`Kanal ${index + 1} hata verdi, bir sonrakine geçiliyor...`);
+            tryFetch(index + 1);
         }
     }
 
-    updateSAB();
-    setInterval(updateSAB, 30000);
+    tryFetch();
+    setInterval(() => tryFetch(0), 45000);
 </script>
 
 </body>
