@@ -1,20 +1,34 @@
 export default async function handler(req, res) {
+  // Dışarıdan erişime izin ver
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+
   try {
+    // 1. Simco'dan veriyi çek
     const response = await fetch('https://api.simcotools.com/v1/realms/0/market/prices', {
       headers: { 'Cache-Control': 'no-cache' }
     });
-    const data = await response.json();
     
-    // Senin verdiğin o spesifik bloğu buluyoruz
-    const item = data.find(i => i.resourceId === 114 && i.quality === 0);
+    const allData = await response.json();
 
-    if (item) {
-      res.status(200).json({ price: item.price });
-    } else {
-      res.status(404).json({ error: "Robot 114 Bulunamadı" });
+    // 2. Kontrol: Gelen veri bir liste mi?
+    if (!Array.isArray(allData)) {
+      return res.status(200).json({ price: "Liste Hatası" });
     }
-  } catch (e) {
-    res.status(500).json({ error: "Simco'ya bağlanılamadı" });
+
+    // 3. KRİTİK NOKTA: Senin verdiğin ID 114 ve Kalite 0 filtrelemesi
+    // "==" kullanarak tip farklarını (yazı/sayı) ortadan kaldırıyoruz
+    const robot = allData.find(item => item.resourceId == 114 && item.quality == 0);
+
+    if (robot) {
+      // Sadece fiyatı gönder
+      return res.status(200).json({ price: robot.price });
+    } else {
+      // Eğer listede 114 yoksa bunu bildir
+      return res.status(200).json({ price: "114 Bulunamadı" });
+    }
+
+  } catch (error) {
+    return res.status(200).json({ price: "Bağlantı Koptu" });
   }
 }
