@@ -1,49 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Simco Price</title>
-
-<style>
-
-body{
-font-family:Arial;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-font-size:60px;
-}
-
-</style>
-
+    <title>Simco Price</title>
+    <style>
+        body { font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 80px; font-weight: bold; margin: 0; }
+    </style>
 </head>
-
 <body>
+    <div id="price">Loading...</div>
 
-<div id="price">Loading...</div>
-
-<script>
-
-async function loadPrice(){
-
-try{
-
-const res = await fetch("/api/price");
-const data = await res.json();
-
-document.getElementById("price").innerText = data.price;
-
-}catch(e){
-
-document.getElementById("price").innerText = "API error";
-
-}
-
-}
-
-loadPrice();
-
-</script>
-
+    <script>
+        async function getPrice() {
+            try {
+                // EĞER DOSYA ADIN get-prices.js KALACAKSA SONU /api/get-prices OLMALI
+                // EĞER prices.js YAPARSAN SONU /api/prices OLMALI
+                const r = await fetch('/api/get-prices'); 
+                const d = await r.json();
+                
+                if (d.price) {
+                    document.getElementById('price').innerText = "$" + d.price;
+                } else {
+                    document.getElementById('price').innerText = "Veri Yok";
+                }
+            } catch (e) {
+                document.getElementById('price').innerText = "Hata";
+            }
+        }
+        getPrice();
+        setInterval(getPrice, 30000);
+    </script>
 </body>
 </html>
