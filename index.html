@@ -2,83 +2,89 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | Robot Terminal v15</title>
+    <title>SAB | İhale Tahmin Sistemi</title>
     <style>
-        :root { --neon: #00ff41; --bg: #050505; }
-        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; flex-direction: column; }
-        .terminal { border: 2px solid var(--neon); padding: 35px; background: #111; box-shadow: 0 0 30px rgba(0,255,65,0.4); border-radius: 15px; width: 420px; text-align: center; }
-        .robot-count { font-size: 1.2em; color: #00ffff; margin-bottom: 10px; border: 1px solid #00ffff; display: inline-block; padding: 5px 15px; border-radius: 5px; }
-        .price-value { font-size: 5em; font-weight: bold; color: white; text-shadow: 0 0 20px var(--neon); margin: 15px 0; }
-        .prediction { margin-top: 20px; font-size: 1.6em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 20px; }
-        .footer { margin-top: 30px; font-size: 0.9em; color: #008f11; letter-spacing: 3px; font-weight: bold; border-top: 1px dashed #444; padding-top: 15px; width: 100%; }
-        .status { font-size: 0.75em; margin-top: 10px; color: #666; }
-        .blink { animation: blinker 1.5s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        :root { --neon: #00ff41; --bg: #050505; --warning: #ff3e3e; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; border-radius: 15px; width: 450px; text-align: center; box-shadow: 0 0 40px rgba(0,255,65,0.2); }
+        .header { font-size: 0.9em; letter-spacing: 2px; color: #888; margin-bottom: 20px; }
+        .price-box { margin: 20px 0; }
+        .current-price { font-size: 5em; font-weight: bold; color: #fff; }
+        .base-price { font-size: 1.1em; color: #00ffff; margin-bottom: 5px; }
+        .alert-box { margin-top: 25px; padding: 20px; border-radius: 10px; font-weight: bold; font-size: 1.4em; border: 1px solid #333; transition: all 0.5s; }
+        .status-normal { background: rgba(0, 255, 65, 0.1); color: var(--neon); }
+        .status-high { background: rgba(255, 62, 62, 0.2); color: var(--warning); border-color: var(--warning); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+        .footer { margin-top: 30px; font-size: 0.8em; opacity: 0.6; border-top: 1px solid #333; padding-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div class="robot-count">ROBOTLAR: 10</div>
-    <div id="price" class="price-value">...</div>
-    <div id="prediction" class="prediction">VERİ ARANIYOR</div>
-    <div class="status">
-        <span class="blink" style="color:red">●</span> 
-        <span id="log">SAB v15 Başlatılıyor...</span>
+    <div class="header">SAB STRATEJİK TAHMİN MERKEZİ</div>
+    
+    <div class="price-box">
+        <div class="base-price">HAFTALIK BAZ FİYAT: <span id="ref-price">$610.00</span></div>
+        <div id="price" class="current-price">...</div>
+        <div style="font-size: 0.8em; color: #666;">ANLIK ROBOT Q0 FİYATI</div>
     </div>
-    <div class="footer">SAB TARAFINDAN GELİŞTİRİLİR</div>
+
+    <div id="alert" class="alert-box status-normal">
+        PİYASA ANALİZ EDİLİYOR...
+    </div>
+
+    <div class="footer">
+        SAB TARAFINDAN GELİŞTİRİLİR <br>
+        <span id="log">Sistem verisi bekleniyor...</span>
+    </div>
 </div>
 
 <script>
-    const target = 'https://api.simcotools.com/v1/realms/0/market/prices';
-    // Dünyanın en hızlı 3 proxy kanalı
-    const proxies = [
-        `https://api.allorigins.win/get?url=${encodeURIComponent(target)}`,
-        `https://api.codetabs.com/v1/proxy?quest=${target}`,
-        `https://corsproxy.io/?${encodeURIComponent(target)}`
-    ];
+    // AYARLAR
+    let referencePrice = 610.00; // Son 1 haftalık genel düzey (Burayı değiştirebilirsin)
+    const targetUrl = 'https://api.simcotools.com/v1/realms/0/market/prices';
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
-    async function tryFetch(index = 0) {
+    async function checkMarket() {
         const priceEl = document.getElementById('price');
+        const alertEl = document.getElementById('alert');
         const logEl = document.getElementById('log');
-        const predEl = document.getElementById('prediction');
+        const refEl = document.getElementById('ref-price');
 
-        if (index >= proxies.length) {
-            logEl.innerText = "TÜM KANALLAR MEŞGUL, 10sn SONRA TEKRAR...";
-            setTimeout(() => tryFetch(0), 10000);
-            return;
-        }
+        refEl.innerText = "$" + referencePrice.toFixed(2);
 
         try {
-            logEl.innerText = `Kanal ${index + 1} üzerinden çekiliyor...`;
-            const response = await fetch(proxies[index]);
-            const raw = await response.json();
+            const res = await fetch(proxy);
+            const raw = await res.json();
+            const data = JSON.parse(raw.contents);
             
-            // Veri yapısı AllOrigins için "contents", diğerleri için direkt kendisidir
-            const data = raw.contents ? JSON.parse(raw.contents) : raw;
+            // Robot Q0 bul (ID: 102)
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
-                const p = robot.price;
-                priceEl.innerText = "$" + p.toFixed(2);
-                logEl.innerText = "BAĞLANTI BAŞARILI | " + new Date().toLocaleTimeString();
-                
-                if (p < 614) {
-                    predEl.innerHTML = "🚨 <span style='color:red'>İHALE GELİYOR!</span>";
-                } else if (p < 627) {
-                    predEl.innerText = "⚠️ TAHMİN: HAZIR OL";
+                const current = robot.price;
+                priceEl.innerText = "$" + current.toFixed(2);
+                logEl.innerText = "SON GÜNCELLEME: " + new Date().toLocaleTimeString();
+
+                // MATEMATİKSEL KONTROL (%3 eşiği)
+                const threshold = referencePrice * 1.03;
+
+                if (current >= threshold) {
+                    alertEl.innerHTML = "⚠️ FİYAT YÜKSEK: İHALE GELEBİLİR!";
+                    alertEl.className = "alert-box status-high";
                 } else {
-                    predEl.innerText = "✅ BORSA SAKİN";
+                    alertEl.innerHTML = "✅ PİYASA SEYRİ NORMAL";
+                    alertEl.className = "alert-box status-normal";
                 }
             }
         } catch (e) {
-            console.warn(`Kanal ${index + 1} hata verdi, bir sonrakine geçiliyor...`);
-            tryFetch(index + 1);
+            logEl.innerText = "Veri çekme hatası, kanallar zorlanıyor...";
         }
     }
 
-    tryFetch();
-    setInterval(() => tryFetch(0), 45000);
+    // Her 30 saniyede bir otomatik analiz
+    checkMarket();
+    setInterval(checkMarket, 30000);
 </script>
 
 </body>
