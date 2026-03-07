@@ -2,15 +2,14 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Simco Tahmin Terminali v4.0</title>
+    <title>Simco Tahmin v7.0</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 20px rgba(0,255,65,0.2); border-radius: 10px; width: 450px; text-align: center; }
-        .price-label { font-size: 1.2em; color: #aaa; margin-bottom: 10px; }
+        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 20px rgba(0,255,65,0.2); border-radius: 10px; width: 420px; text-align: center; }
         .price-value { font-size: 4em; font-weight: bold; color: white; text-shadow: 0 0 10px var(--neon); }
-        .prediction { margin-top: 20px; font-size: 1.5em; border-top: 1px solid #333; padding-top: 15px; color: #ffcc00; font-weight: bold; }
-        .status { margin-top: 15px; font-size: 0.7em; color: #666; }
+        .prediction { margin-top: 20px; font-size: 1.4em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 15px; }
+        .log { margin-top: 15px; font-size: 0.7em; color: #666; }
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
     </style>
@@ -18,73 +17,59 @@
 <body>
 
 <div class="terminal">
-    <div class="price-label">🤖 ROBOT Q0 CANLI TAKİP</div>
+    <div style="color:#aaa; margin-bottom:10px;">🤖 ROBOT Q0 TAKİP</div>
     <div id="robot-price" class="price-value">...</div>
-    <div id="prediction" class="prediction">ANALİZ EDİLİYOR</div>
-    <div class="status">
-        <span id="dot" class="blink">●</span> 
-        <span id="log">Sistem başlatıldı...</span>
-    </div>
+    <div id="prediction" class="prediction">VERİ BEKLENİYOR</div>
+    <div class="log" id="log">Sistem başlatılıyor...</div>
 </div>
 
 <script>
+    // En sağlam 3 farklı aracı (Proxy) kanal
     const TARGET = 'https://api.simcotools.com/v1/realms/0/market/prices';
-    
-    // Sırasıyla denenecek proxy listesi (CORS engelini aşmak için)
     const PROXIES = [
         `https://api.allorigins.win/get?url=${encodeURIComponent(TARGET)}`,
-        `https://corsproxy.io/?${encodeURIComponent(TARGET)}`
+        `https://corsproxy.io/?${encodeURIComponent(TARGET)}`,
+        `https://thingproxy.freeboard.io/fetch/${TARGET}`
     ];
 
-    async function fetchData(proxyIndex = 0) {
-        const logEl = document.getElementById('log');
+    async function getStats(index = 0) {
+        const log = document.getElementById('log');
         const priceEl = document.getElementById('robot-price');
         const predEl = document.getElementById('prediction');
 
-        if (proxyIndex >= PROXIES.length) {
-            logEl.innerText = "TÜM ARACILAR MEŞGUL. 30sn BEKLE...";
+        if (index >= PROXIES.length) {
+            log.innerText = "TÜM YOLLAR MEŞGUL, 30sn BEKLE...";
             return;
         }
 
         try {
-            logEl.innerText = `Bağlanılıyor (Kanal ${proxyIndex + 1})...`;
-            const response = await fetch(PROXIES[proxyIndex]);
-            
-            if (!response.ok) throw new Error('Proxy hatası');
-
-            const result = await response.json();
-            // AllOrigins yapısı farklı olduğu için contents kontrolü yapıyoruz
-            const data = result.contents ? JSON.parse(result.contents) : result;
+            log.innerText = `Kanal ${index + 1} deneniyor...`;
+            const res = await fetch(PROXIES[index]);
+            const json = await res.json();
+            const data = json.contents ? JSON.parse(json.contents) : json;
             
             const robot = data.find(item => item.id === 102);
-
             if (robot) {
-                const price = robot.price;
-                priceEl.innerText = "$" + price.toFixed(2);
-                logEl.innerText = "VERİ ALINDI | " + new Date().toLocaleTimeString();
+                const p = robot.price;
+                priceEl.innerText = "$" + p.toFixed(2);
+                log.innerText = "BAĞLANTI TAMAM | " + new Date().toLocaleTimeString();
                 
-                // --- İHALE TAHMİN MANTIĞI ---
-                if (price < 610) {
-                    predEl.innerHTML = "🚨 <span style='color:red'>KRİTİK: İHALE GELİYOR!</span>";
+                // ANALİZ (Senin 200 ihale tecrübene göre)
+                if (p < 615) {
+                    predEl.innerHTML = "🚨 <span style='color:red'>İHALE GELEBİLİR!</span>";
                     predEl.classList.add('blink');
-                } else if (price < 625) {
-                    predEl.innerText = "⚠️ TAHMİN: HAZIRLIKLI OL";
-                    predEl.classList.remove('blink');
                 } else {
-                    predEl.innerText = "✅ DURUM: BORSA SAKİN";
+                    predEl.innerText = "✅ BORSA SAKİN";
                     predEl.classList.remove('blink');
                 }
             }
-        } catch (error) {
-            console.warn(`Kanal ${proxyIndex + 1} başarısız, diğeri deneniyor...`);
-            fetchData(proxyIndex + 1); // Bir sonraki proxy'yi dene
+        } catch (e) {
+            getStats(index + 1); // Hata varsa sonraki kanala geç
         }
     }
 
-    // İlk çalıştırma ve 30 saniyede bir güncelleme
-    fetchData();
-    setInterval(fetchData, 30000);
+    getStats();
+    setInterval(getStats, 40000);
 </script>
-
 </body>
 </html>
