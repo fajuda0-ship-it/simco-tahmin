@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Simco Price</title>
+
 <style>
 
 body{
@@ -14,6 +15,7 @@ font-size:60px;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -22,16 +24,24 @@ font-size:60px;
 
 <script>
 
-async function getPrice(){
+async function loadPrice(){
+
+try{
 
 const res = await fetch("/api/price");
 const data = await res.json();
 
 document.getElementById("price").innerText = data.price;
 
+}catch(e){
+
+document.getElementById("price").innerText = "API error";
+
 }
 
-getPrice();
+}
+
+loadPrice();
 
 </script>
 
