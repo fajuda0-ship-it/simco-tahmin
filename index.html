@@ -2,14 +2,14 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Simco Robot Analizörü v3.0</title>
+    <title>Simco Tahmin Terminali v4.0</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 20px rgba(0,255,65,0.2); border-radius: 10px; width: 450px; text-align: center; }
         .price-label { font-size: 1.2em; color: #aaa; margin-bottom: 10px; }
         .price-value { font-size: 4em; font-weight: bold; color: white; text-shadow: 0 0 10px var(--neon); }
-        .prediction { margin-top: 20px; font-size: 1.5em; border-top: 1px solid #333; padding-top: 15px; color: #ffcc00; }
+        .prediction { margin-top: 20px; font-size: 1.5em; border-top: 1px solid #333; padding-top: 15px; color: #ffcc00; font-weight: bold; }
         .status { margin-top: 15px; font-size: 0.7em; color: #666; }
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
@@ -18,48 +18,56 @@
 <body>
 
 <div class="terminal">
-    <div class="price-label">🤖 ROBOT Q0 CANLI BORSA</div>
-    <div id="robot-price" class="price-value">Yükleniyor</div>
-    
-    <div id="prediction" class="prediction">VERİ BEKLENİYOR...</div>
-    
+    <div class="price-label">🤖 ROBOT Q0 CANLI TAKİP</div>
+    <div id="robot-price" class="price-value">...</div>
+    <div id="prediction" class="prediction">ANALİZ EDİLİYOR</div>
     <div class="status">
         <span id="dot" class="blink">●</span> 
-        <span id="log">Sistem başlatılıyor...</span>
+        <span id="log">Sistem başlatıldı...</span>
     </div>
 </div>
 
 <script>
-    // ARACI SUNUCU (CORS Engelini Kökten Çözer)
     const TARGET = 'https://api.simcotools.com/v1/realms/0/market/prices';
-    const PROXY_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(TARGET)}`;
+    
+    // Sırasıyla denenecek proxy listesi (CORS engelini aşmak için)
+    const PROXIES = [
+        `https://api.allorigins.win/get?url=${encodeURIComponent(TARGET)}`,
+        `https://corsproxy.io/?${encodeURIComponent(TARGET)}`
+    ];
 
-    async function updateRobotStats() {
+    async function fetchData(proxyIndex = 0) {
         const logEl = document.getElementById('log');
         const priceEl = document.getElementById('robot-price');
         const predEl = document.getElementById('prediction');
 
+        if (proxyIndex >= PROXIES.length) {
+            logEl.innerText = "TÜM ARACILAR MEŞGUL. 30sn BEKLE...";
+            return;
+        }
+
         try {
-            logEl.innerText = "Aracı üzerinden veri çekiliyor...";
+            logEl.innerText = `Bağlanılıyor (Kanal ${proxyIndex + 1})...`;
+            const response = await fetch(PROXIES[proxyIndex]);
             
-            const response = await fetch(PROXY_URL);
-            const wrapper = await response.json();
-            // AllOrigins veriyi "contents" içine string olarak koyar, onu JSON'a çeviriyoruz
-            const data = JSON.parse(wrapper.contents);
+            if (!response.ok) throw new Error('Proxy hatası');
+
+            const result = await response.json();
+            // AllOrigins yapısı farklı olduğu için contents kontrolü yapıyoruz
+            const data = result.contents ? JSON.parse(result.contents) : result;
             
-            // Robot Q0 (ID: 102) verisini bul
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
-                const currentPrice = robot.price;
-                priceEl.innerText = "$" + currentPrice.toFixed(2);
-                logEl.innerText = "BAĞLANTI BAŞARILI | " + new Date().toLocaleTimeString();
+                const price = robot.price;
+                priceEl.innerText = "$" + price.toFixed(2);
+                logEl.innerText = "VERİ ALINDI | " + new Date().toLocaleTimeString();
                 
-                // Senin 200 ihale verinle karşılaştırma (Zeka Katmanı)
-                if (currentPrice < 615) {
-                    predEl.innerHTML = "🚨 <span style='color:red'>İLERİ ROBOTİK GELEBİLİR!</span>";
+                // --- İHALE TAHMİN MANTIĞI ---
+                if (price < 610) {
+                    predEl.innerHTML = "🚨 <span style='color:red'>KRİTİK: İHALE GELİYOR!</span>";
                     predEl.classList.add('blink');
-                } else if (currentPrice < 635) {
+                } else if (price < 625) {
                     predEl.innerText = "⚠️ TAHMİN: HAZIRLIKLI OL";
                     predEl.classList.remove('blink');
                 } else {
@@ -68,15 +76,14 @@
                 }
             }
         } catch (error) {
-            logEl.innerText = "HATA: Aracı sunucu meşgul!";
-            console.error(error);
+            console.warn(`Kanal ${proxyIndex + 1} başarısız, diğeri deneniyor...`);
+            fetchData(proxyIndex + 1); // Bir sonraki proxy'yi dene
         }
     }
 
-    // İlk çalıştırma
-    updateRobotStats();
-    // 30 saniyede bir otomatik tazeleme
-    setInterval(updateRobotStats, 30000);
+    // İlk çalıştırma ve 30 saniyede bir güncelleme
+    fetchData();
+    setInterval(fetchData, 30000);
 </script>
 
 </body>
