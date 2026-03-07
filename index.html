@@ -2,74 +2,86 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | Stratejik Avcı v23</title>
+    <title>SAB | Stratejik Robot Analizör</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; --warn: #ff3e3e; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; border-radius: 15px; width: 450px; text-align: center; box-shadow: 0 0 30px rgba(0,255,65,0.2); }
-        .robot-label { font-size: 1.4em; color: #00ffff; border: 1px solid #00ffff; padding: 5px 15px; margin-bottom: 20px; display: inline-block; }
+        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; border-radius: 15px; width: 460px; text-align: center; box-shadow: 0 0 30px rgba(0,255,65,0.2); }
+        .robot-id { font-size: 1.1em; color: #00ffff; margin-bottom: 10px; letter-spacing: 1px; }
         .price-display { font-size: 5.5em; font-weight: bold; color: white; margin: 10px 0; text-shadow: 0 0 20px var(--neon); }
         .analysis-box { margin-top: 20px; padding: 25px; border-radius: 10px; font-size: 1.4em; font-weight: bold; transition: 0.5s; border: 1px solid #333; }
         .normal { background: rgba(0, 255, 65, 0.05); color: var(--neon); }
-        .alert { background: rgba(255, 62, 62, 0.5); color: white; border-color: var(--warn); animation: flash 0.6s infinite; }
-        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .stats { margin-top: 20px; font-size: 0.85em; color: #666; display: flex; justify-content: space-around; border-top: 1px solid #333; padding-top: 15px; }
+        .alert { background: rgba(255, 62, 62, 0.4); color: white; border-color: var(--warn); animation: flash 0.6s infinite; }
+        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .stats { margin-top: 25px; font-size: 0.85em; color: #666; display: flex; justify-content: space-around; border-top: 1px solid #333; padding-top: 15px; }
+        .log { font-size: 0.7em; color: #444; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div class="robot-label">ROBOTLAR: 10 (Q0)</div>
+    <div class="robot-id">ROBOTLAR (ID: 114) | QUALITY: 0</div>
     <div id="price" class="price-display">...</div>
-    <div id="status-box" class="analysis-box normal">VERİ ARANIYOR...</div>
+    <div id="status-box" class="analysis-box normal">VERİ BEKLENİYOR</div>
 
     <div class="stats">
         <div>BAZ: <span id="base-p" style="color:#00ffff;">$800.00</span></div>
-        <div>ALARM (%3): <span id="thresh-p" style="color:#ffcc00;">$824.00</span></div>
+        <div>EŞİK (%3): <span id="thresh-p" style="color:#ffcc00;">$824.00</span></div>
     </div>
-    <div style="margin-top:15px; font-size:0.7em; color:#444;">SAB v23 / PROXY MODE</div>
+    <div id="log" class="log">Sistem hazır, bağlantı kuruluyor...</div>
 </div>
 
 <script>
-    const BAZ_FIYAT = 800.00;
-    const ESIK = 1.03;
-    const TARGET = 'https://api.simcotools.com/v1/realms/0/market/prices';
+    // --- STRATEJİK AYARLAR ---
+    const BAZ_FIYAT = 800.00; 
+    const ESIK_ORANI = 1.03; // %3 artış uyarısı
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbz5oB7vPmvChcyVy41Zxr7JMqrUGwjXDYeHIvDXX5luMhXmHY83jCpw1SjrYcebvIuS/exec";
 
-    async function fetchData() {
+    async function sabAnalizYap() {
         const priceEl = document.getElementById('price');
         const boxEl = document.getElementById('status-box');
-        const limit = BAZ_FIYAT * ESIK;
+        const logEl = document.getElementById('log');
+        const limit = BAZ_FIYAT * ESIK_ORANI;
 
         document.getElementById('base-p').innerText = "$" + BAZ_FIYAT.toFixed(2);
         document.getElementById('thresh-p').innerText = "$" + limit.toFixed(2);
 
         try {
-            // Google Script yerine AllOrigins köprüsü kullanıyoruz
-            const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(TARGET)}`);
-            const raw = await response.json();
-            const data = JSON.parse(raw.contents); // Veriyi temizle
+            // Google Script üzerinden Simco verisini çek
+            const response = await fetch(GOOGLE_URL);
+            if (!response.ok) throw new Error("Ağ hatası");
             
-            const robot = data.find(item => item.id === 102);
+            const data = await response.json();
+            
+            // Senin bulduğun resourceId 114 ve Quality 0 filtresi
+            const robot = data.find(item => item.resourceId === 114 && item.quality === 0);
 
             if (robot) {
-                const currentPrice = robot.price;
-                priceEl.innerText = "$" + currentPrice.toFixed(2);
+                const anlikFiyat = robot.price;
+                priceEl.innerText = "$" + anlikFiyat.toFixed(2);
+                logEl.innerText = "SON SENKRONİZASYON: " + new Date().toLocaleTimeString();
 
-                if (currentPrice >= limit) {
+                // %3 HESAPLAMA VE ALARM
+                if (anlikFiyat >= limit) {
                     boxEl.innerHTML = "🚨 FİYAT YÜKSEK: İHALE GELEBİLİR!";
                     boxEl.className = "analysis-box alert";
                 } else {
                     boxEl.innerHTML = "✅ PİYASA SEYRİ NORMAL";
                     boxEl.className = "analysis-box normal";
                 }
+            } else {
+                logEl.innerText = "Hata: Robot verisi (114) listede bulunamadı.";
             }
         } catch (e) {
+            console.error(e);
+            logEl.innerText = "BAĞLANTI HATASI: Google Script'e ulaşılamıyor.";
             boxEl.innerText = "YENİDEN DENENİYOR...";
         }
     }
 
-    fetchData();
-    setInterval(fetchData, 45000); // 45 saniyede bir kontrol
+    // 30 saniyede bir otomatik tazeleme
+    sabAnalizYap();
+    setInterval(sabAnalizYap, 30000);
 </script>
 </body>
 </html>
