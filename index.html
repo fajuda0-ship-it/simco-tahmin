@@ -2,90 +2,74 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB | İhale Tahmin Sistemi</title>
+    <title>SAB | Stratejik Avcı v22</title>
     <style>
-        :root { --neon: #00ff41; --bg: #050505; --warning: #ff3e3e; }
-        body { background: var(--bg); color: var(--neon); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; border-radius: 15px; width: 450px; text-align: center; box-shadow: 0 0 40px rgba(0,255,65,0.2); }
-        .header { font-size: 0.9em; letter-spacing: 2px; color: #888; margin-bottom: 20px; }
-        .price-box { margin: 20px 0; }
-        .current-price { font-size: 5em; font-weight: bold; color: #fff; }
-        .base-price { font-size: 1.1em; color: #00ffff; margin-bottom: 5px; }
-        .alert-box { margin-top: 25px; padding: 20px; border-radius: 10px; font-weight: bold; font-size: 1.4em; border: 1px solid #333; transition: all 0.5s; }
-        .status-normal { background: rgba(0, 255, 65, 0.1); color: var(--neon); }
-        .status-high { background: rgba(255, 62, 62, 0.2); color: var(--warning); border-color: var(--warning); animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        .footer { margin-top: 30px; font-size: 0.8em; opacity: 0.6; border-top: 1px solid #333; padding-top: 15px; }
+        :root { --neon: #00ff41; --bg: #050505; --warn: #ff3e3e; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; border-radius: 15px; width: 450px; text-align: center; box-shadow: 0 0 30px rgba(0,255,65,0.2); }
+        .robot-label { font-size: 1.4em; color: #00ffff; border: 1px solid #00ffff; padding: 5px 15px; margin-bottom: 20px; display: inline-block; }
+        .price-display { font-size: 5.5em; font-weight: bold; color: white; margin: 10px 0; text-shadow: 0 0 20px var(--neon); }
+        .analysis-box { margin-top: 20px; padding: 25px; border-radius: 10px; font-size: 1.4em; font-weight: bold; transition: 0.5s; border: 1px solid #333; }
+        .normal { background: rgba(0, 255, 65, 0.05); color: var(--neon); }
+        .alert { background: rgba(255, 62, 62, 0.4); color: white; border-color: var(--warn); animation: flash 0.6s infinite; }
+        @keyframes flash { 0% { background: rgba(255, 62, 62, 0.4); } 50% { background: rgba(255, 62, 62, 0.8); } 100% { background: rgba(255, 62, 62, 0.4); } }
+        .stats { margin-top: 20px; font-size: 0.85em; color: #666; display: flex; justify-content: space-around; border-top: 1px solid #333; padding-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div class="header">SAB STRATEJİK TAHMİN MERKEZİ</div>
-    
-    <div class="price-box">
-        <div class="base-price">HAFTALIK BAZ FİYAT: <span id="ref-price">$610.00</span></div>
-        <div id="price" class="current-price">...</div>
-        <div style="font-size: 0.8em; color: #666;">ANLIK ROBOT Q0 FİYATI</div>
-    </div>
+    <div class="robot-label">ROBOTLAR: 10 (Q0)</div>
+    <div id="price" class="price-display">...</div>
+    <div id="status-box" class="analysis-box normal">VERİ BEKLENİYOR...</div>
 
-    <div id="alert" class="alert-box status-normal">
-        PİYASA ANALİZ EDİLİYOR...
-    </div>
-
-    <div class="footer">
-        SAB TARAFINDAN GELİŞTİRİLİR <br>
-        <span id="log">Sistem verisi bekleniyor...</span>
+    <div class="stats">
+        <div>SENİN BAZIN: <span id="base-p" style="color:#00ffff;">$800.00</span></div>
+        <div>ALARM EŞİĞİ (%3): <span id="thresh-p" style="color:#ffcc00;">$824.00</span></div>
     </div>
 </div>
 
 <script>
-    // AYARLAR
-    let referencePrice = 610.00; // Son 1 haftalık genel düzey (Burayı değiştirebilirsin)
-    const targetUrl = 'https://api.simcotools.com/v1/realms/0/market/prices';
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+    // --- BURAYI İSTEDİĞİN GİBİ DEĞİŞTİR ---
+    const BAZ_FIYAT = 800.00; 
+    const ESIK = 1.03; // %3 fazlası
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyI3eCkTkQVMdftx3txBYDvsI4lIvu1hPAHXnYskVgP2I1oxSKgW1BzibBkh0Nx_ZAO/exec";
 
-    async function checkMarket() {
+    async function sabAvci() {
         const priceEl = document.getElementById('price');
-        const alertEl = document.getElementById('alert');
-        const logEl = document.getElementById('log');
-        const refEl = document.getElementById('ref-price');
+        const boxEl = document.getElementById('status-box');
+        const limit = BAZ_FIYAT * ESIK;
 
-        refEl.innerText = "$" + referencePrice.toFixed(2);
+        document.getElementById('base-p').innerText = "$" + BAZ_FIYAT.toFixed(2);
+        document.getElementById('thresh-p').innerText = "$" + limit.toFixed(2);
 
         try {
-            const res = await fetch(proxy);
-            const raw = await res.json();
-            const data = JSON.parse(raw.contents);
+            const response = await fetch(GOOGLE_URL);
+            const data = await response.json();
             
             // Robot Q0 bul (ID: 102)
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
-                const current = robot.price;
-                priceEl.innerText = "$" + current.toFixed(2);
-                logEl.innerText = "SON GÜNCELLEME: " + new Date().toLocaleTimeString();
+                const anlikSimco = robot.price; 
+                priceEl.innerText = "$" + anlikSimco.toFixed(2);
 
-                // MATEMATİKSEL KONTROL (%3 eşiği)
-                const threshold = referencePrice * 1.03;
-
-                if (current >= threshold) {
-                    alertEl.innerHTML = "⚠️ FİYAT YÜKSEK: İHALE GELEBİLİR!";
-                    alertEl.className = "alert-box status-high";
+                // KARŞILAŞTIRMA MANTIĞI
+                if (anlikSimco >= limit) {
+                    boxEl.innerHTML = "🚨 FİYAT YÜKSEK: İHALE GELEBİLİR!";
+                    boxEl.className = "analysis-box alert";
                 } else {
-                    alertEl.innerHTML = "✅ PİYASA SEYRİ NORMAL";
-                    alertEl.className = "alert-box status-normal";
+                    boxEl.innerHTML = "✅ PİYASA SEYRİ NORMAL";
+                    boxEl.className = "analysis-box normal";
                 }
             }
         } catch (e) {
-            logEl.innerText = "Veri çekme hatası, kanallar zorlanıyor...";
+            boxEl.innerText = "BAĞLANTI HATASI...";
         }
     }
 
-    // Her 30 saniyede bir otomatik analiz
-    checkMarket();
-    setInterval(checkMarket, 30000);
+    sabAvci();
+    setInterval(sabAvci, 30000); // 30 saniyede bir otomatik kontrol
 </script>
-
 </body>
 </html>
