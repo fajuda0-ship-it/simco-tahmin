@@ -10,14 +10,13 @@
             align-items: center; 
             height: 100vh; 
             margin: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f4f4f4;
+            font-family: sans-serif; 
+            background-color: #ffffff;
         }
         #price { 
             font-size: 180px; 
             font-weight: bold; 
-            color: #2c3e50;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            color: #1a1a1a;
         }
     </style>
 </head>
@@ -28,27 +27,28 @@
     <script>
         async function updatePrice() {
             try {
-                // Senin yeni Google Script linkin
-                const url = 'https://script.google.com/macros/s/AKfycbyCRmM5on64hveJVNClRqHeoKe6DbpvLw01SrUdB1IhNuFp5i8baqxrMcuSH_jP6HHX/exec';
+                // Senin en son verdiğin güncel Google Script linki
+                const url = 'https://script.google.com/macros/s/AKfycbxuJQoPZ2sI-aIqzp6fbkIZY5Azokl-DXMqu_5OUVoNdzNwy2jli_MAbP6d7w8uCKQt/exec';
                 
                 const response = await fetch(url);
                 const data = await response.json();
                 
                 if (data.price !== undefined) {
+                    // Rakamı bulduysak ekrana bas
                     document.getElementById('price').innerText = "$" + data.price;
-                } else if (data.error) {
-                    document.getElementById('price').innerText = "BULUNAMADI";
+                } else {
+                    document.getElementById('price').innerText = "VERI YOK";
                 }
             } catch (e) {
-                document.getElementById('price').innerText = "BAĞLANTI YOK";
+                document.getElementById('price').innerText = "BAGLANTI HATASI";
                 console.error("Hata:", e);
             }
         }
 
-        // İlk çalıştırma
+        // Sayfa açılır açılmaz çalıştır
         updatePrice();
         
-        // 30 saniyede bir otomatik yenileme
+        // 30 saniyede bir otomatik tazele
         setInterval(updatePrice, 30000);
     </script>
 </body>
