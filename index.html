@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB | Simco Robot Terminal</title>
+    <title>SAB | Kesin Çözüm v11</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; flex-direction: column; }
-        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 25px rgba(0,255,65,0.3); border-radius: 12px; width: 400px; text-align: center; position: relative; }
-        .price-label { font-size: 1.2em; color: #aaa; margin-bottom: 10px; letter-spacing: 1px; }
+        .terminal { border: 2px solid var(--neon); padding: 30px; background: #111; box-shadow: 0 0 25px rgba(0,255,65,0.3); border-radius: 12px; width: 400px; text-align: center; }
+        .price-label { font-size: 1.2em; color: #aaa; margin-bottom: 10px; }
         .price-value { font-size: 4.8em; font-weight: bold; color: white; text-shadow: 0 0 20px var(--neon); margin: 10px 0; }
         .prediction { margin-top: 25px; font-size: 1.6em; color: #ffcc00; font-weight: bold; border-top: 1px solid #333; padding-top: 20px; text-transform: uppercase; }
-        .status { margin-top: 20px; font-size: 0.8em; color: #555; font-weight: normal; }
+        .status { margin-top: 20px; font-size: 0.8em; color: #555; }
         .footer { margin-top: 30px; font-size: 0.95em; color: #008f11; letter-spacing: 3px; font-weight: bold; border-top: 1px dashed #444; padding-top: 15px; width: 100%; }
         .blink { animation: blinker 1.2s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
-        .glitch { animation: glitch-effect 3s infinite; }
-        @keyframes glitch-effect { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -24,19 +22,15 @@
 <div class="terminal">
     <div class="price-label">🤖 ROBOT Q0 ANALİZ</div>
     <div id="price" class="price-value">...</div>
-    
     <div id="prediction" class="prediction">SAB SİSTEMİ ÇEVRİMİÇİ</div>
-    
     <div class="status">
         <span class="blink" style="color:red">●</span> 
         <span id="log">Veri çekiliyor...</span>
     </div>
-
     <div class="footer">SAB TARAFINDAN GELİŞTİRİLİR</div>
 </div>
 
 <script>
-    // Google Script Köprüsü
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyI3eCkTkQVMdftx3txBYDvsI4lIvu1hPAHXnYskVgP2I1oxSKgW1BzibBkh0Nx_ZAO/exec";
 
     async function updateDashboard() {
@@ -45,10 +39,15 @@
         const predEl = document.getElementById('prediction');
 
         try {
-            const response = await fetch(GOOGLE_URL);
-            const data = await response.json();
+            // KRİTİK AYAR: redirect: 'follow' ekledik
+            const response = await fetch(GOOGLE_URL, { 
+                method: 'GET',
+                redirect: 'follow' 
+            });
+
+            if (!response.ok) throw new Error("Ağ hatası");
             
-            // Robot Q0 verisini bul (ID: 102)
+            const data = await response.json();
             const robot = data.find(item => item.id === 102);
 
             if (robot) {
@@ -56,8 +55,6 @@
                 priceEl.innerText = "$" + currentPrice.toFixed(2);
                 logEl.innerText = "GÜNCEL: " + new Date().toLocaleTimeString();
                 
-                // SAB ANALİZ ALGORİTMASI
-                // 200 ihale verisine göre eşik değerleri
                 if (currentPrice < 615) {
                     predEl.innerHTML = "<span style='color:red'>🚨 İHALE ALARMI! 🚨</span>";
                     predEl.classList.add('blink');
@@ -70,14 +67,13 @@
                 }
             }
         } catch (error) {
-            logEl.innerText = "Bağlantı hatası, tekrar deneniyor...";
+            logEl.innerText = "Hata: Google yanıt vermedi. Yeniden deneniyor...";
             console.error(error);
         }
     }
 
-    // İlk çalıştırma ve her 30 saniyede bir güncelleme
     updateDashboard();
-    setInterval(updateDashboard, 30000);
+    setInterval(updateDashboard, 30000); // 30 saniyede bir güncelle
 </script>
 
 </body>
