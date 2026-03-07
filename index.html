@@ -1,52 +1,27 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>SAB Fiyat Takip</title>
     <style>
-        body { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            font-family: Arial, sans-serif; 
-            background-color: white; 
-        }
-        #price { 
-            font-size: 150px; 
-            font-weight: bold; 
-            color: black; 
-        }
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        #display { font-size: 150px; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div id="price">...</div>
-
+    <div id="display">YÜKLENİYOR...</div>
     <script>
-        async function updatePrice() {
+        async function get() {
             try {
-                // Senin sitenin tam API adresi burası
-                const response = await fetch('https://simco-tahmin.vercel.app/api/price');
-                const data = await response.json();
-                
-                if (data.price !== undefined) {
-                    document.getElementById('price').innerText = "$" + data.price;
-                } else {
-                    document.getElementById('price').innerText = "VERİ YOK";
-                }
+                // Kendi sitenin API ucuna git
+                const r = await fetch('/api/price');
+                const d = await r.json();
+                document.getElementById('display').innerText = d.price ? "$" + d.price : "VERİ YOK";
             } catch (e) {
-                document.getElementById('price').innerText = "HATA";
-                console.error("Hata detayı:", e);
+                document.getElementById('display').innerText = "HATA";
             }
         }
-
-        // Sayfa açılınca çalıştır
-        updatePrice();
-        
-        // 30 saniyede bir güncelle
-        setInterval(updatePrice, 30000);
+        get();
+        setInterval(get, 30000);
     </script>
 </body>
 </html>
