@@ -1,48 +1,54 @@
 import os
 import json
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 def get_price():
     chrome_options = Options()
-    chrome_options.add_argument("--headless") # Ekran açılmasın (GitHub için şart)
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1920,1080")
+    
+    # SSL Hatalarını Aşmak İçin Eklenen Ayarlar:
+    chrome_options.add_argument('--ignore-certificate-errors')
+    chrome_options.add_argument('--ignore-ssl-errors')
+    chrome_options.add_argument('--allow-insecure-localhost')
+    chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     
     try:
-        # Fiyatların olduğu ana tablo sayfası
-        driver.get("https://www.simcotools.com/market/prices")
-        time.sleep(10) # Sayfanın ve JavaScript'in tamamen yüklenmesi için bekliyoruz
+        # API yerine direkt fiyatların listelendiği ana sayfaya gitmek daha garantidir
+        url = "https://www.simcotools.com/market/prices"
+        driver.get(url)
+        
+        # Sayfanın yüklenmesi için biraz daha fazla bekle (Simco yavaş olabilir)
+        time.sleep(15) 
 
-        # Sayfa içindeki tüm metni tarayıp Robot 114 ve yanındaki fiyatı arıyoruz
-        # (Selector bulamadığımız için en sağlam yol: Sayfa kaynağında regex)
         page_source = driver.page_source
         
-        # Simco'nun HTML yapısına göre fiyatı cımbızla çekiyoruz
-        import re
-        # Bu regex, 114 numaralı id'den sonra gelen ilk fiyat kalıbını arar
-        match = re.search(r'114.*?(\d{3,4})', page_source)
+        # Regex ile 114 (Robot) id'sini ve peşindeki fiyatı (3-4 haneli rakam) ara
+        # Örnek: "resourceId":114 ... "price":895
+        match = re.search(r'114.*?price.*?(\d{2,5})', page_source)
         
         if match:
             return match.group(1)
         else:
-            return "Fiyat Bulunamadı"
+            # Eğer bulamazsa, belki sayfa yapısı farklıdır, ham veriden bir parça alalım
+            print("Ekranda 114 bulunamadı, sayfa yapısı değişmiş olabilir.")
+            return "Bulunamadı"
 
     except Exception as e:
-        return f"Hata: {str(e)[:50]}"
+        return f"Hata: {str(e)[:30]}"
     finally:
         driver.quit()
 
-# Veriyi kaydet
 price = get_price()
 with open("data.json", "w") as f:
     json.dump({"price": price}, f)
 
-print(f"Selenium Sonucu: {price}")
+print(f"Sonuç: {price}")
