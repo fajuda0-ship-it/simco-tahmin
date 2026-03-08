@@ -1,9 +1,36 @@
-- name: Chrome ve Driver Kur
+name: Selenium Fiyat Botu
+on:
+  schedule:
+    - cron: '*/30 * * * *' # 30 dakikada bir otomatik çalışır
+  workflow_dispatch: # Senin manuel çalıştırman için buton ekler
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu GitHub'dan çek
+        uses: actions/checkout@v2
+
+      - name: Python 3.9 Kur
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Chrome Tarayıcısını ve Driver'ı Kur
         run: |
+          pip install selenium webdriver-manager
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-      - name: Kütüphaneleri Kur
-        run: |
-          pip install selenium webdriver-manager requests
-      - name: Botu Çalıştır
+
+      - name: Selenium Botunu (bot.py) Çalıştır
         run: python bot.py
+
+      - name: Güncel Fiyatı data.json Olarak Kaydet
+        run: |
+          git config --global user.name 'GitHub Action Bot'
+          git config --global user.email 'action@github.com'
+          git add data.json
+          git commit -m "Selenium ile fiyat güncellendi" || echo "Değişiklik yok"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
