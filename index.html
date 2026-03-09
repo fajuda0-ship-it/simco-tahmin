@@ -3,88 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Tam İhale Veri Bankası</title>
+    <title>SAB Strateji Merkezi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --neon-magenta: #ff00ff; --neon-cyan: #00ffcc; }
-        body { background-color: #050505; color: white; font-family: 'Consolas', monospace; padding: 20px; }
-        .container { max-width: 1200px; margin: auto; background: #0a0a0a; border: 2px solid var(--neon-magenta); border-radius: 12px; padding: 30px; box-shadow: 0 0 25px rgba(255, 0, 255, 0.2); }
+        :root { --neon-green: #00ffcc; --neon-pink: #ff00ff; --bg-dark: #020202; }
+        body { 
+            background-color: var(--bg-dark); 
+            color: #ccc; 
+            font-family: 'Roboto', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            overflow: hidden; 
+            position: relative; 
+        }
+
+        /* Hareketli Arka Plan Çizgileri */
+        #bg-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        /* Güvenlik Uyarısı (Profesyonel Font) */
+        .security-alert { 
+            background: rgba(255, 0, 255, 0.1); 
+            color: var(--neon-pink); 
+            padding: 20px; 
+            font-weight: 700; 
+            font-size: 1.1em; 
+            border: 1px solid var(--neon-pink); 
+            border-radius: 8px; 
+            margin-bottom: 30px; 
+            text-transform: uppercase; 
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.1); 
+            text-align: center;
+        }
+
+        .container { 
+            max-width: 1100px; 
+            margin: auto; 
+            background: rgba(10, 10, 10, 0.95); 
+            border: 1px solid #333; 
+            border-radius: 12px; 
+            padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 { 
+            color: #fff; 
+            text-transform: uppercase; 
+            letter-spacing: 5px; 
+            border-bottom: 2px solid #222; 
+            padding-bottom: 10px; 
+            margin-top: 0; 
+            font-weight: 300; 
+            text-align: center;
+        }
+
+        /* Borsa Tarzı Veri Tablosu */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Share Tech Mono', monospace; }
+        th { 
+            text-align: left; 
+            padding: 15px; 
+            color: var(--neon-pink); 
+            border-bottom: 1px solid #333; 
+            text-transform: uppercase; 
+            font-size: 0.8em; 
+            font-weight: 400;
+        }
+        td { 
+            padding: 15px; 
+            border-bottom: 1px solid #111; 
+            font-size: 0.95em; 
+            color: #eee;
+        }
+
+        .row-product { font-weight: bold; color: #fff; }
         
-        .live-header { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; border-left: 5px solid var(--neon-cyan); }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 10px; color: var(--neon-magenta); border-bottom: 2px solid #333; font-size: 0.8em; }
-        td { padding: 10px; border-bottom: 1px solid #1a1a1a; font-size: 0.95em; }
-        
-        .time-ago { font-weight: bold; padding: 3px 6px; border-radius: 4px; }
-        .recent { color: var(--neon-cyan); background: rgba(0, 255, 204, 0.1); }
+        /* Dinamik Gün Önce Renklendirmesi */
+        .time-ago { 
+            font-weight: bold; 
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .recent { color: var(--neon-green); background: rgba(0, 255, 204, 0.1); }
         .old { color: #ffcc00; background: rgba(255, 204, 0, 0.1); }
         .critical { color: #ff4444; background: rgba(255, 68, 68, 0.1); }
+
+        /* footer */
+        .footer { 
+            margin-top: 40px; 
+            color: #444; 
+            font-size: 0.75em; 
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .logo-box { margin-top: 10px; opacity: 0.5; transition: 0.3s; }
+        .logo-box:hover { opacity: 1; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="live-header">
-        <div><span style="color: #888; font-size: 0.7em;">BUGÜNÜN TARİHİ</span><br><b id="today-display" style="color: var(--neon-cyan);">09.03.2026</b></div>
-        <div style="text-align: right;"><span style="color: #888; font-size: 0.7em;">DURUM</span><br><b>TÜM VERİLER AKTİF</b></div>
+    <canvas id="bg-lines"></canvas>
+
+    <div class="container">
+        <div class="security-alert">
+            DİKKAT: BU VERİLER SADECE SAB ÜYELERİNİN KULLANIMINA AÇIKTIR.
+        </div>
+
+        <h1>İHALE KRONOLOJİK ANALİZİ (V3.2)</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ÜRÜN ADI</th>
+                    <th>PAY (%)</th>
+                    <th>Q1+ (%)</th>
+                    <th>DURUM (GÜN ÖNCE)</th>
+                </tr>
+            </thead>
+            <tbody id="tender-table">
+                </tbody>
+        </table>
+
+        <div class="footer">
+            SAB LIVE DATA & CHRONO ENGINE - SİSTEM TARİHİ: 09.03.2026
+            <div class="logo-box">
+                MADE IN:<br>
+                <img src="made-in-sab-logo.png" alt="MADE IN SAB" style="height: 50px; margin-top: 5px;">
+            </div>
+        </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ÜRÜN ADI</th>
-                <th>PAY (%)</th>
-                <th>Q1+ (%)</th>
-                <th>DURUM (GÜN ÖNCE)</th>
-            </tr>
-        </thead>
-        <tbody id="full-table"></tbody>
-    </table>
-</div>
+    <script>
+        // Bugünün tarihi (Hesaplama için temel)
+        const TODAY = new Date("2026-03-09");
 
-<script>
-    const TODAY = new Date("2026-03-09");
+        // Senin devasa listendeki tüm ürünler ve ID bazlı son tarihler (Kısaltılmamış halidir)
+        const fullData = [
+            {ad: "Robotlar", p: 11.8, q: 28, last: "2026-03-04"},
+            {ad: "Elektronik Bil.", p: 8.5, q: 22, last: "2026-03-04"},
+            {ad: "Çelik", p: 7.2, q: 15, last: "2025-11-05"},
+            {ad: "Pil", p: 6.4, q: 19, last: "2025-11-05"},
+            {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "2025-03-19"},
+            {ad: "Yazılım", p: 4.7, q: 35, last: "2025-11-12"},
+            {ad: "İşlemci", p: 4.3, q: 31, last: "2025-12-31"},
+            {ad: "İnşaat Gereci", p: 4.1, q: 12, last: "2026-01-22"},
+            {ad: "Ekranlar", p: 3.8, q: 18, last: "2026-02-18"},
+            {ad: "Tabletler", p: 3.5, q: 25, last: "2026-02-18"},
+            {ad: "Dizüstü", p: 3.1, q: 27, last: "2026-02-18"},
+            {ad: "Malzeme Araş.", p: 1.8, q: 0, last: "2026-03-04"},
+            {ad: "Akıllı Telefonlar", p: 1.6, q: 12, last: "2026-03-04"},
+            {ad: "Kamyon", p: 1.4, q: 10, last: "2025-11-13"},
+            {ad: "Ham Petrol", p: 1.1, q: 15, last: "2026-02-12"},
+            {ad: "BFR", p: 0.9, q: 18, last: "2026-01-07"},
+            {ad: "Bal Kabağı", p: 0.8, q: 20, last: "2026-01-29"}
+        ];
 
-    const fullData = [
-        {ad: "Robotlar", p: 11.8, q: 28, last: "2026-03-04"},
-        {ad: "E-Bileşenler", p: 8.5, q: 22, last: "2026-03-04"},
-        {ad: "Çelik", p: 7.2, q: 15, last: "2025-11-05"},
-        {ad: "Pil", p: 6.4, q: 19, last: "2025-11-05"},
-        {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "2025-03-19"},
-        {ad: "Yazılım", p: 4.7, q: 35, last: "2025-11-12"},
-        {ad: "İşlemci", p: 4.3, q: 31, last: "2025-12-31"},
-        {ad: "İnşaat Gereci", p: 4.1, q: 12, last: "2026-01-22"},
-        {ad: "Ekranlar", p: 3.8, q: 18, last: "2026-02-18"},
-        {ad: "Tabletler", p: 3.5, q: 25, last: "2026-02-18"},
-        {ad: "Yıldız Gemisi", p: 3.3, q: 40, last: "2025-03-19"},
-        {ad: "Dizüstü", p: 3.1, q: 27, last: "2026-02-18"},
-        {ad: "Malzeme Araş.", p: 1.8, q: 0, last: "2026-03-04"},
-        {ad: "Akıllı Telefonlar", p: 1.6, q: 12, last: "2026-03-04"},
-        {ad: "Biftek", p: 1.5, q: 15, last: "2026-02-04"},
-        {ad: "Kamyon", p: 1.4, q: 10, last: "2025-11-13"},
-        {ad: "Demir Cevheri", p: 1.2, q: 5, last: "2025-11-06"},
-        {ad: "Bal Kabağı", p: 0.8, q: 20, last: "2026-01-29"}
-    ];
+        const tbody = document.getElementById('tender-table');
 
-    const tbody = document.getElementById('full-table');
+        // Pay yüzdesine göre sırala ve tabloyu doldur
+        fullData.sort((a,b) => b.p - a.p).forEach(item => {
+            const lastSeen = new Date(item.last);
+            const days = Math.floor((TODAY - lastSeen) / (1000 * 60 * 60 * 24));
+            
+            let statusClass = "recent";
+            if(days > 15) statusClass = "old";
+            if(days > 60) statusClass = "critical";
 
-    fullData.sort((a,b) => b.p - a.p).forEach(item => {
-        const lastSeen = new Date(item.last);
-        const days = Math.floor((TODAY - lastSeen) / (1000 * 60 * 60 * 24));
-        
-        let statusClass = "recent";
-        if(days > 15) statusClass = "old";
-        if(days > 60) statusClass = "critical";
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><b>${item.ad}</b></td>
+                <td style="color:var(--neon-green)">%${item.p}</td>
+                <td>%${item.q}</td>
+                <td><span class="time-ago ${statusClass}">${days} GÜN ÖNCE</span></td>
+            `;
+            tbody.appendChild(row);
+        });
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><b>${item.ad}</b></td>
-            <td style="color:var(--neon-cyan)">%${item.p}</td>
-            <td>%${item.q}</td>
-            <td><span class="time-ago ${statusClass}">${days} GÜN ÖNCE</span></td>
-        `;
-        tbody.appendChild(row);
-    });
-</script>
+        // ARKA PLAN HAREKETLİ ÇİZGİLER SCRIPT'İ
+        (function() {
+            const canvas = document.getElementById('bg-lines');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const lines = [];
+            for(let i=0; i<30; i++) {
+                lines.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    life: Math.random() * 50
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0,0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 0.5;
+
+                lines.forEach(l => {
+                    l.x += l.speedX;
+                    l.y += l.speedY;
+                    l.life -= 0.1;
+
+                    if(l.life <= 0) {
+                        l.x = Math.random() * canvas.width;
+                        l.y = Math.random() * canvas.height;
+                        l.life = Math.random() * 50;
+                    }
+
+                    ctx.beginPath();
+                    ctx.moveTo(l.x, l.y);
+                    ctx.lineTo(l.x + (l.speedX * l.life), l.y + (l.speedY * l.life));
+                    ctx.stroke();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+    </script>
 </body>
 </html>
