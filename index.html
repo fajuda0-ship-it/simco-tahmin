@@ -4,232 +4,175 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAB Strateji Merkezi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon-green: #00ffcc; --neon-pink: #ff00ff; --bg-dark: #020202; }
-        body { 
+        :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #080808; }
+        
+        /* Kaydırma sorununu çözen ana ayarlar */
+        html, body { 
             background-color: var(--bg-dark); 
-            color: #ccc; 
-            font-family: 'Roboto', sans-serif; 
+            color: #e0e0e0; 
+            font-family: 'Rajdhani', sans-serif; 
             margin: 0; 
-            padding: 20px; 
-            overflow: hidden; 
-            position: relative; 
+            padding: 0;
+            overflow-y: auto; /* Kaydırmayı zorunlu açar */
+            min-height: 100vh;
         }
 
-        /* Hareketli Arka Plan Çizgileri */
-        #bg-lines {
+        /* Hafif ve kasmayan arka plan efekti */
+        body::before {
+            content: "";
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 2px, 3px 100%;
             z-index: -1;
-            opacity: 0.1;
-        }
-
-        /* Güvenlik Uyarısı (Profesyonel Font) */
-        .security-alert { 
-            background: rgba(255, 0, 255, 0.1); 
-            color: var(--neon-pink); 
-            padding: 20px; 
-            font-weight: 700; 
-            font-size: 1.1em; 
-            border: 1px solid var(--neon-pink); 
-            border-radius: 8px; 
-            margin-bottom: 30px; 
-            text-transform: uppercase; 
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.1); 
-            text-align: center;
+            pointer-events: none;
         }
 
         .container { 
-            max-width: 1100px; 
-            margin: auto; 
-            background: rgba(10, 10, 10, 0.95); 
-            border: 1px solid #333; 
-            border-radius: 12px; 
-            padding: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            position: relative;
-            z-index: 1;
+            max-width: 1000px; 
+            margin: 40px auto; 
+            background: rgba(15, 15, 15, 0.9); 
+            border: 1px solid #222; 
+            padding: 25px; 
+            box-shadow: 0 0 40px rgba(0,0,0,1);
+        }
+
+        .security-banner {
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            padding: 15px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            background: rgba(255, 0, 255, 0.05);
+            text-transform: uppercase;
         }
 
         h1 { 
+            text-align: center; 
+            font-size: 2.2em; 
             color: #fff; 
-            text-transform: uppercase; 
-            letter-spacing: 5px; 
-            border-bottom: 2px solid #222; 
-            padding-bottom: 10px; 
-            margin-top: 0; 
-            font-weight: 300; 
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+
+        .date-box {
             text-align: center;
+            color: var(--neon-blue);
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 30px;
+            font-size: 1.2em;
         }
 
-        /* Borsa Tarzı Veri Tablosu */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Share Tech Mono', monospace; }
-        th { 
-            text-align: left; 
-            padding: 15px; 
-            color: var(--neon-pink); 
-            border-bottom: 1px solid #333; 
-            text-transform: uppercase; 
-            font-size: 0.8em; 
-            font-weight: 400;
-        }
-        td { 
-            padding: 15px; 
-            border-bottom: 1px solid #111; 
-            font-size: 0.95em; 
-            color: #eee;
-        }
-
-        .row-product { font-weight: bold; color: #fff; }
+        table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; }
+        th { border-bottom: 2px solid #333; color: var(--neon-blue); padding: 12px; text-align: left; font-size: 0.9em; }
+        td { padding: 12px; border-bottom: 1px solid #1a1a1a; }
         
-        /* Dinamik Gün Önce Renklendirmesi */
-        .time-ago { 
-            font-weight: bold; 
-            padding: 4px 8px;
-            border-radius: 4px;
+        .product-name { color: #fff; font-weight: 700; }
+        .days-ago { 
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: bold;
         }
-        .recent { color: var(--neon-green); background: rgba(0, 255, 204, 0.1); }
-        .old { color: #ffcc00; background: rgba(255, 204, 0, 0.1); }
-        .critical { color: #ff4444; background: rgba(255, 68, 68, 0.1); }
+        .status-new { color: var(--neon-blue); border: 1px solid var(--neon-blue); }
+        .status-old { color: #ffcc00; border: 1px solid #ffcc00; }
+        .status-critical { color: #ff4444; border: 1px solid #ff4444; animation: blink 2s infinite; }
 
-        /* footer */
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
         .footer { 
-            margin-top: 40px; 
-            color: #444; 
-            font-size: 0.75em; 
-            text-align: center;
-            text-transform: uppercase;
+            margin-top: 50px; 
+            text-align: center; 
+            padding-bottom: 40px;
+            border-top: 1px solid #222;
+            padding-top: 20px;
         }
-        .logo-box { margin-top: 10px; opacity: 0.5; transition: 0.3s; }
-        .logo-box:hover { opacity: 1; }
+        
+        .made-in-logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #444;
+            letter-spacing: 5px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <canvas id="bg-lines"></canvas>
-
-    <div class="container">
-        <div class="security-alert">
-            DİKKAT: BU VERİLER SADECE SAB ÜYELERİNİN KULLANIMINA AÇIKTIR.
-        </div>
-
-        <h1>İHALE KRONOLOJİK ANALİZİ (V3.2)</h1>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ÜRÜN ADI</th>
-                    <th>PAY (%)</th>
-                    <th>Q1+ (%)</th>
-                    <th>DURUM (GÜN ÖNCE)</th>
-                </tr>
-            </thead>
-            <tbody id="tender-table">
-                </tbody>
-        </table>
-
-        <div class="footer">
-            SAB LIVE DATA & CHRONO ENGINE - SİSTEM TARİHİ: 09.03.2026
-            <div class="logo-box">
-                MADE IN:<br>
-                <img src="made-in-sab-logo.png" alt="MADE IN SAB" style="height: 50px; margin-top: 5px;">
-            </div>
-        </div>
+<div class="container">
+    <div class="security-banner">
+        DİKKAT: BU VERİLER SADECE SAB ÜYELERİNİN KULLANIMINA AÇIKTIR.
     </div>
 
-    <script>
-        // Bugünün tarihi (Hesaplama için temel)
-        const TODAY = new Date("2026-03-09");
+    <h1>SAB STRATEGY ENGINE</h1>
+    <div class="date-box">SİSTEM TARİHİ: 09.03.2026</div>
 
-        // Senin devasa listendeki tüm ürünler ve ID bazlı son tarihler (Kısaltılmamış halidir)
-        const fullData = [
-            {ad: "Robotlar", p: 11.8, q: 28, last: "2026-03-04"},
-            {ad: "Elektronik Bil.", p: 8.5, q: 22, last: "2026-03-04"},
-            {ad: "Çelik", p: 7.2, q: 15, last: "2025-11-05"},
-            {ad: "Pil", p: 6.4, q: 19, last: "2025-11-05"},
-            {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "2025-03-19"},
-            {ad: "Yazılım", p: 4.7, q: 35, last: "2025-11-12"},
-            {ad: "İşlemci", p: 4.3, q: 31, last: "2025-12-31"},
-            {ad: "İnşaat Gereci", p: 4.1, q: 12, last: "2026-01-22"},
-            {ad: "Ekranlar", p: 3.8, q: 18, last: "2026-02-18"},
-            {ad: "Tabletler", p: 3.5, q: 25, last: "2026-02-18"},
-            {ad: "Dizüstü", p: 3.1, q: 27, last: "2026-02-18"},
-            {ad: "Malzeme Araş.", p: 1.8, q: 0, last: "2026-03-04"},
-            {ad: "Akıllı Telefonlar", p: 1.6, q: 12, last: "2026-03-04"},
-            {ad: "Kamyon", p: 1.4, q: 10, last: "2025-11-13"},
-            {ad: "Ham Petrol", p: 1.1, q: 15, last: "2026-02-12"},
-            {ad: "BFR", p: 0.9, q: 18, last: "2026-01-07"},
-            {ad: "Bal Kabağı", p: 0.8, q: 20, last: "2026-01-29"}
-        ];
+    <table>
+        <thead>
+            <tr>
+                <th>ÜRÜN</th>
+                <th>PAY (%)</th>
+                <th>Q1+ (%)</th>
+                <th>DURUM</th>
+            </tr>
+        </thead>
+        <tbody id="main-table">
+            </tbody>
+    </table>
 
-        const tbody = document.getElementById('tender-table');
+    <div class="footer">
+        <div style="font-size: 0.8em; color: #666;">© 2026 STRATEJİ ATILIM BİRLİĞİ - TÜM HAKLARI SAKLIDIR.</div>
+        <div class="made-in-logo">MADE IN: SAB</div>
+    </div>
+</div>
 
-        // Pay yüzdesine göre sırala ve tabloyu doldur
-        fullData.sort((a,b) => b.p - a.p).forEach(item => {
-            const lastSeen = new Date(item.last);
-            const days = Math.floor((TODAY - lastSeen) / (1000 * 60 * 60 * 24));
-            
-            let statusClass = "recent";
-            if(days > 15) statusClass = "old";
-            if(days > 60) statusClass = "critical";
+<script>
+    const TODAY = new Date("2026-03-09");
 
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><b>${item.ad}</b></td>
-                <td style="color:var(--neon-green)">%${item.p}</td>
-                <td>%${item.q}</td>
-                <td><span class="time-ago ${statusClass}">${days} GÜN ÖNCE</span></td>
-            `;
-            tbody.appendChild(row);
-        });
+    // Senin ihalelerinden süzülen tam liste
+    const rawData = [
+        {ad: "Robotlar", p: 11.8, q: 28, d: "2026-03-04"},
+        {ad: "E-Bileşenler", p: 8.5, q: 22, d: "2026-03-04"},
+        {ad: "Çelik", p: 7.2, q: 15, d: "2025-11-05"},
+        {ad: "Pil", p: 6.4, q: 19, d: "2025-11-05"},
+        {ad: "Yazılım", p: 4.7, q: 35, d: "2025-11-12"},
+        {ad: "İşlemci", p: 4.3, q: 31, d: "2025-12-31"},
+        {ad: "İnşaat Gereci", p: 4.1, q: 12, d: "2026-01-22"},
+        {ad: "Ekranlar", p: 3.8, q: 18, d: "2026-02-18"},
+        {ad: "Tabletler", p: 3.5, q: 25, d: "2026-02-18"},
+        {ad: "Dizüstü", p: 3.1, q: 27, d: "2026-02-18"},
+        {ad: "Akıllı Telefon", p: 1.6, q: 12, d: "2026-03-04"},
+        {ad: "Kamyon", p: 1.4, q: 10, d: "2025-11-13"},
+        {ad: "BFR", p: 0.9, q: 18, d: "2026-01-07"},
+        {ad: "Bal Kabağı", p: 0.8, q: 20, d: "2026-01-29"},
+        {ad: "Biftek", p: 1.5, q: 15, d: "2026-02-04"}
+    ];
 
-        // ARKA PLAN HAREKETLİ ÇİZGİLER SCRIPT'İ
-        (function() {
-            const canvas = document.getElementById('bg-lines');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            const lines = [];
-            for(let i=0; i<30; i++) {
-                lines.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    speedX: (Math.random() - 0.5) * 0.5,
-                    speedY: (Math.random() - 0.5) * 0.5,
-                    life: Math.random() * 50
-                });
-            }
+    const table = document.getElementById('main-table');
 
-            function animate() {
-                ctx.clearRect(0,0, canvas.width, canvas.height);
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 0.5;
+    rawData.sort((a,b) => b.p - a.p).forEach(item => {
+        const lastSeen = new Date(item.d);
+        const diff = Math.floor((TODAY - lastSeen) / (1000 * 60 * 60 * 24));
+        
+        let statusClass = "status-new";
+        if(diff > 20) statusClass = "status-old";
+        if(diff > 60) statusClass = "status-critical";
 
-                lines.forEach(l => {
-                    l.x += l.speedX;
-                    l.y += l.speedY;
-                    l.life -= 0.1;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="product-name">${item.ad}</td>
+            <td style="color: var(--neon-blue)">%${item.p}</td>
+            <td>%${item.q}</td>
+            <td><span class="days-ago ${statusClass}">${diff} GÜN ÖNCE</span></td>
+        `;
+        table.appendChild(row);
+    });
+</script>
 
-                    if(l.life <= 0) {
-                        l.x = Math.random() * canvas.width;
-                        l.y = Math.random() * canvas.height;
-                        l.life = Math.random() * 50;
-                    }
-
-                    ctx.beginPath();
-                    ctx.moveTo(l.x, l.y);
-                    ctx.lineTo(l.x + (l.speedX * l.life), l.y + (l.speedY * l.life));
-                    ctx.stroke();
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        })();
-    </script>
 </body>
 </html>
