@@ -3,115 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Stratejik Analiz Paneli</title>
+    <title>SAB Tam İhale Veri Bankası</title>
     <style>
-        :root { --neon-magenta: #ff00ff; --neon-cyan: #00ffcc; --warning-yellow: #ffcc00; }
+        :root { --neon-magenta: #ff00ff; --neon-cyan: #00ffcc; }
         body { background-color: #050505; color: white; font-family: 'Consolas', monospace; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; background: #0a0a0a; border: 2px solid var(--neon-magenta); border-radius: 12px; padding: 30px; box-shadow: 0 0 25px rgba(255, 0, 255, 0.2); }
+        .container { max-width: 1200px; margin: auto; background: #0a0a0a; border: 2px solid var(--neon-magenta); border-radius: 12px; padding: 30px; box-shadow: 0 0 25px rgba(255, 0, 255, 0.2); }
         
-        .live-header { 
-            background: #111; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 25px; 
-            display: flex; 
-            justify-content: space-between; 
-            border-left: 5px solid var(--neon-cyan);
-        }
-
+        .live-header { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; border-left: 5px solid var(--neon-cyan); }
+        
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: var(--neon-magenta); border-bottom: 2px solid #333; font-size: 0.85em; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #1a1a1a; }
+        th { text-align: left; padding: 10px; color: var(--neon-magenta); border-bottom: 2px solid #333; font-size: 0.8em; }
+        td { padding: 10px; border-bottom: 1px solid #1a1a1a; font-size: 0.95em; }
         
-        .row-product { font-weight: bold; color: #fff; }
-        .row-pct { color: var(--neon-cyan); font-weight: bold; }
-        
-        /* Dinamik Gün Önce Renklendirmesi */
-        .time-ago { 
-            font-family: 'Courier New', monospace; 
-            font-weight: bold; 
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: rgba(255, 204, 0, 0.1);
-            color: var(--warning-yellow);
-        }
-        .urgent { color: #ff4444; background: rgba(255, 68, 68, 0.1); } /* Çok uzun süre olduysa kırmızı */
+        .time-ago { font-weight: bold; padding: 3px 6px; border-radius: 4px; }
+        .recent { color: var(--neon-cyan); background: rgba(0, 255, 204, 0.1); }
+        .old { color: #ffcc00; background: rgba(255, 204, 0, 0.1); }
+        .critical { color: #ff4444; background: rgba(255, 68, 68, 0.1); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="live-header">
-        <div>
-            <span style="font-size: 0.7em; color: #888; display: block; text-transform: uppercase;">Sistem Tarihi</span>
-            <span id="current-date" style="font-size: 1.5em; font-weight: bold; color: var(--neon-cyan);">09.03.2026</span>
-        </div>
-        <div style="text-align: right;">
-            <span style="font-size: 0.7em; color: #888; display: block; text-transform: uppercase;">Durum</span>
-            <span style="font-size: 1.2em; color: #fff;">ANALİZ AKTİF</span>
-        </div>
+        <div><span style="color: #888; font-size: 0.7em;">BUGÜNÜN TARİHİ</span><br><b id="today-display" style="color: var(--neon-cyan);">09.03.2026</b></div>
+        <div style="text-align: right;"><span style="color: #888; font-size: 0.7em;">DURUM</span><br><b>TÜM VERİLER AKTİF</b></div>
     </div>
-
-    <h1 style="text-align: center; letter-spacing: 3px; font-size: 1.2em; color: #fff; margin-bottom: 30px;">STRATEJİ ATILIM BİRLİĞİ - İHALE DÖNGÜ TAKİBİ</h1>
 
     <table>
         <thead>
             <tr>
-                <th>ÜRÜN</th>
-                <th>TRAFİK PAYI (%)</th>
-                <th>Q1+ ORANI</th>
-                <th>SON GÖRÜLMESİNDEN BERİ</th>
+                <th>ÜRÜN ADI</th>
+                <th>PAY (%)</th>
+                <th>Q1+ (%)</th>
+                <th>DURUM (GÜN ÖNCE)</th>
             </tr>
         </thead>
-        <tbody id="tender-table">
-            </tbody>
+        <tbody id="full-table"></tbody>
     </table>
 </div>
 
 <script>
-    // Bugünün tarihi (Hesaplama için temel)
     const TODAY = new Date("2026-03-09");
 
-    // İhale Verileri (Gerçek tarihlerle)
-    const data = [
-        {ad: "Robotlar", p: 12.4, q: 28, lastDate: "2026-03-04"},
-        {ad: "Elektronik Bileşenler", p: 9.1, q: 22, lastDate: "2026-03-04"},
-        {ad: "Pil", p: 6.9, q: 19, lastDate: "2025-11-05"},
-        {ad: "Çelik", p: 7.8, q: 15, lastDate: "2025-11-05"},
-        {ad: "İşlemci", p: 5.5, q: 31, lastDate: "2025-12-31"},
-        {ad: "Yazılım", p: 4.4, q: 35, lastDate: "2025-11-12"},
-        {ad: "Akıllı Telefonlar", p: 1.9, q: 12, lastDate: "2026-03-04"},
-        {ad: "Malzeme Araştırması", p: 2.1, q: 0, lastDate: "2026-03-04"}
+    const fullData = [
+        {ad: "Robotlar", p: 11.8, q: 28, last: "2026-03-04"},
+        {ad: "E-Bileşenler", p: 8.5, q: 22, last: "2026-03-04"},
+        {ad: "Çelik", p: 7.2, q: 15, last: "2025-11-05"},
+        {ad: "Pil", p: 6.4, q: 19, last: "2025-11-05"},
+        {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "2025-03-19"},
+        {ad: "Yazılım", p: 4.7, q: 35, last: "2025-11-12"},
+        {ad: "İşlemci", p: 4.3, q: 31, last: "2025-12-31"},
+        {ad: "İnşaat Gereci", p: 4.1, q: 12, last: "2026-01-22"},
+        {ad: "Ekranlar", p: 3.8, q: 18, last: "2026-02-18"},
+        {ad: "Tabletler", p: 3.5, q: 25, last: "2026-02-18"},
+        {ad: "Yıldız Gemisi", p: 3.3, q: 40, last: "2025-03-19"},
+        {ad: "Dizüstü", p: 3.1, q: 27, last: "2026-02-18"},
+        {ad: "Malzeme Araş.", p: 1.8, q: 0, last: "2026-03-04"},
+        {ad: "Akıllı Telefonlar", p: 1.6, q: 12, last: "2026-03-04"},
+        {ad: "Biftek", p: 1.5, q: 15, last: "2026-02-04"},
+        {ad: "Kamyon", p: 1.4, q: 10, last: "2025-11-13"},
+        {ad: "Demir Cevheri", p: 1.2, q: 5, last: "2025-11-06"},
+        {ad: "Bal Kabağı", p: 0.8, q: 20, last: "2026-01-29"}
     ];
 
-    function calculateDaysAgo(dateString) {
-        const lastSeen = new Date(dateString);
-        const diffInTime = TODAY.getTime() - lastSeen.getTime();
-        const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
-        return diffInDays;
-    }
+    const tbody = document.getElementById('full-table');
 
-    const tableBody = document.getElementById('tender-table');
-    
-    data.forEach(item => {
-        const daysAgo = calculateDaysAgo(item.lastDate);
-        const row = document.createElement('tr');
+    fullData.sort((a,b) => b.p - a.p).forEach(item => {
+        const lastSeen = new Date(item.last);
+        const days = Math.floor((TODAY - lastSeen) / (1000 * 60 * 60 * 24));
         
-        // Eğer 30 günden fazlaysa 'urgent' sınıfını ekle
-        const urgencyClass = daysAgo > 30 ? 'urgent' : '';
+        let statusClass = "recent";
+        if(days > 15) statusClass = "old";
+        if(days > 60) statusClass = "critical";
 
+        const row = document.createElement('tr');
         row.innerHTML = `
-            <td class="row-product">${item.ad}</td>
-            <td class="row-pct">%${item.p}</td>
+            <td><b>${item.ad}</b></td>
+            <td style="color:var(--neon-cyan)">%${item.p}</td>
             <td>%${item.q}</td>
-            <td><span class="time-ago ${urgencyClass}">${daysAgo} GÜN ÖNCE</span></td>
+            <td><span class="time-ago ${statusClass}">${days} GÜN ÖNCE</span></td>
         `;
-        tableBody.appendChild(row);
+        tbody.appendChild(row);
     });
-
-    // Sayfa üzerindeki tarihi de göster
-    document.getElementById('current-date').innerText = "09.03.2026";
 </script>
-
 </body>
 </html>
