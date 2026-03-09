@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji Paneli - Üye Girişi</title>
+    <title>SAB Strateji Paneli V4.1 - Secure</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -11,69 +11,85 @@
 
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
-        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* Giriş Formu Tasarımı */
-        #login-form { width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; padding: 40px; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,1); text-align: center; }
+        /* GİRİŞ EKRANI TASARIMI */
+        #login-form { width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; padding: 40px; border-radius: 4px; text-align: center; box-shadow: 0 0 20px rgba(0,0,0,1); }
         .input-group { margin-bottom: 20px; text-align: left; }
         label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8em; letter-spacing: 1px; }
         input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; font-family: 'Share Tech Mono', monospace; box-sizing: border-box; }
-        input:focus { border-color: var(--neon-blue); outline: none; }
-        button { width: 100%; padding: 12px; background: var(--neon-blue); border: none; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
-        button:hover { background: #00b8dd; }
-
-        /* Ana Panel (Girişten Sonra Gözükecek) */
-        #main-content { display: none; width: 100%; max-width: 1100px; padding: 20px; }
-        .container { background: rgba(10, 10, 10, 0.95); border: 1px solid #222; padding: 30px; }
-        .timer-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 20px; text-align: center; color: var(--neon-pink); font-size: 2em; font-family: 'Share Tech Mono', monospace; }
+        button.login-btn { width: 100%; padding: 12px; background: var(--neon-blue); border: none; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
         
+        /* SENİN ORİJİNAL KONTEYNER TASARIMIN */
+        #main-content { display: none; width: 100%; max-width: 1100px; }
+        .container { background: rgba(10, 10, 10, 0.95); border: 1px solid #222; padding: 30px; position: relative; }
+        
+        .countdown-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 20px; text-align: center; }
+        #timer { font-size: 2.2em; font-family: 'Share Tech Mono', monospace; color: var(--neon-pink); }
+        
+        .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .predict-card { background: #0c0c0c; border: 1px solid #333; padding: 20px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--neon-blue); }
+        .prob-value { font-size: 2em; font-weight: bold; color: var(--neon-blue); display: block; }
+
         table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; margin-top: 20px; }
-        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; font-size: 0.85em; }
+        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; text-transform: uppercase; font-size: 0.85em; }
         td { padding: 15px; border-bottom: 1px solid #111; }
+        
         .row-high-pct { color: var(--neon-blue); font-weight: bold; }
-        .logout-btn { background: none; border: 1px solid #333; color: #555; width: auto; padding: 5px 15px; font-size: 0.7em; margin-top: 20px; }
-        .logout-btn:hover { color: var(--neon-pink); border-color: var(--neon-pink); }
+        .security-msg { text-align: center; color: var(--neon-pink); font-weight: bold; margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; }
+        .made-in { margin-top: 50px; text-align: center; color: #333; font-weight: 800; font-size: 1.5em; letter-spacing: 10px; border-top: 1px solid #111; padding-top: 20px; }
+        .logout-link { color: #444; text-decoration: none; font-size: 0.7em; position: absolute; right: 10px; top: 10px; }
+        .logout-link:hover { color: var(--neon-pink); }
     </style>
 </head>
 <body>
 
 <div id="login-form">
-    <h2 style="color: var(--neon-pink); letter-spacing: 5px;">SAB LOGIN</h2>
+    <h2 style="color: var(--neon-pink); letter-spacing: 5px; margin-bottom: 30px;">SAB LOGIN</h2>
     <div class="input-group">
-        <label>STRATEJİ E-POSTA</label>
-        <input type="email" id="email" placeholder="email@sab.com">
+        <label>E-POSTA (ad@sab.com)</label>
+        <input type="email" id="u-email" placeholder="burhan@sab.com">
     </div>
     <div class="input-group">
-        <label>GÜVENLİK ŞİFRESİ</label>
-        <input type="password" id="pass" placeholder="******">
+        <label>ŞİFRE</label>
+        <input type="password" id="u-pass" placeholder="******">
     </div>
-    <button onclick="login()">SİSTEME GİRİŞ YAP</button>
-    <p id="error-msg" style="color: red; font-size: 0.8em; margin-top: 10px;"></p>
+    <button class="login-btn" onclick="login()">Sisteme Gir</button>
+    <p id="err" style="color: #ff0055; font-size: 0.8em; margin-top: 15px; font-family: 'Share Tech Mono';"></p>
 </div>
 
 <div id="main-content">
     <div class="container">
-        <div style="text-align: right;"><button class="logout-btn" onclick="logout()">SİSTEMDEN ÇIK</button></div>
-        <h3 style="color: var(--neon-pink); text-align: center;">SAB ÖZEL STRATEJİ VERİLERİ</h3>
-        
-        <div class="timer-box" id="timer">00G 00S 00D 00S</div>
+        <a href="#" class="logout-link" onclick="logout()">[ SİSTEMDEN ÇIK ]</a>
+        <div class="security-msg">BU VERİLER SADECE SAB ÜYELERİNE ÖZELDİR | HENÜZ YAPIM AŞAMASINDADIR. VERİLERİN DOĞRULUĞUNA GÖRE NİHAİ HALİNİ ALACAKTIR.</div>
 
+        <div class="countdown-box">
+            <div style="font-size: 0.7em; color: #888;">SIRADAKİ İHALE (SALI 16:00) İÇİN KALAN SÜRE</div>
+            <div id="timer">00G 00S 00D 00S</div>
+        </div>
+
+        <h2 style="text-align: center; letter-spacing: 3px; color: #fff;">SAB AI: GELME OLASILIĞI EN YÜKSEK ÜRÜNLER</h2>
+        <div class="prediction-grid" id="prediction-cards"></div>
+
+        <h2 style="text-align: center; letter-spacing: 3px; color: #fff; margin-top: 50px;">GENEL İHALE TRAFİK PAYI (%)</h2>
         <table>
             <thead>
                 <tr>
                     <th>ÜRÜN ADI</th>
                     <th>TRAFİK PAYI (%)</th>
                     <th>DURUM</th>
+                    <th>TAHMİNİ OLASILIK</th>
                 </tr>
             </thead>
             <tbody id="main-table-body"></tbody>
         </table>
-        <div style="margin-top: 40px; text-align: center; color: #333; font-weight: 800; font-size: 1.5em; letter-spacing: 10px;">MADE IN: SAB</div>
+
+        <div class="made-in">MADE IN: SAB</div>
     </div>
 </div>
 
 <script>
-    // 1. FIREBASE CONFIGURATION (Senin Verilerin)
+    // --- 1. FIREBASE AYARLARI ---
     const firebaseConfig = {
         apiKey: "AIzaSyBTplbpl4cP8ATDIWE9Vb_BogSxHjvc0BM",
         authDomain: "saboff.firebaseapp.com",
@@ -84,12 +100,13 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    // 2. GİRİŞ KONTROL MEKANİZMASI
+    // --- 2. ÜYELİK KONTROLÜ ---
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('main-content').style.display = 'block';
             document.getElementById('login-form').style.display = 'none';
-            loadData(); // Verileri yükle
+            document.body.style.display = 'block'; // Ortalama ekranından çık
+            initDashboard(); 
         } else {
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
@@ -97,18 +114,19 @@
     });
 
     function login() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
+        const email = document.getElementById('u-email').value;
+        const pass = document.getElementById('u-pass').value;
         firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(e => document.getElementById('error-msg').innerText = "HATA: GİRİŞ REDDEDİLDİ.");
+            .catch(e => document.getElementById('err').innerText = "ERİŞİM REDDEDİLDİ: HATALI VERİ.");
     }
 
     function logout() {
         firebase.auth().signOut();
     }
 
-    // 3. TABLO VERİLERİ VE SAYAÇ
-    function loadData() {
+    // --- 3. SENİN ASIL VERİ VE SAYAÇ FONKSİYONLARIN ---
+    function initDashboard() {
+        const TODAY = new Date();
         const rawData = [
             {ad: "Robotlar", p: 12.4, last: "2026-03-04"},
             {ad: "E-Bileşenler", p: 9.1, last: "2026-03-04"},
@@ -116,26 +134,44 @@
             {ad: "Pil", p: 6.9, last: "2025-11-05"},
             {ad: "İşlemci", p: 5.5, last: "2025-12-31"},
             {ad: "Yazılım", p: 4.4, last: "2025-11-12"},
-            {ad: "Samosa", p: 1.4, last: "2026-02-01"}
+            {ad: "Ekranlar", p: 3.9, last: "2026-02-18"},
+            {ad: "Tabletler", p: 3.5, last: "2026-02-18"},
+            {ad: "Dizüstü", p: 3.1, last: "2026-02-18"},
+            {ad: "Akıllı Telefon", p: 1.9, last: "2026-03-04"},
+            {ad: "Kamyon", p: 1.4, last: "2025-11-13"}
         ];
 
-        const tbody = document.getElementById('main-table-body');
-        tbody.innerHTML = "";
-        const TODAY = new Date();
+        let processed = rawData.map(item => {
+            const lastDate = new Date(item.last);
+            const diffDays = Math.floor((TODAY - lastDate) / (1000 * 60 * 60 * 24));
+            const prob = Math.min(98, (item.p * 2) + (diffDays / 4)).toFixed(1);
+            return { ...item, diffDays, prob };
+        });
 
-        rawData.sort((a,b) => b.p - a.p).forEach(item => {
-            const diffDays = Math.floor((TODAY - new Date(item.last)) / (1000 * 60 * 60 * 24));
-            tbody.innerHTML += `
+        const cardZone = document.getElementById('prediction-cards');
+        cardZone.innerHTML = "";
+        [...processed].sort((a,b) => b.prob - a.prob).slice(0, 3).forEach(item => {
+            cardZone.innerHTML += `
+                <div class="predict-card">
+                    <div style="color: #888; font-size: 0.8em; margin-bottom: 5px;">${item.ad}</div>
+                    <span class="prob-value">%${item.prob}</span>
+                    <div style="color: var(--neon-pink); font-size: 0.7em;">YÜKSEK POTANSİYEL</div>
+                </div>`;
+        });
+
+        const tableBody = document.getElementById('main-table-body');
+        tableBody.innerHTML = "";
+        [...processed].sort((a,b) => b.p - a.p).forEach(item => {
+            tableBody.innerHTML += `
                 <tr>
                     <td><b>${item.ad}</b></td>
                     <td class="row-high-pct">%${item.p}</td>
-                    <td style="font-size: 0.85em;">${diffDays} GÜN ÖNCE</td>
-                </tr>
-            `;
+                    <td style="font-size: 0.85em;">${item.diffDays} GÜN ÖNCE GELDİ</td>
+                    <td style="color: var(--neon-pink); font-weight: bold;">%${item.prob}</td>
+                </tr>`;
         });
     }
 
-    // 4. SALI 16:00 SAYACI
     function updateTimer() {
         const now = new Date();
         let target = new Date();
@@ -147,12 +183,12 @@
         const hrs = Math.floor((d % 86400000) / 3600000);
         const mins = Math.floor((d % 3600000) / 60000);
         const secs = Math.floor((d % 60000) / 1000);
-        const timerElem = document.getElementById('timer');
-        if(timerElem) timerElem.innerText = `${days}G ${String(hrs).padStart(2, '0')}S ${String(mins).padStart(2, '0')}D ${String(secs).padStart(2, '0')}S`;
+        const tElem = document.getElementById('timer');
+        if(tElem) tElem.innerText = `${days}G ${String(hrs).padStart(2, '0')}S ${String(mins).padStart(2, '0')}D ${String(secs).padStart(2, '0')}S`;
     }
+
     setInterval(updateTimer, 1000);
     updateTimer();
 </script>
-
 </body>
 </html>
