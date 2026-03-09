@@ -5,102 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAB Strateji Merkezi</title>
     <style>
-        body {
-            background-color: #050505;
-            color: #00ffcc;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .dashboard {
-            max-width: 1000px;
-            width: 100%;
-            background: rgba(10, 10, 10, 0.98);
-            border: 2px solid #ff00ff;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 0 40px rgba(255, 0, 255, 0.2);
-            text-align: center;
-        }
-
-        .security-alert {
-            background: #ff00ff;
-            color: #000;
-            padding: 15px;
-            font-weight: bold;
-            font-size: 1.2em;
-            border-radius: 5px;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            box-shadow: 0 0 20px #ff00ff;
-        }
-
-        h1 {
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 40px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th {
-            text-align: left;
-            padding: 15px;
-            color: #ff00ff;
-            border-bottom: 2px solid #333;
-            text-transform: uppercase;
-            font-size: 0.85em;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #222;
-        }
-
-        .product-name {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #fff;
-            text-align: left;
-        }
-
-        .q-tag {
-            background: #111;
-            color: #ff00ff;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            border: 1px solid #ff00ff;
-        }
-
-        .last-seen {
-            color: #ffcc00; /* Dikkat çekmesi için altın sarısı */
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-
-        .footer {
-            margin-top: 40px;
-            color: #444;
-            font-size: 0.8em;
-        }
+        body { background-color: #050505; color: #00ffcc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .dashboard { max-width: 1000px; width: 100%; background: #0a0a0a; border: 2px solid #ff00ff; border-radius: 15px; padding: 40px; box-shadow: 0 0 30px rgba(255, 0, 255, 0.2); text-align: center; }
+        .security-alert { background: #ff00ff; color: #000; padding: 15px; font-weight: bold; border-radius: 5px; margin-bottom: 30px; text-transform: uppercase; }
+        h1 { color: #fff; text-transform: uppercase; letter-spacing: 5px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 15px; color: #ff00ff; border-bottom: 2px solid #333; text-transform: uppercase; font-size: 0.85em; }
+        td { padding: 15px; border-bottom: 1px solid #222; text-align: left; }
+        .product-name { font-weight: bold; color: #fff; }
+        .last-seen { color: #ffcc00; font-family: 'Courier New', monospace; font-weight: bold; }
+        .bar-bg { background: #1a1a1a; height: 8px; border-radius: 4px; width: 100px; display: inline-block; margin-left: 10px; }
+        .bar-fill { height: 100%; background: #00ffcc; border-radius: 4px; }
+        .footer { margin-top: 40px; color: #444; font-size: 0.8em; }
     </style>
 </head>
 <body>
 
     <div class="dashboard">
         <div class="security-alert">
-            DİKKAT: BU VERİLER YALNIZCA STRATEJİ ATILIM BİRLİĞİ ÜYELERİNİN KULLANIMINA AÇIKTIR
+            DİKKAT: BU VERİLER YALNIZCA STRATEJİ ATILIM BİRLİĞİ ÜYELERİNE KULLANIMA AÇIKTIR
         </div>
 
         <h1>İHALE KRONOLOJİK ANALİZİ</h1>
@@ -109,34 +32,39 @@
             <thead>
                 <tr>
                     <th>ÜRÜN ADI</th>
-                    <th>TRAFİK PAYI</th>
-                    <th>KALİTE ANALİZİ (Q1+)</th>
-                    <th>EN SON GÖRÜLDÜĞÜ TARİH</th>
+                    <th>TRAFİK PAYI (%)</th>
+                    <th>Q1+ ORANI</th>
+                    <th>SON GÖRÜLDÜĞÜ TARİH</th>
                 </tr>
             </thead>
             <tbody id="data-table">
                 </tbody>
         </table>
 
-        <div class="footer">
-            SAB v2.6 - GERÇEK ZAMANLI VERİ DOĞRULAMA AKTİF
-        </div>
+        <div class="footer">SAB v2.7 - HATASIZ KRONOLOJİ SİSTEMİ</div>
     </div>
 
     <script>
-        // Senin verilerinden çıkarılan en son görülme tarihleri (Kronolojik)
+        // Veriler: Trafik payına göre Büyükten Küçüğe (DESC) sıralandı.
+        // Tarihler: Listendeki en güncel (Son) ihale tarihleri baz alındı.
         const analysis = [
             {ad: "Robotlar", p: 11.8, q: 28, last: "6 Mar 2026 Cum"},
-            {ad: "Malzeme Araştırması", p: 1.8, q: 0, last: "4 Mar 2026 Çar"},
-            {ad: "Akıllı Telefonlar", p: 2.1, q: 0, last: "4 Mar 2026 Çar"},
             {ad: "Elektronik Bileşenler", p: 8.5, q: 22, last: "6 Mar 2026 Cum"},
             {ad: "Çelik", p: 7.2, q: 15, last: "5 Mar 2026 Per"},
             {ad: "Pil", p: 6.4, q: 19, last: "6 Mar 2026 Cum"},
             {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "5 Mar 2026 Per"},
+            {ad: "Süt", p: 5.1, q: 5, last: "27 Kas 2024 Çar"},
             {ad: "Yazılım", p: 4.7, q: 35, last: "4 Mar 2026 Çar"},
             {ad: "İşlemci", p: 4.3, q: 31, last: "6 Mar 2026 Cum"},
+            {ad: "İnşaat Gereci", p: 4.1, q: 12, last: "4 Mar 2026 Çar"},
+            {ad: "Ekranlar", p: 3.8, q: 18, last: "3 Mar 2026 Sal"},
+            {ad: "Tabletler", p: 3.5, q: 25, last: "5 Mar 2026 Per"},
             {ad: "Yıldız Gemisi", p: 3.3, q: 40, last: "3 Mar 2026 Sal"},
-            {ad: "Tabletler", p: 3.5, q: 25, last: "5 Mar 2026 Per"}
+            {ad: "Dizüstü", p: 3.1, q: 27, last: "6 Mar 2026 Cum"},
+            {ad: "Betonarme Blok", p: 2.8, q: 8, last: "4 Mar 2026 Çar"},
+            {ad: "Malzeme Araştırması", p: 1.8, q: 0, last: "4 Mar 2026 Çar"},
+            {ad: "Akıllı Telefonlar", p: 1.6, q: 12, last: "4 Mar 2026 Çar"},
+            {ad: "Cam", p: 1.5, q: 4, last: "2 Mar 2026 Pzt"}
         ];
 
         const tbody = document.getElementById('data-table');
@@ -145,8 +73,11 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="product-name">${item.ad}</td>
-                <td>%${item.p}</td>
-                <td><span class="q-tag">Q1+ : %${item.q}</span></td>
+                <td>
+                    %${item.p}
+                    <div class="bar-bg"><div class="bar-fill" style="width: ${item.p * 5}%"></div></div>
+                </td>
+                <td>%${item.q}</td>
                 <td class="last-seen">${item.last}</td>
             `;
             tbody.appendChild(row);
@@ -154,4 +85,3 @@
     </script>
 </body>
 </html>
-
