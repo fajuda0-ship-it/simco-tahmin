@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji Paneli V4.1 - Centered</title>
+    <title>SAB Strateji Paneli V5.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -11,64 +11,32 @@
 
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
+        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         
-        /* Body ayarını girişe göre esnek yaptık */
-        body { 
-            background-color: var(--bg-dark); 
-            color: #eee; 
-            font-family: 'Rajdhani', sans-serif; 
-            margin: 0; 
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center; /* Yatayda ortala */
-            align-items: flex-start; /* Üstten başla (tablo uzun olabilir) */
-        }
-
-        /* Giriş Formu - Sayfanın tam ortasında dursun */
-        #login-form { 
-            width: 100%; 
-            max-width: 400px; 
-            background: #0a0a0a; 
-            border: 1px solid #222; 
-            padding: 40px; 
-            margin-top: 10vh; /* Üstten biraz boşluk */
-            text-align: center; 
-            box-shadow: 0 0 30px rgba(0,0,0,1);
-        }
-
-        /* Ana İçerik - Sayfayı kaplasın ama ortalı kalsın */
-        #main-content { 
-            display: none; 
-            width: 100%; 
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .container { 
-            max-width: 1100px; 
-            margin: 20px auto; /* Otomatik yan boşluklar ile ORTALAR */
-            background: rgba(10, 10, 10, 0.95); 
-            border: 1px solid #222; 
-            padding: 30px; 
-            position: relative;
-        }
-        
-        /* Diğer orijinal stillerin (tablo, kartlar vb.) aynen devam ediyor */
+        /* GİRİŞ FORMU */
+        #login-form { width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; padding: 40px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,1); }
         .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8em; letter-spacing: 1px; }
+        label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8em; }
         input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; font-family: 'Share Tech Mono', monospace; box-sizing: border-box; }
-        button.login-btn { width: 100%; padding: 12px; background: var(--neon-blue); border: none; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        button.login-btn { width: 100%; padding: 12px; background: var(--neon-blue); border: none; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+
+        /* ANA PANEL */
+        #main-content { display: none; width: 100%; padding: 20px; box-sizing: border-box; }
+        .container { max-width: 1100px; margin: 20px auto; background: rgba(10, 10, 10, 0.95); border: 1px solid #222; padding: 30px; position: relative; }
+        
+        .security-msg { text-align: center; color: var(--neon-pink); font-weight: bold; margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; font-size: 0.9em; }
         .countdown-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 20px; text-align: center; }
         #timer { font-size: 2.2em; font-family: 'Share Tech Mono', monospace; color: var(--neon-pink); }
-        .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .predict-card { background: #0c0c0c; border: 1px solid #333; padding: 20px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--neon-blue); }
-        .prob-value { font-size: 2em; font-weight: bold; color: var(--neon-blue); display: block; }
+        
+        .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .predict-card { background: #0c0c0c; border: 1px solid #333; padding: 20px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--neon-blue); position: relative; }
+        .prob-value { font-size: 2.2em; font-weight: bold; color: var(--neon-blue); display: block; margin: 10px 0; }
+
         table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; margin-top: 20px; }
-        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; text-transform: uppercase; font-size: 0.85em; }
+        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; font-size: 0.85em; }
         td { padding: 15px; border-bottom: 1px solid #111; }
+        
         .row-high-pct { color: var(--neon-blue); font-weight: bold; }
-        .security-msg { text-align: center; color: var(--neon-pink); font-weight: bold; margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; }
         .made-in { margin-top: 50px; text-align: center; color: #333; font-weight: 800; font-size: 1.5em; letter-spacing: 10px; border-top: 1px solid #111; padding-top: 20px; }
         .logout-link { color: #444; text-decoration: none; font-size: 0.7em; position: absolute; right: 10px; top: 10px; }
     </style>
@@ -78,44 +46,44 @@
 <div id="login-form">
     <h2 style="color: var(--neon-pink); letter-spacing: 5px; margin-bottom: 30px;">SAB LOGIN</h2>
     <div class="input-group">
-        <label>E-POSTA (ad@sab.com)</label>
-        <input type="email" id="u-email" placeholder="burhan@sab.com">
+        <label>E-POSTA</label>
+        <input type="email" id="u-email" placeholder="ad@sab.com">
     </div>
     <div class="input-group">
         <label>ŞİFRE</label>
         <input type="password" id="u-pass" placeholder="******">
     </div>
-    <button class="login-btn" onclick="login()">Sisteme Gir</button>
-    <p id="err" style="color: #ff0055; font-size: 0.8em; margin-top: 15px; font-family: 'Share Tech Mono';"></p>
+    <button class="login-btn" onclick="login()">Giriş Yap</button>
+    <p id="err" style="color: #ff0055; font-size: 0.8em; margin-top: 15px;"></p>
 </div>
 
 <div id="main-content">
     <div class="container">
         <a href="#" class="logout-link" onclick="logout()">[ SİSTEMDEN ÇIK ]</a>
-        <div class="security-msg">BU VERİLER SADECE SAB ÜYELERİNE ÖZELDİR | HENÜZ YAPIM AŞAMASINDADIR.DOĞRULUK VERİLERİNE GÖRE NİHAİ HALİNİ ALACAKTIR.</div>
+        <div class="security-msg">SAB ÖZEL VERİ HATTI | 10 MART İHALESİ TAHMİN MODÜLÜ AKTİF</div>
 
         <div class="countdown-box">
-            <div style="font-size: 0.7em; color: #888;">SIRADAKİ İHALE (SALI 16:00) İÇİN KALAN SÜRE</div>
+            <div style="font-size: 0.7em; color: #888;">SIRADAKİ İHALE (SALI 16:00) KALAN SÜRE</div>
             <div id="timer">00G 00S 00D 00S</div>
         </div>
 
-        <h2 style="text-align: center; letter-spacing: 3px; color: #fff;">SAB AI: GELME OLASILIĞI EN YÜKSEK ÜRÜNLER</h2>
+        <h2 style="text-align: center; letter-spacing: 3px; color: #fff; text-transform: uppercase; font-size: 1.2em;">10 Mart İhalesinde Gelme İhtimali Yüksek Ürünler</h2>
         <div class="prediction-grid" id="prediction-cards"></div>
 
-        <h2 style="text-align: center; letter-spacing: 3px; color: #fff; margin-top: 50px;">GENEL İHALE TRAFİK PAYI (%)</h2>
+        <h2 style="text-align: center; letter-spacing: 3px; color: #fff; margin-top: 50px; text-transform: uppercase; font-size: 1.2em;">Genel İhale Trafik Payı ve Geçmiş Veriler</h2>
         <table>
             <thead>
                 <tr>
                     <th>ÜRÜN ADI</th>
                     <th>TRAFİK PAYI (%)</th>
-                    <th>DURUM</th>
-                    <th>TAHMİNİ OLASILIK</th>
+                    <th>DURUM (HAFTA)</th>
+                    <th>GELME İHTİMALİ</th>
                 </tr>
             </thead>
             <tbody id="main-table-body"></tbody>
         </table>
 
-        <div class="made-in">SAB PROJESİDİR.</div>
+        <div class="made-in">MADE IN: SAB</div>
     </div>
 </div>
 
@@ -134,13 +102,12 @@
         if (user) {
             document.getElementById('main-content').style.display = 'block';
             document.getElementById('login-form').style.display = 'none';
-            // Girişten sonra body'yi normal akışına bırakıyoruz
             document.body.style.alignItems = 'flex-start'; 
             initDashboard(); 
         } else {
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
-            document.body.style.alignItems = 'center'; // Giriş ekranını dikeyde de ortala
+            document.body.style.alignItems = 'center';
         }
     });
 
@@ -148,7 +115,7 @@
         const email = document.getElementById('u-email').value;
         const pass = document.getElementById('u-pass').value;
         firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(e => document.getElementById('err').innerText = "ERİŞİM REDDEDİLDİ.");
+            .catch(e => document.getElementById('err').innerText = "YETKİSİZ ERİŞİM.");
     }
 
     function logout() { firebase.auth().signOut(); }
@@ -156,35 +123,64 @@
     function initDashboard() {
         const TODAY = new Date();
         const rawData = [
-            {ad: "Robotlar", p: 12.4, last: "2026-03-04"},
-            {ad: "E-Bileşenler", p: 9.1, last: "2026-03-04"},
-            {ad: "Çelik", p: 7.8, last: "2025-11-05"},
-            {ad: "Pil", p: 6.9, last: "2025-11-05"},
-            {ad: "İşlemci", p: 5.5, last: "2025-12-31"},
-            {ad: "Yazılım", p: 4.4, last: "2025-11-12"},
-            {ad: "Ekranlar", p: 3.9, last: "2026-02-18"},
-            {ad: "Tabletler", p: 3.5, last: "2026-02-18"},
-            {ad: "Dizüstü", p: 3.1, last: "2026-02-18"},
-            {ad: "Akıllı Telefon", p: 1.9, last: "2026-03-04"},
-            {ad: "Kamyon", p: 1.4, last: "2025-11-13"}
+            {ad: "Robotlar", p: 12.4, last: "2026-03-04", maxH: 2},
+            {ad: "E-Bileşenler", p: 9.1, last: "2026-03-04", maxH: 2},
+            {ad: "Çelik", p: 7.8, last: "2025-11-05", maxH: 5},
+            {ad: "Pil", p: 6.9, last: "2025-11-05", maxH: 4},
+            {ad: "İşlemci", p: 5.5, last: "2025-12-31", maxH: 4},
+            {ad: "Yazılım", p: 4.4, last: "2025-11-12", maxH: 6},
+            {ad: "Ekranlar", p: 3.9, last: "2026-02-18", maxH: 4},
+            {ad: "Tabletler", p: 3.5, last: "2026-02-18", maxH: 4},
+            {ad: "Dizüstü", p: 3.1, last: "2026-02-18", maxH: 4},
+            {ad: "Samosa", p: 1.4, last: "2026-02-01", maxH: 3},
+            {ad: "Kamyon", p: 1.4, last: "2025-11-13", maxH: 8}
         ];
 
         let processed = rawData.map(item => {
             const diffDays = Math.floor((TODAY - new Date(item.last)) / (1000 * 60 * 60 * 24));
-            const prob = Math.min(98, (item.p * 2) + (diffDays / 4)).toFixed(1);
-            return { ...item, diffDays, prob };
+            const maxDays = item.maxH * 7;
+            const timeRatio = diffDays / maxDays;
+
+            // GÜVENLİ HESAPLAMA (Tavan %88 + Logaritmik Artış)
+            let baseScore = item.p * 1.5; 
+            let timeScore = timeRatio * 40; 
+            let finalProb = baseScore + timeScore;
+
+            if (finalProb > 85) finalProb = 85 + (finalProb / 40); // %85'ten sonra çok yavaşlar
+            if (timeRatio < 0.3) finalProb *= 0.5; // Yeni gelenin şansını kır
+
+            return { 
+                ...item, 
+                diffDays, 
+                diffWeeks: (diffDays / 7).toFixed(1),
+                prob: Math.min(91.2, finalProb).toFixed(1), // Mutlak tavan %91.2
+                riskLevel: timeRatio >= 1.0 ? 'KRİTİK' : (timeRatio > 0.7 ? 'YÜKSEK' : 'NORMAL')
+            };
         });
 
+        // ÜST KARTLAR: Tahmini en yüksek 3 ürün
         const cardZone = document.getElementById('prediction-cards');
         cardZone.innerHTML = "";
         [...processed].sort((a,b) => b.prob - a.prob).slice(0, 3).forEach(item => {
-            cardZone.innerHTML += `<div class="predict-card"><div style="color:#888;font-size:0.8em;">${item.ad}</div><span class="prob-value">%${item.prob}</span></div>`;
+            cardZone.innerHTML += `
+                <div class="predict-card" style="border-bottom: 3px solid ${item.riskLevel==='KRİTİK' ? 'var(--neon-pink)' : 'var(--neon-blue)'}">
+                    <div style="color:#888;font-size:0.8em;letter-spacing:1px;">${item.ad}</div>
+                    <span class="prob-value" style="color:${item.riskLevel==='KRİTİK' ? 'var(--neon-pink)' : 'var(--neon-blue)'}">%${item.prob}</span>
+                    <div style="font-size:0.7em; letter-spacing:2px; color:#555;">DURUM: ${item.riskLevel}</div>
+                </div>`;
         });
 
+        // ALT TABLO: Tüm veriler
         const tableBody = document.getElementById('main-table-body');
         tableBody.innerHTML = "";
         [...processed].sort((a,b) => b.p - a.p).forEach(item => {
-            tableBody.innerHTML += `<tr><td><b>${item.ad}</b></td><td class="row-high-pct">%${item.p}</td><td>${item.diffDays} GÜN ÖNCE</td><td style="color:var(--neon-pink);">%${item.prob}</td></tr>`;
+            tableBody.innerHTML += `
+                <tr>
+                    <td><b>${item.ad}</b></td>
+                    <td class="row-high-pct">%${item.p}</td>
+                    <td>${item.diffWeeks} / ${item.maxH} Hafta</td>
+                    <td style="color:${parseFloat(item.prob) > 80 ? 'var(--neon-pink)' : 'var(--neon-blue)'}; font-weight:bold;">%${item.prob}</td>
+                </tr>`;
         });
     }
 
@@ -207,5 +203,3 @@
 </script>
 </body>
 </html>
-
-
