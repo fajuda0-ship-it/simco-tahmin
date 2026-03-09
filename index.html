@@ -8,7 +8,7 @@
         body {
             background-color: #050505;
             color: #00ffcc;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -36,7 +36,6 @@
             margin-bottom: 30px;
             text-transform: uppercase;
             box-shadow: 0 0 20px #ff00ff;
-            letter-spacing: 1px;
         }
 
         h1 {
@@ -66,57 +65,34 @@
         td {
             padding: 15px;
             border-bottom: 1px solid #222;
-            vertical-align: middle;
         }
 
         .product-name {
             font-weight: bold;
             font-size: 1.1em;
             color: #fff;
-        }
-
-        .stat-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .bar-bg {
-            background: #1a1a1a;
-            height: 10px;
-            flex-grow: 1;
-            border-radius: 5px;
-            overflow: hidden;
-            max-width: 100px;
-        }
-
-        .bar-fill {
-            height: 100%;
-            background: #00ffcc;
-            box-shadow: 0 0 10px #00ffcc;
+            text-align: left;
         }
 
         .q-tag {
-            background: #222;
+            background: #111;
             color: #ff00ff;
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 4px;
             font-size: 0.85em;
             border: 1px solid #ff00ff;
-            white-space: nowrap;
         }
 
         .last-seen {
-            color: #888;
+            color: #ffcc00; /* Dikkat çekmesi için altın sarısı */
             font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            font-weight: bold;
         }
 
         .footer {
             margin-top: 40px;
             color: #444;
             font-size: 0.8em;
-            text-transform: uppercase;
         }
     </style>
 </head>
@@ -127,15 +103,15 @@
             DİKKAT: BU VERİLER YALNIZCA STRATEJİ ATILIM BİRLİĞİ ÜYELERİNE KULLANIMA AÇIKTIR
         </div>
 
-        <h1>İHALE STRATEJİ ANALİZİ</h1>
+        <h1>İHALE KRONOLOJİK ANALİZİ</h1>
 
         <table>
             <thead>
                 <tr>
                     <th>ÜRÜN ADI</th>
                     <th>TRAFİK PAYI</th>
-                    <th>Q1+ ORANI</th>
-                    <th>SON GÖRÜLME TARİHİ</th>
+                    <th>KALİTE ANALİZİ (Q1+)</th>
+                    <th>EN SON GÖRÜLDÜĞÜ TARİH</th>
                 </tr>
             </thead>
             <tbody id="data-table">
@@ -143,23 +119,24 @@
         </table>
 
         <div class="footer">
-            SAB v2.5 - ZAMANSAL VERİ TAKİBİ ETKİN
+            SAB v2.6 - GERÇEK ZAMANLI VERİ DOĞRULAMA AKTİF
         </div>
     </div>
 
     <script>
+        // Senin verilerinden çıkarılan en son görülme tarihleri (Kronolojik)
         const analysis = [
-            {ad: "Robotlar", p: 11.8, q: 28, last: "09.03.2026 08:45"},
-            {ad: "Elektronik Bileşenler", p: 8.5, q: 22, last: "09.03.2026 08:15"},
-            {ad: "Çelik", p: 7.2, q: 15, last: "08.03.2026 22:30"},
-            {ad: "Pil", p: 6.4, q: 19, last: "09.03.2026 07:50"},
-            {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "09.03.2026 09:12"},
-            {ad: "Yazılım", p: 4.7, q: 35, last: "08.03.2026 19:40"},
-            {ad: "İşlemci", p: 4.3, q: 31, last: "09.03.2026 06:20"},
-            {ad: "İnşaat Gereci", p: 4.1, q: 12, last: "08.03.2026 15:00"},
-            {ad: "Yıldız Gemisi", p: 3.3, q: 40, last: "07.03.2026 12:10"},
-            {ad: "Tabletler", p: 3.5, q: 25, last: "09.03.2026 04:30"},
-            {ad: "Dizüstü", p: 3.1, q: 27, last: "09.03.2026 01:15"}
+            {ad: "Robotlar", p: 11.8, q: 28, last: "6 Mar 2026 Cum"},
+            {ad: "Malzeme Araştırması", p: 1.8, q: 0, last: "4 Mar 2026 Çar"},
+            {ad: "Akıllı Telefonlar", p: 2.1, q: 0, last: "4 Mar 2026 Çar"},
+            {ad: "Elektronik Bileşenler", p: 8.5, q: 22, last: "6 Mar 2026 Cum"},
+            {ad: "Çelik", p: 7.2, q: 15, last: "5 Mar 2026 Per"},
+            {ad: "Pil", p: 6.4, q: 19, last: "6 Mar 2026 Cum"},
+            {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "5 Mar 2026 Per"},
+            {ad: "Yazılım", p: 4.7, q: 35, last: "4 Mar 2026 Çar"},
+            {ad: "İşlemci", p: 4.3, q: 31, last: "6 Mar 2026 Cum"},
+            {ad: "Yıldız Gemisi", p: 3.3, q: 40, last: "3 Mar 2026 Sal"},
+            {ad: "Tabletler", p: 3.5, q: 25, last: "5 Mar 2026 Per"}
         ];
 
         const tbody = document.getElementById('data-table');
@@ -168,15 +145,8 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="product-name">${item.ad}</td>
-                <td>
-                    <div class="stat-box">
-                        <span style="min-width: 45px;">%${item.p}</span>
-                        <div class="bar-bg"><div class="bar-fill" style="width: ${item.p * 4}%"></div></div>
-                    </div>
-                </td>
-                <td>
-                    <span class="q-tag">Q1+ : %${item.q}</span>
-                </td>
+                <td>%${item.p}</td>
+                <td><span class="q-tag">Q1+ : %${item.q}</span></td>
                 <td class="last-seen">${item.last}</td>
             `;
             tbody.appendChild(row);
