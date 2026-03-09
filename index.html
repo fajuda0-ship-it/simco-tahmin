@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji Paneli V4.1 - Secure</title>
+    <title>SAB Strateji Paneli V4.1 - Centered</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -11,35 +11,66 @@
 
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
-        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* GİRİŞ EKRANI TASARIMI */
-        #login-form { width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; padding: 40px; border-radius: 4px; text-align: center; box-shadow: 0 0 20px rgba(0,0,0,1); }
+        /* Body ayarını girişe göre esnek yaptık */
+        body { 
+            background-color: var(--bg-dark); 
+            color: #eee; 
+            font-family: 'Rajdhani', sans-serif; 
+            margin: 0; 
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center; /* Yatayda ortala */
+            align-items: flex-start; /* Üstten başla (tablo uzun olabilir) */
+        }
+
+        /* Giriş Formu - Sayfanın tam ortasında dursun */
+        #login-form { 
+            width: 100%; 
+            max-width: 400px; 
+            background: #0a0a0a; 
+            border: 1px solid #222; 
+            padding: 40px; 
+            margin-top: 10vh; /* Üstten biraz boşluk */
+            text-align: center; 
+            box-shadow: 0 0 30px rgba(0,0,0,1);
+        }
+
+        /* Ana İçerik - Sayfayı kaplasın ama ortalı kalsın */
+        #main-content { 
+            display: none; 
+            width: 100%; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container { 
+            max-width: 1100px; 
+            margin: 20px auto; /* Otomatik yan boşluklar ile ORTALAR */
+            background: rgba(10, 10, 10, 0.95); 
+            border: 1px solid #222; 
+            padding: 30px; 
+            position: relative;
+        }
+        
+        /* Diğer orijinal stillerin (tablo, kartlar vb.) aynen devam ediyor */
         .input-group { margin-bottom: 20px; text-align: left; }
         label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8em; letter-spacing: 1px; }
         input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; font-family: 'Share Tech Mono', monospace; box-sizing: border-box; }
-        button.login-btn { width: 100%; padding: 12px; background: var(--neon-blue); border: none; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
-        
-        /* SENİN ORİJİNAL KONTEYNER TASARIMIN */
-        #main-content { display: none; width: 100%; max-width: 1100px; }
-        .container { background: rgba(10, 10, 10, 0.95); border: 1px solid #222; padding: 30px; position: relative; }
-        
+        button.login-btn { width: 100%; padding: 12px; background: var(--neon-blue); border: none; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
         .countdown-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 20px; text-align: center; }
         #timer { font-size: 2.2em; font-family: 'Share Tech Mono', monospace; color: var(--neon-pink); }
-        
         .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .predict-card { background: #0c0c0c; border: 1px solid #333; padding: 20px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--neon-blue); }
         .prob-value { font-size: 2em; font-weight: bold; color: var(--neon-blue); display: block; }
-
         table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; margin-top: 20px; }
         th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; text-transform: uppercase; font-size: 0.85em; }
         td { padding: 15px; border-bottom: 1px solid #111; }
-        
         .row-high-pct { color: var(--neon-blue); font-weight: bold; }
         .security-msg { text-align: center; color: var(--neon-pink); font-weight: bold; margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; }
         .made-in { margin-top: 50px; text-align: center; color: #333; font-weight: 800; font-size: 1.5em; letter-spacing: 10px; border-top: 1px solid #111; padding-top: 20px; }
         .logout-link { color: #444; text-decoration: none; font-size: 0.7em; position: absolute; right: 10px; top: 10px; }
-        .logout-link:hover { color: var(--neon-pink); }
     </style>
 </head>
 <body>
@@ -61,7 +92,7 @@
 <div id="main-content">
     <div class="container">
         <a href="#" class="logout-link" onclick="logout()">[ SİSTEMDEN ÇIK ]</a>
-        <div class="security-msg">BU VERİLER SADECE SAB ÜYELERİNE ÖZELDİR | HENÜZ YAPIM AŞAMASINDADIR. VERİLERİN DOĞRULUĞUNA GÖRE NİHAİ HALİNİ ALACAKTIR.</div>
+        <div class="security-msg">BU VERİLER SADECE SAB ÜYELERİNE ÖZELDİR | HENÜZ YAPIM AŞAMASINDADIR.</div>
 
         <div class="countdown-box">
             <div style="font-size: 0.7em; color: #888;">SIRADAKİ İHALE (SALI 16:00) İÇİN KALAN SÜRE</div>
@@ -89,7 +120,6 @@
 </div>
 
 <script>
-    // --- 1. FIREBASE AYARLARI ---
     const firebaseConfig = {
         apiKey: "AIzaSyBTplbpl4cP8ATDIWE9Vb_BogSxHjvc0BM",
         authDomain: "saboff.firebaseapp.com",
@@ -100,16 +130,17 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    // --- 2. ÜYELİK KONTROLÜ ---
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('main-content').style.display = 'block';
             document.getElementById('login-form').style.display = 'none';
-            document.body.style.display = 'block'; // Ortalama ekranından çık
+            // Girişten sonra body'yi normal akışına bırakıyoruz
+            document.body.style.alignItems = 'flex-start'; 
             initDashboard(); 
         } else {
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
+            document.body.style.alignItems = 'center'; // Giriş ekranını dikeyde de ortala
         }
     });
 
@@ -117,14 +148,11 @@
         const email = document.getElementById('u-email').value;
         const pass = document.getElementById('u-pass').value;
         firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(e => document.getElementById('err').innerText = "ERİŞİM REDDEDİLDİ: HATALI VERİ.");
+            .catch(e => document.getElementById('err').innerText = "ERİŞİM REDDEDİLDİ.");
     }
 
-    function logout() {
-        firebase.auth().signOut();
-    }
+    function logout() { firebase.auth().signOut(); }
 
-    // --- 3. SENİN ASIL VERİ VE SAYAÇ FONKSİYONLARIN ---
     function initDashboard() {
         const TODAY = new Date();
         const rawData = [
@@ -142,8 +170,7 @@
         ];
 
         let processed = rawData.map(item => {
-            const lastDate = new Date(item.last);
-            const diffDays = Math.floor((TODAY - lastDate) / (1000 * 60 * 60 * 24));
+            const diffDays = Math.floor((TODAY - new Date(item.last)) / (1000 * 60 * 60 * 24));
             const prob = Math.min(98, (item.p * 2) + (diffDays / 4)).toFixed(1);
             return { ...item, diffDays, prob };
         });
@@ -151,24 +178,13 @@
         const cardZone = document.getElementById('prediction-cards');
         cardZone.innerHTML = "";
         [...processed].sort((a,b) => b.prob - a.prob).slice(0, 3).forEach(item => {
-            cardZone.innerHTML += `
-                <div class="predict-card">
-                    <div style="color: #888; font-size: 0.8em; margin-bottom: 5px;">${item.ad}</div>
-                    <span class="prob-value">%${item.prob}</span>
-                    <div style="color: var(--neon-pink); font-size: 0.7em;">YÜKSEK POTANSİYEL</div>
-                </div>`;
+            cardZone.innerHTML += `<div class="predict-card"><div style="color:#888;font-size:0.8em;">${item.ad}</div><span class="prob-value">%${item.prob}</span></div>`;
         });
 
         const tableBody = document.getElementById('main-table-body');
         tableBody.innerHTML = "";
         [...processed].sort((a,b) => b.p - a.p).forEach(item => {
-            tableBody.innerHTML += `
-                <tr>
-                    <td><b>${item.ad}</b></td>
-                    <td class="row-high-pct">%${item.p}</td>
-                    <td style="font-size: 0.85em;">${item.diffDays} GÜN ÖNCE GELDİ</td>
-                    <td style="color: var(--neon-pink); font-weight: bold;">%${item.prob}</td>
-                </tr>`;
+            tableBody.innerHTML += `<tr><td><b>${item.ad}</b></td><td class="row-high-pct">%${item.p}</td><td>${item.diffDays} GÜN ÖNCE</td><td style="color:var(--neon-pink);">%${item.prob}</td></tr>`;
         });
     }
 
@@ -186,7 +202,6 @@
         const tElem = document.getElementById('timer');
         if(tElem) tElem.innerText = `${days}G ${String(hrs).padStart(2, '0')}S ${String(mins).padStart(2, '0')}D ${String(secs).padStart(2, '0')}S`;
     }
-
     setInterval(updateTimer, 1000);
     updateTimer();
 </script>
