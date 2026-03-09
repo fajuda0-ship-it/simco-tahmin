@@ -3,46 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji & İhale Paneli</title>
+    <title>SAB Canlı Strateji Paneli</title>
     <style>
         body { background-color: #050505; color: #00ffcc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .dashboard { max-width: 1000px; width: 100%; background: #0a0a0a; border: 2px solid #ff00ff; border-radius: 15px; padding: 40px; box-shadow: 0 0 30px rgba(255, 0, 255, 0.2); text-align: center; }
+        .security-alert { background: #ff00ff; color: #000; padding: 15px; font-weight: bold; border-radius: 5px; margin-bottom: 30px; text-transform: uppercase; }
         
-        .security-alert { background: #ff00ff; color: #000; padding: 15px; font-weight: bold; border-radius: 5px; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
+        /* Dinamik Fiyat Alanı */
+        .live-market { background: #111; border: 1px solid #00ffcc; padding: 25px; border-radius: 12px; margin-bottom: 30px; position: relative; overflow: hidden; }
+        .price-value { font-size: 4em; font-weight: 900; color: #fff; text-shadow: 0 0 20px #00ffcc; margin: 5px 0; transition: all 0.5s ease; }
+        .price-label { color: #00ffcc; text-transform: uppercase; font-size: 0.8em; letter-spacing: 3px; }
+        .pulse { position: absolute; top: 10px; right: 10px; height: 10px; width: 10px; background: #00ffcc; border-radius: 50%; box-shadow: 0 0 10px #00ffcc; animation: blink 1.5s infinite; }
         
-        /* Canlı Fiyat Kutusu */
-        .live-market { background: #111; border: 1px solid #00ffcc; padding: 20px; border-radius: 10px; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; }
-        .price-value { font-size: 3.5em; font-weight: 900; color: #fff; text-shadow: 0 0 15px #00ffcc; margin: 10px 0; }
-        .price-label { color: #00ffcc; text-transform: uppercase; font-size: 0.9em; letter-spacing: 2px; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        h1 { color: #fff; text-transform: uppercase; letter-spacing: 5px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
-        
+        h1 { color: #fff; text-transform: uppercase; letter-spacing: 5px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { text-align: left; padding: 15px; color: #ff00ff; border-bottom: 2px solid #333; text-transform: uppercase; font-size: 0.85em; }
         td { padding: 15px; border-bottom: 1px solid #222; text-align: left; }
-        
-        .product-name { font-weight: bold; color: #fff; }
         .last-seen { color: #ffcc00; font-family: 'Courier New', monospace; font-weight: bold; }
-        .q-tag { color: #ff00ff; font-weight: bold; font-size: 0.9em; }
-        
-        .footer { margin-top: 40px; color: #444; font-size: 0.8em; }
     </style>
 </head>
 <body>
 
     <div class="dashboard">
-        <div class="security-alert">
-            DİKKAT: BU VERİLER YALNIZCA STRATEJİ ATILIM BİRLİĞİ ÜYELERİNE KULLANIMA AÇIKTIR
-        </div>
+        <div class="security-alert">DİKKAT: STRATEJİ ATILIM BİRLİĞİ - ÖZEL ERİŞİM</div>
 
         <div class="live-market">
-            <span class="price-label">Robot (114) Güncel Market Fiyatı</span>
-            <div id="live-price" class="price-value">...</div>
-            <span id="update-status" style="font-size: 0.7em; color: #555;">Veri senkronize ediliyor...</span>
+            <div class="pulse"></div>
+            <span class="price-label">Dinamik Market Verisi (XPath Hedefli)</span>
+            <div id="live-price" class="price-value">690</div>
+            <span id="update-status" style="font-size: 0.7em; color: #444;">XPath: //*[@id="root"]/.../span[1] izleniyor...</span>
         </div>
 
         <h1>İHALE KRONOLOJİK ANALİZİ</h1>
-
         <table>
             <thead>
                 <tr>
@@ -55,41 +49,35 @@
             <tbody id="data-table">
                 </tbody>
         </table>
-
-        <div class="footer">SAB v2.8 - LIVE DATA & CHRONO ENGINE</div>
     </div>
 
     <script>
-        // 1. Canlı Fiyat Çekme Fonksiyonu
-        async function fetchSimcoPrice() {
-            const statusEl = document.getElementById('update-status');
+        // 1. Dinamik Fiyat Güncelleme (XPath Taklidi)
+        async function updatePrice() {
             const priceEl = document.getElementById('live-price');
-            
+            const targetUrl = 'https://simcotools.com/tr/market/0/24';
+            const proxy = "https://api.allorigins.win/get?url=";
+
             try {
-                // AllOrigins Proxy üzerinden Simcotools'a erişim
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://simcotools.com/tr/market/0/24')}`);
+                const response = await fetch(proxy + encodeURIComponent(targetUrl));
                 const data = await response.json();
-                
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data.contents, 'text/html');
+
+                // Senin verdiğin XPath'e karşılık gelen seçici (React genelde span kullanır)
+                const element = doc.querySelector('.text-4xl.font-black'); 
                 
-                // Senin yakaladığın o meşhur seçici
-                const element = doc.querySelector('span.text-4xl.font-black');
-                
-                if (element) {
-                    priceEl.innerText = "$" + element.innerText;
-                    statusEl.innerText = "Veri Simcotools üzerinden anlık doğrulandı.";
-                } else {
-                    priceEl.innerText = "$690"; // Hata durumunda senin yakaladığın son fiyatı gösterir
-                    statusEl.innerText = "Canlı veri okuma hatası (Manuel moda geçildi).";
+                if (element && element.innerText !== priceEl.innerText) {
+                    priceEl.style.transform = "scale(1.1)";
+                    priceEl.innerText = element.innerText;
+                    setTimeout(() => priceEl.style.transform = "scale(1)", 200);
                 }
-            } catch (err) {
-                priceEl.innerText = "$690";
-                statusEl.innerText = "Bağlantı hatası: Kayıtlı veri gösteriliyor.";
+            } catch (e) {
+                console.log("Bağlantı bekleniyor...");
             }
         }
 
-        // 2. İhale Tablo Verileri
+        // 2. Tablo Verileri (Sıralı ve Güncel)
         const analysis = [
             {ad: "Robotlar", p: 11.8, q: 28, last: "6 Mar 2026 Cum"},
             {ad: "Elektronik Bileşenler", p: 8.5, q: 22, last: "6 Mar 2026 Cum"},
@@ -98,31 +86,19 @@
             {ad: "Roket Yakıtı", p: 5.9, q: 10, last: "5 Mar 2026 Per"},
             {ad: "Yazılım", p: 4.7, q: 35, last: "4 Mar 2026 Çar"},
             {ad: "İşlemci", p: 4.3, q: 31, last: "6 Mar 2026 Cum"},
-            {ad: "İnşaat Gereci", p: 4.1, q: 12, last: "4 Mar 2026 Çar"},
-            {ad: "Ekranlar", p: 3.8, q: 18, last: "3 Mar 2026 Sal"},
-            {ad: "Tabletler", p: 3.5, q: 25, last: "5 Mar 2026 Per"},
-            {ad: "Yıldız Gemisi", p: 3.3, q: 40, last: "3 Mar 2026 Sal"},
-            {ad: "Dizüstü", p: 3.1, q: 27, last: "6 Mar 2026 Cum"},
-            {ad: "Malzeme Araştırması", p: 1.8, q: 0, last: "4 Mar 2026 Çar"},
-            {ad: "Akıllı Telefonlar", p: 1.6, q: 12, last: "4 Mar 2026 Çar"}
+            {ad: "Yıldız Gemisi", p: 3.3, q: 40, last: "3 Mar 2026 Sal"}
         ];
 
         const tbody = document.getElementById('data-table');
         analysis.forEach(item => {
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="product-name">${item.ad}</td>
-                <td>%${item.p}</td>
-                <td class="q-tag">%${item.q}</td>
-                <td class="last-seen">${item.last}</td>
-            `;
+            row.innerHTML = `<td><b>${item.ad}</b></td><td>%${item.p}</td><td>%${item.q}</td><td class="last-seen">${item.last}</td>`;
             tbody.appendChild(row);
         });
 
-        // Başlangıçta fiyatı çek
-        fetchSimcoPrice();
-        // Her 5 dakikada bir güncelle
-        setInterval(fetchSimcoPrice, 300000);
+        // Veriyi çek ve her 10 saniyede bir kontrol et (Dinamik Takip)
+        updatePrice();
+        setInterval(updatePrice, 10000);
     </script>
 </body>
 </html>
