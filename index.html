@@ -3,46 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji Paneli V4.1</title>
+    <title>SAB Strateji Merkezi</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
-        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; background: rgba(10, 10, 10, 0.95); border: 1px solid #222; padding: 30px; }
+        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 20px; overflow-y: auto; }
+        .container { max-width: 1100px; margin: auto; background: rgba(10, 10, 10, 0.95); border: 1px solid #222; padding: 30px; box-shadow: 0 0 50px rgba(0,0,0,1); }
         
-        /* Geri Sayım */
-        .countdown-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 20px; text-align: center; }
-        #timer { font-size: 2.2em; font-family: 'Share Tech Mono', monospace; color: var(--neon-pink); }
+        .security-banner { border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 12px; text-align: center; font-weight: 700; letter-spacing: 2px; margin-bottom: 25px; background: rgba(255, 0, 255, 0.05); text-transform: uppercase; font-size: 0.9em; }
         
-        /* Tahmin Bölümü */
-        .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        /* Geri Sayım Paneli */
+        .countdown-box { background: #111; padding: 20px; border-left: 5px solid var(--neon-pink); margin-bottom: 30px; text-align: center; }
+        #timer { font-size: 2.8em; font-family: 'Share Tech Mono', monospace; color: var(--neon-pink); text-shadow: 0 0 10px rgba(255, 0, 255, 0.3); }
+        
+        /* Tahmin Kartları */
+        .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 40px; }
         .predict-card { background: #0c0c0c; border: 1px solid #333; padding: 20px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--neon-blue); }
-        .prob-value { font-size: 2em; font-weight: bold; color: var(--neon-blue); display: block; }
+        .prob-value { font-size: 2.2em; font-weight: bold; color: var(--neon-blue); display: block; }
 
-        /* Ana Veri Tablosu */
-        table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; margin-top: 20px; }
-        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; text-transform: uppercase; font-size: 0.85em; }
+        /* Veri Tablosu */
+        table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; }
+        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; text-transform: uppercase; font-size: 0.8em; }
         td { padding: 15px; border-bottom: 1px solid #111; }
         
         .row-high-pct { color: var(--neon-blue); font-weight: bold; }
-        .security-msg { text-align: center; color: var(--neon-pink); font-weight: bold; margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; }
-        .made-in { margin-top: 50px; text-align: center; color: #333; font-weight: 800; font-size: 1.5em; letter-spacing: 10px; border-top: 1px solid #111; padding-top: 20px; }
+        .made-in { margin-top: 60px; text-align: center; color: #333; font-weight: 800; font-size: 1.8em; letter-spacing: 12px; border-top: 1px solid #111; padding-top: 20px; opacity: 0.6; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="security-msg">BU VERİLER SADECE SAB ÜYELERİNE ÖZELDİR | HENÜZ TEST AŞAMASINDADIR DOĞRULUK VERİLERİNE GÖRE NİHAİ HALİNİ ALACAKTIR. </div>
+    <div class="security-banner">BU VERİLER SADECE SAB ÜYELERİNİN KULLANIMINA AÇIKTIR</div>
 
     <div class="countdown-box">
-        <div style="font-size: 0.7em; color: #888;">SIRADAKİ İHALE (PAZARTESİ 16:00) İÇİN KALAN SÜRE</div>
+        <div style="font-size: 0.8em; color: #888; letter-spacing: 2px; margin-bottom: 5px;">SIRADAKİ İHALE (SALI 16:00) İÇİN KALAN SÜRE</div>
         <div id="timer">00G 00S 00D 00S</div>
     </div>
 
-    <h2 style="text-align: center; letter-spacing: 3px; color: #fff;">SAB AI: GELME OLASILIĞI EN YÜKSEK ÜRÜNLER</h2>
+    <h2 style="text-align: center; letter-spacing: 3px; color: #fff; text-transform: uppercase;">SAB AI: Yüksek Olasılıklı Ürünler</h2>
     <div class="prediction-grid" id="prediction-cards"></div>
 
-    <h2 style="text-align: center; letter-spacing: 3px; color: #fff; margin-top: 50px;">GENEL İHALE TRAFİK PAYI (%)</h2>
+    <h2 style="text-align: center; letter-spacing: 3px; color: #fff; margin-top: 50px; text-transform: uppercase;">İhale Trafik ve Kronoloji Analizi</h2>
     <table>
         <thead>
             <tr>
@@ -55,13 +56,14 @@
         <tbody id="main-table-body"></tbody>
     </table>
 
-    <div class="made-in">MADE IN: SAB  </div>
+    <div class="made-in">MADE IN: SAB</div>
 </div>
 
 <script>
     // Sistem Tarihi: 09.03.2026
     const TODAY = new Date();
 
+    // Samosa dahil güncel veri listesi
     const rawData = [
         {ad: "Robotlar", p: 12.4, last: "2026-03-04"},
         {ad: "E-Bileşenler", p: 9.1, last: "2026-03-04"},
@@ -73,65 +75,26 @@
         {ad: "Tabletler", p: 3.5, last: "2026-02-18"},
         {ad: "Dizüstü", p: 3.1, last: "2026-02-18"},
         {ad: "Akıllı Telefon", p: 1.9, last: "2026-03-04"},
+        {ad: "Samosa", p: 1.4, last: "2026-02-01"},
+        {ad: "Biftek", p: 1.5, last: "2026-02-04"},
         {ad: "Kamyon", p: 1.4, last: "2025-11-13"}
     ];
 
-    // 1. Veriyi Hazırla ve Hesapla
+    // 1. Veri İşleme ve Olasılık Hesabı
     let processed = rawData.map(item => {
         const lastDate = new Date(item.last);
         const diffDays = Math.floor((TODAY - lastDate) / (1000 * 60 * 60 * 24));
-        // Olasılık: Trafik gücü + Sessiz kaldığı gün ağırlığı
-        const prob = Math.min(98, (item.p * 2) + (diffDays / 4)).toFixed(1);
+        // Olasılık Algoritması: Pay gücü + Sessiz kaldığı gün çarpanı
+        const prob = Math.min(99.2, (item.p * 2.2) + (diffDays / 3.5)).toFixed(1);
         return { ...item, diffDays, prob };
     });
 
-    // 2. Tahmin Kartları (Olasılığa Göre Sırala - En yüksek 3)
+    // 2. Olasılığı En Yüksek 3 Ürünü Kart Yap (Tahmin Kartları)
     const forCards = [...processed].sort((a,b) => b.prob - a.prob).slice(0, 3);
     const cardZone = document.getElementById('prediction-cards');
     forCards.forEach(item => {
         cardZone.innerHTML += `
             <div class="predict-card">
-                <div style="color: #888; font-size: 0.8em; margin-bottom: 5px;">${item.ad}</div>
+                <div style="color: #888; font-size: 0.85em; margin-bottom: 8px;">${item.ad.toUpperCase()}</div>
                 <span class="prob-value">%${item.prob}</span>
-                <div style="color: var(--neon-pink); font-size: 0.7em;">YÜKSEK POTANSİYEL</div>
-            </div>
-        `;
-    });
-
-    // 3. Ana Tablo (Trafik Payına Göre Sırala - BÜYÜKTEN KÜÇÜĞE)
-    const forTable = [...processed].sort((a,b) => b.p - a.p);
-    const tableBody = document.getElementById('main-table-body');
-    forTable.forEach(item => {
-        tableBody.innerHTML += `
-            <tr>
-                <td><b>${item.ad}</b></td>
-                <td class="row-high-pct">%${item.p}</td>
-                <td style="font-size: 0.85em;">${item.diffDays} GÜN ÖNCE GELDİ</td>
-                <td style="color: var(--neon-pink); font-weight: bold;">%${item.prob}</td>
-            </tr>
-        `;
-    });
-
-    // 4. Geri Sayım Scripti
-    function updateTimer() {
-        const now = new Date();
-        let target = new Date();
-        target.setDate(now.getDate() + (1 + 7 - now.getDay()) % 7);
-        target.setHours(16, 0, 0, 0);
-        if (now > target) target.setDate(target.getDate() + 7);
-        
-        const d = target - now;
-        const days = Math.floor(d / 86400000);
-        const hrs = Math.floor((d % 86400000) / 3600000);
-        const mins = Math.floor((d % 3600000) / 60000);
-        const secs = Math.floor((d % 60000) / 1000);
-        
-        document.getElementById('timer').innerText = `${days}G ${hrs}S ${mins}D ${secs}S`;
-    }
-    setInterval(updateTimer, 1000);
-    updateTimer();
-</script>
-</body>
-</html>
-
-
+                <div style="color: var(--neon-pink); font-size: 0.7em; letter-spacing: 1px; margin-top: 5px;">STR
