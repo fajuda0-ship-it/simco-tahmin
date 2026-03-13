@@ -3,46 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Full İhale Analizi</title>
+    <title>SAB Frekans Analizi</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
         body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 10px; }
-        .container { max-width: 1200px; margin: auto; background: rgba(10, 10, 10, 0.98); border: 1px solid #333; padding: 20px; box-shadow: 0 0 50px rgba(0,0,0,1); }
+        .container { max-width: 1200px; margin: auto; background: rgba(10, 10, 10, 0.98); border: 1px solid #333; padding: 20px; }
         
-        .header-box { text-align: center; border-bottom: 2px solid var(--neon-blue); padding-bottom: 20px; margin-bottom: 20px; }
-        h2 { color: var(--neon-blue); letter-spacing: 5px; text-transform: uppercase; margin: 0; }
+        .header-box { text-align: center; border-bottom: 2px solid var(--neon-pink); padding-bottom: 20px; margin-bottom: 20px; }
+        h2 { color: var(--neon-pink); letter-spacing: 5px; text-transform: uppercase; margin: 0; }
         
         .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-item { background: #111; padding: 15px; border-left: 3px solid var(--neon-pink); text-align: center; }
+        .stat-item { background: #111; padding: 15px; border-top: 3px solid var(--neon-blue); text-align: center; }
         .stat-label { font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 2px; }
-        .stat-num { display: block; font-family: 'Share Tech Mono'; font-size: 1.8em; color: var(--neon-pink); }
+        .stat-num { display: block; font-family: 'Share Tech Mono'; font-size: 1.8em; color: var(--neon-blue); }
 
-        .table-wrapper { overflow-x: auto; max-height: 700px; overflow-y: auto; }
+        .table-wrapper { overflow-x: auto; max-height: 700px; overflow-y: auto; border: 1px solid #222; }
         table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; font-size: 0.85em; }
-        th { position: sticky; top: 0; background: #1a1a1a; color: var(--neon-blue); padding: 15px; text-align: left; border-bottom: 2px solid var(--neon-blue); z-index: 10; }
+        th { position: sticky; top: 0; background: #1a1a1a; color: var(--neon-pink); padding: 15px; text-align: left; border-bottom: 2px solid var(--neon-pink); z-index: 10; }
         td { padding: 12px 15px; border-bottom: 1px solid #222; }
-        tr:hover { background: #151515; }
+        tr:nth-child(even) { background: #0a0a0a; }
+        tr:hover { background: #1a1a1a; cursor: crosshair; }
         
         .q-tag { padding: 2px 8px; border-radius: 3px; font-weight: bold; }
-        .high { color: #00ff88; }
+        .high { color: #00ff88; text-shadow: 0 0 5px #00ff88; }
         .mid { color: #ffcc00; }
         .low { color: #ff4444; }
-        .date-col { color: #888; font-size: 0.9em; }
+        .freq-count { color: var(--neon-blue); font-weight: bold; font-size: 1.2em; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-box">
-        <h2>SAB FULL DATA MINING</h2>
-        <div style="font-size: 0.8em; color: #555; margin-top: 5px;">TÜM GEÇMİŞ İHALELER VE KALİTE OLASILIKLARI</div>
+        <h2>SAB FREKANS ANALİZİ (V10.0)</h2>
+        <div style="font-size: 0.8em; color: #555; margin-top: 5px;">ÜRÜNLER EN ÇOK GELENDEN EN AZ GELENE SIRALANMIŞTIR</div>
     </div>
 
     <div class="stats-bar">
-        <div class="stat-item"><span class="stat-label">Toplam İhale Girişi</span><span class="stat-num">208</span></div>
-        <div class="stat-item"><span class="stat-label">Aktif Ürün Sayısı</span><span class="stat-num" id="u-count">0</span></div>
-        <div class="stat-item"><span class="stat-label">Sistem Durumu</span><span class="stat-num" style="color:var(--neon-blue)">SENKRONİZE</span></div>
+        <div class="stat-item"><span class="stat-label">Toplam Analiz Edilen İhale</span><span class="stat-num">208</span></div>
+        <div class="stat-item"><span class="stat-label">En Çok Gelen Sektör</span><span class="stat-num" style="color:var(--neon-pink)">ROBOTİK</span></div>
+        <div class="stat-item"><span class="stat-label">Sıralama Modu</span><span class="stat-num">FREKANS (Z->A)</span></div>
     </div>
 
     <div class="table-wrapper">
@@ -50,19 +51,20 @@
             <thead>
                 <tr>
                     <th>ÜRÜN İSMİ</th>
-                    <th>TOPLAM GELİŞ</th>
+                    <th>TOPLAM GELİŞ (FREKANS)</th>
                     <th>Q0+ OLASILIĞI</th>
-                    <th>SON GÖRÜLME TARİHİ</th>
+                    <th>SON GÖRÜLME</th>
                 </tr>
             </thead>
             <tbody id="data-table"></tbody>
         </table>
     </div>
     
-    <div style="margin-top: 30px; text-align: center; color: #333; letter-spacing: 15px; font-weight: 900; font-size: 1.5em;">MADE IN: SAB</div>
+    <div style="margin-top: 30px; text-align: center; color: #222; letter-spacing: 15px; font-weight: 900; font-size: 1.5em;">SAB STRATEGY SYSTEMS</div>
 </div>
 
 <script>
+    // Full Data Seti (Senin gönderdiğin listeye göre güncellenmiş rakamlar)
     const fullData = [
         {ad: "Robotlar", c: 15, qp: 11, l: "2026-03-04"},
         {ad: "Çelik", c: 14, qp: 13, l: "2026-01-21"},
@@ -73,70 +75,69 @@
         {ad: "Yazılım", c: 9, qp: 0, l: "2025-11-12"},
         {ad: "Ekranlar", c: 9, qp: 5, l: "2026-02-18"},
         {ad: "İnşaat Gereci", c: 8, qp: 0, l: "2026-01-21"},
+        {ad: "Havacılık araştırması", c: 8, qp: 0, l: "2025-11-19"},
         {ad: "Biftek", c: 7, qp: 5, l: "2026-02-11"},
         {ad: "Su", c: 7, qp: 5, l: "2026-01-21"},
         {ad: "Tabletler", c: 7, qp: 5, l: "2026-02-18"},
-        {ad: "Dizüstü", c: 6, qp: 5, l: "2026-02-18"},
-        {ad: "Kumaş", c: 6, qp: 6, l: "2025-10-01"},
-        {ad: "Eldiven", c: 5, qp: 5, l: "2026-03-11"},
-        {ad: "Deri", c: 4, qp: 4, l: "2026-03-11"},
-        {ad: "Samosa", c: 3, qp: 1, l: "2026-02-11"},
-        {ad: "Kamyon", c: 5, qp: 3, l: "2025-11-05"},
-        {ad: "İç Çamaşır", c: 6, qp: 4, l: "2025-05-07"},
         {ad: "Yıldız gemisi", c: 7, qp: 7, l: "2026-01-28"},
-        {ad: "Uydu", c: 4, qp: 4, l: "2026-03-11"},
-        {ad: "Dondurulmuş pizza", c: 3, qp: 3, l: "2026-03-11"},
-        {ad: "Bal kabağı çorbası", c: 2, qp: 2, l: "2026-03-11"},
-        {ad: "Monitör", c: 5, qp: 3, l: "2026-03-04"},
-        {ad: "Ekonomik araba", c: 4, qp: 4, l: "2026-03-04"},
-        {ad: "Oto karoseri", c: 4, qp: 4, l: "2026-03-04"},
-        {ad: "Temel iç kısım", c: 4, qp: 4, l: "2026-03-04"},
-        {ad: "Havacılık araştırması", c: 8, qp: 0, l: "2025-11-19"},
         {ad: "Kimyasal", c: 7, qp: 7, l: "2026-01-21"},
-        {ad: "Demir cevheri", c: 5, qp: 5, l: "2026-01-14"},
+        {ad: "Dizüstü", c: 6, qp: 5, l: "2026-02-18"},
+        {ad: "Kumaş", c: 6, qp: 6, l: "2026-03-11"},
+        {ad: "İç Çamaşır", c: 6, qp: 4, l: "2025-05-07"},
         {ad: "Çelik Kiriş", c: 6, qp: 4, l: "2026-02-18"},
+        {ad: "Eldiven", c: 5, qp: 5, l: "2026-03-11"},
+        {ad: "Kamyon", c: 5, qp: 3, l: "2025-11-05"},
+        {ad: "Monitör", c: 5, qp: 3, l: "2026-03-04"},
+        {ad: "Demir cevheri", c: 5, qp: 5, l: "2026-01-14"},
         {ad: "Betonarme Blok", c: 5, qp: 5, l: "2026-01-21"},
-        {ad: "Ekmek", c: 4, qp: 2, l: "2026-02-11"},
         {ad: "Süt", c: 5, qp: 5, l: "2025-10-01"},
         {ad: "Elmalar", c: 5, qp: 4, l: "2025-10-01"},
         {ad: "Portakal", c: 5, qp: 3, l: "2025-10-01"},
-        {ad: "Pencere", c: 3, qp: 3, l: "2026-02-18"},
-        {ad: "Tohum", c: 3, qp: 2, l: "2026-02-18"},
-        {ad: "Lüks Saat", c: 4, qp: 3, l: "2025-11-26"},
         {ad: "El Çantası", c: 5, qp: 3, l: "2026-02-04"},
-        {ad: "Topuklu Ayakkabı", c: 3, qp: 3, l: "2026-02-04"},
-        {ad: "Cadı kostümü", c: 3, qp: 2, l: "2026-02-04"},
-        {ad: "Quadcopter", c: 4, qp: 4, l: "2026-02-11"},
-        {ad: "Uçuş bilgisayarı", c: 3, qp: 2, l: "2026-02-11"},
-        {ad: "Sosis", c: 2, qp: 2, l: "2026-02-04"},
-        {ad: "Yüksek seviye e-bilgisayar", c: 4, qp: 3, l: "2026-01-07"},
-        {ad: "Karbon fiber", c: 3, qp: 0, l: "2026-01-07"},
-        {ad: "BFR", c: 3, qp: 3, l: "2026-01-07"},
-        {ad: "Yörüngesel güçlendirici", c: 3, qp: 3, l: "2026-01-07"},
-        {ad: "Tahıl", c: 4, qp: 3, l: "2026-01-21"},
-        {ad: "Kereste", c: 3, qp: 3, l: "2026-01-21"},
-        {ad: "Buldozer", c: 3, qp: 3, l: "2026-01-21"},
-        {ad: "Alet Takımı", c: 3, qp: 3, l: "2026-01-21"},
-        {ad: "Elektrik motoru", c: 4, qp: 4, l: "2026-01-14"},
         {ad: "Yerleşik bilgisayar", c: 5, qp: 3, l: "2025-12-31"},
         {ad: "Metan", c: 5, qp: 5, l: "2026-01-15"},
         {ad: "Etanol", c: 5, qp: 5, l: "2026-01-15"},
         {ad: "Petrol", c: 5, qp: 5, l: "2026-01-15"},
+        {ad: "Deri", c: 4, qp: 4, l: "2026-03-11"},
+        {ad: "Uydu", c: 4, qp: 4, l: "2026-03-11"},
+        {ad: "Ekonomik araba", c: 4, qp: 4, l: "2026-03-04"},
+        {ad: "Oto karoseri", c: 4, qp: 4, l: "2026-03-04"},
+        {ad: "Temel iç kısım", c: 4, qp: 4, l: "2026-03-04"},
+        {ad: "Ekmek", c: 4, qp: 2, l: "2026-02-11"},
+        {ad: "Lüks Saat", c: 4, qp: 3, l: "2025-11-26"},
+        {ad: "Quadcopter", c: 4, qp: 4, l: "2026-02-11"},
+        {ad: "Yüksek seviye e-bilgisayar", c: 4, qp: 3, l: "2026-01-07"},
+        {ad: "Tahıl", c: 4, qp: 3, l: "2026-01-21"},
+        {ad: "Elektrik motoru", c: 4, qp: 4, l: "2026-01-14"},
         {ad: "Altın cevheri", c: 4, qp: 4, l: "2025-12-10"},
         {ad: "Külçe Altın", c: 4, qp: 4, l: "2025-12-10"},
+        {ad: "Samosa", c: 3, qp: 1, l: "2026-02-11"},
+        {ad: "Dondurulmuş pizza", c: 3, qp: 3, l: "2026-03-11"},
+        {ad: "Pencere", c: 3, qp: 3, l: "2026-02-18"},
+        {ad: "Tohum", c: 3, qp: 2, l: "2026-02-18"},
+        {ad: "Topuklu Ayakkabı", c: 3, qp: 3, l: "2026-02-04"},
+        {ad: "Cadı kostümü", c: 3, qp: 2, l: "2026-02-04"},
+        {ad: "Uçuş bilgisayarı", c: 3, qp: 2, l: "2026-02-11"},
+        {ad: "Karbon fiber", c: 3, qp: 0, l: "2026-01-07"},
+        {ad: "BFR", c: 3, qp: 3, l: "2026-01-07"},
+        {ad: "Yörüngesel güçlendirici", c: 3, qp: 3, l: "2026-01-07"},
+        {ad: "Kereste", c: 3, qp: 3, l: "2026-01-21"},
+        {ad: "Buldozer", c: 3, qp: 3, l: "2026-01-21"},
+        {ad: "Alet Takımı", c: 3, qp: 3, l: "2026-01-21"},
         {ad: "Akıllı Telefonlar", c: 3, qp: 2, l: "2025-12-10"},
-        {ad: "Kimya araştırması", c: 2, qp: 0, l: "2025-10-22"},
         {ad: "Malzeme araştırması", c: 3, qp: 0, l: "2026-03-04"},
+        {ad: "Bal kabağı çorbası", c: 2, qp: 2, l: "2026-03-11"},
+        {ad: "Sosis", c: 2, qp: 2, l: "2026-02-04"},
+        {ad: "Kimya araştırması", c: 2, qp: 0, l: "2025-10-22"},
         {ad: "Elektronik araştırması", c: 2, qp: 0, l: "2025-10-22"},
         {ad: "Madencilik araştırması", c: 2, qp: 0, l: "2025-10-22"}
     ];
 
     const tableBody = document.getElementById('data-table');
-    const uCountElem = document.getElementById('u-count');
 
     function renderTable() {
-        // İsme göre sırala
-        const sorted = fullData.sort((a,b) => a.ad.localeCompare(b.ad));
+        // EN ÖNEMLİ KISIM: Geliş sayısına (c) göre büyükten küçüğe sırala
+        const sorted = fullData.sort((a,b) => b.c - a.c);
         
         sorted.forEach(item => {
             const prob = ((item.qp / item.c) * 100).toFixed(1);
@@ -145,14 +146,13 @@
             if (prob <= 30) probClass = "low";
 
             const row = `<tr>
-                <td><b>${item.ad}</b></td>
-                <td>${item.c}</td>
+                <td><b style="color:#fff">${item.ad}</b></td>
+                <td><span class="freq-count">${item.c} Kez</span></td>
                 <td><span class="q-tag ${probClass}">%${prob}</span></td>
-                <td class="date-col">${item.l}</td>
+                <td style="color:#666">${item.l}</td>
             </tr>`;
             tableBody.innerHTML += row;
         });
-        uCountElem.innerText = fullData.length;
     }
 
     renderTable();
