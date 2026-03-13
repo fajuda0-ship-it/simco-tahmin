@@ -2,64 +2,43 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji Paneli</title>
+    <title>SAB Full Veri Terminali</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #007bff; --bg: #0d1117; --sidebar-bg: #161b22; --border: #30363d; --text: #c9d1d9; }
+        :root { --accent: #2f81f7; --bg: #0d1117; --sidebar-bg: #161b22; --border: #30363d; --text: #c9d1d9; }
         body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* Header */
-        .header { background: var(--sidebar-bg); padding: 12px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-family: 'Roboto Mono'; font-size: 0.9em; }
-        
+        .header { background: var(--sidebar-bg); padding: 10px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-family: 'Roboto Mono'; font-size: 0.85em; }
         .container { display: flex; flex: 1; overflow: hidden; }
-
-        /* Sol Liste */
-        .sidebar { width: 450px; background: var(--sidebar-bg); border-right: 1px solid var(--border); overflow-y: auto; padding: 15px; }
-        .list-header { display: grid; grid-template-columns: 1fr 60px 100px; font-size: 0.7em; color: #8b949e; padding: 0 15px 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px; text-transform: uppercase; }
-        
-        .item { 
-            padding: 12px 15px; margin-bottom: 4px; cursor: pointer; border-radius: 6px;
-            display: grid; grid-template-columns: 1fr 60px 100px; align-items: center; transition: 0.2s; font-size: 0.85em;
-        }
+        .sidebar { width: 460px; background: var(--sidebar-bg); border-right: 1px solid var(--border); overflow-y: auto; padding: 10px; }
+        .list-header { display: grid; grid-template-columns: 1fr 60px 100px; font-size: 0.7em; color: #8b949e; padding: 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+        .item { padding: 10px; margin-bottom: 2px; cursor: pointer; border-radius: 4px; display: grid; grid-template-columns: 1fr 60px 100px; align-items: center; font-size: 0.82em; transition: 0.1s; }
         .item:hover { background: #21262d; }
         .item.active { background: #1f6feb; color: white; }
-        
         .freq { font-family: 'Roboto Mono'; font-weight: bold; text-align: center; color: #58a6ff; }
         .item.active .freq { color: white; }
-        .days { font-family: 'Roboto Mono'; text-align: right; font-size: 0.9em; }
-
-        /* Sağ Panel */
-        .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .detail-header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
-        .detail-header h1 { margin: 0; font-size: 1.8em; color: #f0f6fc; }
-        
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .card { background: #161b22; border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
-        .card-name { display: block; font-weight: bold; margin-bottom: 5px; color: #58a6ff; }
-        .card-q { font-family: 'Roboto Mono'; font-size: 0.75em; color: #8b949e; }
-
-        /* Ticker */
-        .ticker { background: #010409; height: 35px; border-top: 1px solid var(--border); overflow: hidden; white-space: nowrap; display: flex; align-items: center; }
-        .ticker-inner { display: inline-block; padding-left: 100%; animation: scroll 30s linear infinite; }
-        .ticker-span { margin-right: 50px; font-family: 'Roboto Mono'; font-size: 0.8em; }
+        .days { font-family: 'Roboto Mono'; text-align: right; }
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
+        .card { background: #161b22; border: 1px solid var(--border); padding: 15px; border-radius: 6px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 20px; }
+        .ticker { background: #010409; height: 30px; border-top: 1px solid var(--border); overflow: hidden; display: flex; align-items: center; }
+        .ticker-inner { display: inline-block; padding-left: 100%; animation: scroll 40s linear infinite; white-space: nowrap; }
         @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div>ANALİZ TERMİNALİ / FREKANS SIRALAMASI</div>
-    <div style="color:#8b949e">BUGÜN: 13 MART 2026</div>
+    <div>SAB STRATEGY V18 // FULL DATABASE</div>
+    <div>SİSTEM TARİHİ: 13 MART 2026</div>
 </div>
 
 <div class="container">
     <div class="sidebar">
-        <div class="list-header"><span>Senaryo</span><span>Geliş</span><span>Gecikme</span></div>
+        <div class="list-header"><span>Paket Adı</span><span>Frekans</span><span>Gecikme</span></div>
         <div id="target"></div>
     </div>
     <div class="main" id="view">
-        <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#484f58; font-size:1.2em;">BİR PAKET SEÇİN</div>
+        <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#484f58;">ANALİZ İÇİN LİSTEDEN SEÇİM YAPIN</div>
     </div>
 </div>
 
@@ -67,54 +46,80 @@
 
 <script>
     const now = new Date("2026-03-13");
+    // TÜM PAKETLERİN EKSİKSİZ LİSTESİ
     const data = {
         "İleri Robotik": { c: 15, d: "2026-03-04", i: ["Robotlar Q0", "Elektronik bileşenler Q0", "Yüksek seviye e-bilgisayar Q2"] },
         "Hava Kalitesi İzleme": { c: 12, d: "2025-12-10", i: ["Kimyasal Q3", "Akıllı Telefonlar Q1", "Ekranlar Q0"] },
         "Mars Gezgini": { c: 11, d: "2025-11-19", i: ["Pil Q3", "Havacılık araştırması Q0", "Robotlar Q3"] },
         "Sürdürülebilir Tarım": { c: 9, d: "2026-01-21", i: ["Su Q3", "Tahıl Q0"] },
         "E-öğrenme Cihazları": { c: 9, d: "2026-02-18", i: ["Tabletler Q3", "Dizüstü Q0", "Ekranlar Q3"] },
-        "Ezilme Testleri": { c: 8, d: "2026-03-04", i: ["Araba Karoseri Q2", "Ekonomik Araba Q1", "İç Kısım Q2"] },
-        "Yıldız Gemisi": { c: 8, d: "2026-01-28", i: ["Yıldız Gemisi Q3", "Roket Yakıtı Q3"] },
-        "Veri Merkezi": { c: 8, d: "2025-12-31", i: ["Yerleşik Bilgisayar Q0", "İşlemci Q2"] },
-        "Akıllı Yollar": { c: 7, d: "2026-03-04", i: ["Monitör Q0", "Akıllı Telefon Q0", "Ekran Q0"] },
+        "Ezilme Testleri": { c: 8, d: "2026-03-04", i: ["Ekonomik elektrikli araba Q1", "Oto karoseri Q2", "Temel iç kısım Q2"] },
+        "Yıldız Gemisi Geliştirme": { c: 8, d: "2026-01-28", i: ["Yıldız gemisi Q3", "Roket Yakıtı Q3"] },
+        "Veri Merkezi": { c: 8, d: "2025-12-31", i: ["Yerleşik bilgisayar Q0", "İşlemci Q2"] },
+        "Akıllı Yollar": { c: 7, d: "2026-03-04", i: ["Monitör Q0", "Akıllı Telefonlar Q0", "Elektronik bileşenler Q2"] },
+        "İlk Müdahale": { c: 7, d: "2026-01-21", i: ["Kereste Q2", "İnşaat Gereci Q0", "Buldozer Q2", "Alet Takımı Q1"] },
         "Yakıt Rezervleri": { c: 7, d: "2025-11-12", i: ["Metan Q2", "Etanol Q3", "Petrol Q0"] },
+        "Okul Öğle Yemeği Programı": { c: 7, d: "2025-10-01", i: ["Portakal Q0", "Süt Q3", "Elmalar Q2"] },
+        "Uzay Keşfi": { c: 6, d: "2026-01-07", i: ["Karbon fiber Q0", "BFR Q1", "Yörüngesel güçlendirici Q3"] },
+        "Değerli Metaller": { c: 6, d: "2025-12-10", i: ["Külçe Altın Q1", "Altın cevheri Q3"] },
         "Güvenlik Ekipmanı": { c: 6, d: "2026-03-11", i: ["Deri Q1", "Eldiven Q1"] },
-        "Navigasyon": { c: 5, d: "2026-03-11", i: ["Roket Yakıtı Q3", "Uydu Q3"] },
+        "Navigasyon Takımyıldızı": { c: 5, d: "2026-03-11", i: ["Roket Yakıtı Q3", "Uydu Q3"] },
+        "Evsizleri besleyin": { c: 5, d: "2026-03-11", i: ["Bal kabağı çorbası Q2", "Dondurulmuş pizza Q2"] },
         "Çevreci Binalar": { c: 5, d: "2026-02-18", i: ["Çelik Kiriş Q2", "Pencere Q1"] },
-        "Nükleer Santral": { c: 4, d: "2026-01-21", i: ["Çelik Q2", "Beton Q1", "Kimyasal Q1"] },
-        "Tahliye Araçları": { c: 2, d: "2025-11-05", i: ["Taşıma Q0", "Kamyon Q0", "Dizel Q3"] }
+        "Protein Reserves": { c: 5, d: "2026-02-11", i: ["Yumurta Q2", "Biftek Q0"] },
+        "Drone flosu": { c: 5, d: "2026-02-11", i: ["Quadcopter Q1", "Uçuş bilgisayarı Q2", "Pil Q2"] },
+        "Meat Supply": { c: 4, d: "2026-02-04", i: ["Sosis Q3", "Biftek Q1"] },
+        "Şehir Festivali": { c: 4, d: "2026-02-04", i: ["El Çantası Q3", "Cadı kostümü Q2", "Topuklu Ayakkabı Q2"] },
+        "Nükleer Santral": { c: 4, d: "2026-01-21", i: ["Çelik Q2", "Betonarme Blok Q1", "Kimyasal Q1"] },
+        "Moda Festivali": { c: 4, d: "2025-10-01", i: ["Kumaş Q2", "Moda araştırması Q0"] },
+        "Metal İşleme": { c: 3, d: "2026-02-25", i: ["Alüminyum Q1", "Demir cevheri Q2", "Çelik Q3"] },
+        "Okul Öğle Yemeği Malzemeleri": { c: 3, d: "2026-02-25", i: ["Kakao Q3", "Hamur Q3", "Şeker Q3"] },
+        "Zirve ikramları": { c: 3, d: "2026-02-11", i: ["Samosa Q0", "Salata Q2", "Ekmek Q0"] },
+        "İtici Roket Testi": { c: 3, d: "2026-01-28", i: ["İtici tankı Q3", "Katı yakıt güçlendirici Q2"] },
+        "Sanat Müzesi": { c: 3, d: "2025-10-22", i: ["İnşaat Gereci Q0", "Çelik Kiriş Q0", "Cam Q3"] },
+        "G6 Zirvesi İkramları": { c: 3, d: "2026-01-07", i: ["Makarna Q0", "Elma suyu Q3", "Kokteyl Q1", "Köfte Q0"] },
+        "Etçil Hayvan Beslenmesi": { c: 3, d: "2025-11-26", i: ["İnek Q0", "Domuz Q1"] },
+        "Tahliye Araçları": { c: 2, d: "2025-11-05", i: ["Taşıma Q0", "Kamyon Q0", "Dizel Q3"] },
+        "Orman Restorasyonu": { c: 2, d: "2026-02-18", i: ["Tohum Q1", "Bitki araştırma Q0"] },
+        "Drone programı": { c: 2, d: "2024-12-24", i: ["Kanat Q3", "Uçak gövdesi Q3", "Uçuş bilgisayarı Q0"] },
+        "Üretim Desteği": { c: 2, d: "2025-12-10", i: ["Demir cevheri Q1", "Çelik Q3"] },
+        "Ekonomik Destek": { c: 2, d: "2025-11-12", i: ["Yazılım Q0", "Tabletler Q2"] },
+        "Şehir Dekorasyonları": { c: 2, d: "2026-02-04", i: ["Bal kabağı feneri Q1", "Bal kabağı Q2"] },
+        "BM Zirvesi İkramları": { c: 2, d: "2025-09-24", i: ["Ekmek Q1", "Kahve çekirdeği Q2", "Çikolata Q3"] },
+        "Metro Altyapısı": { c: 2, d: "2025-11-26", i: ["Betonarme Blok Q2", "İnşaat Gereci Q0", "Çelik Kiriş Q0"] }
     };
 
-    function getDays(s) {
-        return Math.floor((now - new Date(s)) / 86400000);
-    }
-
-    const sorted = Object.keys(data).sort((a,b) => data[b].c - data[a].c);
     const target = document.getElementById('target');
     const tick = document.getElementById('tick');
 
-    sorted.forEach(name => {
-        const days = getDays(data[name].d);
+    // En çok gelenden sırala
+    Object.keys(data).sort((a,b) => data[b].c - data[a].c).forEach(name => {
+        const days = Math.floor((now - new Date(data[name].d)) / 86400000);
         const el = document.createElement('div');
         el.className = 'item';
         el.innerHTML = `<span>${name}</span><span class="freq">${data[name].c}x</span><span class="days">${days} GÜN</span>`;
         el.onclick = () => {
             document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            render(name, days);
+            show(name, days);
         };
         target.appendChild(el);
-        tick.innerHTML += `<span class="ticker-span">${name.toUpperCase()}: ${days} GÜN ÖNCE</span>`;
+        tick.innerHTML += `<span style="margin-right:40px;">${name.toUpperCase()}: ${days} GÜN ÖNCE</span>`;
     });
 
-    function render(name, days) {
+    function show(name, days) {
         const info = data[name];
         document.getElementById('view').innerHTML = `
-            <div class="detail-header">
-                <h1>${name}</h1>
-                <p style="color:#8b949e">Toplam ${info.c} kez geldi. En son ${days} gün önce görüldü.</p>
-            </div>
-            <div class="grid">${info.i.map(x => `<div class="card"><span class="card-name">${x.split(' Q')[0]}</span><span class="card-q">Kriter: Q${x.split(' Q')[1]}</span></div>`).join('')}</div>
+            <h1 style="margin:0; font-size:1.6em; color:#fff;">${name}</h1>
+            <p style="color:#8b949e; font-size:0.9em; margin-bottom:20px;">
+                Bu paket toplam <b>${info.c}</b> kez ihale edildi. En son <b>${days}</b> gün önce görüldü.
+            </p>
+            <div class="grid">${info.i.map(p => `
+                <div class="card">
+                    <span style="display:block; color:#58a6ff; font-weight:bold; font-size:0.9em; margin-bottom:5px;">${p.split(' Q')[0]}</span>
+                    <span style="font-family:'Roboto Mono'; font-size:0.75em; color:#8b949e;">Hedef Kalite: Q${p.split(' Q')[1]}</span>
+                </div>
+            `).join('')}</div>
         `;
     }
 </script>
