@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji Paneli V6.0</title>
+    <title>SAB Strateji Paneli V7.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
         
@@ -21,46 +17,28 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center; /* Giriş ekranı için merkezleme */
+            align-items: flex-start;
         }
 
-        /* GİRİŞ EKRANI */
-        #login-form { 
-            width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; 
-            padding: 40px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,1); 
-        }
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8em; letter-spacing: 1px; }
-        input { 
-            width: 100%; padding: 12px; background: #000; border: 1px solid #333; 
-            color: #fff; font-family: 'Share Tech Mono', monospace; box-sizing: border-box; 
-        }
-        button.login-btn { 
-            width: 100%; padding: 12px; background: var(--neon-blue); border: none; 
-            color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
-        }
-
-        /* ANA PANEL */
-        #main-content { display: none; width: 100%; padding: 20px; box-sizing: border-box; }
+        #main-content { width: 100%; padding: 20px; box-sizing: border-box; }
+        
         .container { 
             max-width: 1100px; margin: 20px auto; background: rgba(10, 10, 10, 0.95); 
             border: 1px solid #222; padding: 30px; position: relative; 
         }
         
-        /* ÜST BUTONLAR */
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .top-nav { display: flex; justify-content: center; margin-bottom: 15px; }
         .simco-btn { 
             text-decoration: none; color: var(--neon-blue); border: 1px solid var(--neon-blue); 
-            padding: 6px 15px; font-size: 0.75em; font-weight: bold; transition: 0.3s; 
+            padding: 8px 20px; font-size: 0.8em; font-weight: bold; transition: 0.3s; letter-spacing: 1px;
         }
-        .simco-btn:hover { background: var(--neon-blue); color: #000; }
-        .logout-link { color: #444; text-decoration: none; font-size: 0.7em; }
-        .logout-link:hover { color: var(--neon-pink); }
+        .simco-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
 
         .security-msg { 
             text-align: center; color: var(--neon-pink); font-weight: bold; 
             margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; font-size: 0.9em; 
         }
+        
         .countdown-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 25px; text-align: center; }
         #timer { font-size: 2.2em; font-family: 'Share Tech Mono', monospace; color: var(--neon-pink); }
         
@@ -81,27 +59,12 @@
 </head>
 <body>
 
-<div id="login-form">
-    <h2 style="color: var(--neon-pink); letter-spacing: 5px; margin-bottom: 30px;">SAB LOGIN</h2>
-    <div class="input-group">
-        <label>E-POSTA (ad@sab.com)</label>
-        <input type="email" id="u-email" placeholder="burhan@sab.com">
-    </div>
-    <div class="input-group">
-        <label>ŞİFRE</label>
-        <input type="password" id="u-pass" placeholder="******">
-    </div>
-    <button class="login-btn" onclick="login()">Sisteme Bağlan</button>
-    <p id="err" style="color: #ff0055; font-size: 0.8em; margin-top: 15px; font-family: 'Share Tech Mono';"></p>
-</div>
-
 <div id="main-content">
     <div class="container">
         <div class="top-nav">
             <a href="https://simcotools.com/tr/realms/0/" target="_blank" class="simco-btn">
-                [ SİMCOTOOLS CANLI VERİ ]
+                [ SİMCOTOOLS CANLI VERİ PANELİ ]
             </a>
-            <a href="#" class="logout-link" onclick="logout()">[ SİSTEMDEN ÇIK ]</a>
         </div>
 
         <div class="security-msg">SAB ÖZEL STRATEJİ HATTI | 17 MART İHALESİ TAHMİN VERİLERİ</div>
@@ -111,7 +74,7 @@
             <div id="timer">00G 00S 00D 00S</div>
         </div>
 
-        <h2 style="text-align: center; letter-spacing: 2px; color: #fff; font-size: 1.1em; text-transform: uppercase;">17 Mart İhalesinde Gelme İhtimali Yüksek Ürünler</h2>
+        <h2 style="text-align: center; letter-spacing: 2px; color: #fff; font-size: 1.1em; text-transform: uppercase;">17 Mart Tahmini Gelme İhtimali Yüksek Ürünler</h2>
         <div class="prediction-grid" id="prediction-cards"></div>
 
         <h2 style="text-align: center; letter-spacing: 2px; color: #fff; margin-top: 50px; font-size: 1.1em; text-transform: uppercase;">Tüm Ürünler ve Trafik Payı Verileri</h2>
@@ -120,4 +83,31 @@
                 <tr>
                     <th>ÜRÜN ADI</th>
                     <th>TRAFİK PAYI (%)</th>
-                    <th>GEÇEN SÜ
+                    <th>GEÇEN SÜRE (HAFTA)</th>
+                    <th>TAHMİN ORANI</th>
+                </tr>
+            </thead>
+            <tbody id="main-table-body"></tbody>
+        </table>
+
+        <div class="made-in">MADE IN: SAB</div>
+    </div>
+</div>
+
+<script>
+    function initDashboard() {
+        const TODAY = new Date();
+        
+        // Veriler: Son ihale (10 Mart) Eldiven/Kumaş verileri güncel.
+        const rawData = [
+            {ad: "Eldiven", p: 0.8, last: "2026-03-10", maxH: 8},
+            {ad: "Kumaş", p: 1.2, last: "2026-03-10", maxH: 6},
+            {ad: "Samosa", p: 1.4, last: "2026-02-01", maxH: 3},
+            {ad: "Robotlar", p: 12.4, last: "2026-03-04", maxH: 2},
+            {ad: "E-Bileşenler", p: 9.1, last: "2026-03-04", maxH: 2},
+            {ad: "Çelik", p: 7.8, last: "2025-11-05", maxH: 5},
+            {ad: "Pil", p: 6.9, last: "2025-11-05", maxH: 4},
+            {ad: "İşlemci", p: 5.5, last: "2025-12-31", maxH: 4},
+            {ad: "Ekranlar", p: 3.9, last: "2026-02-18", maxH: 4},
+            {ad: "Yazılım", p: 4.4, last: "2025-11-12", maxH: 6},
+            {ad:
