@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Strateji Paneli V5.5</title>
+    <title>SAB Strateji Paneli V6.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -11,34 +11,72 @@
 
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
-        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         
-        /* GİRİŞ FORMU */
-        #login-form { width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; padding: 40px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,1); }
+        body { 
+            background-color: var(--bg-dark); 
+            color: #eee; 
+            font-family: 'Rajdhani', sans-serif; 
+            margin: 0; 
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Giriş ekranı için merkezleme */
+        }
+
+        /* GİRİŞ EKRANI */
+        #login-form { 
+            width: 100%; max-width: 400px; background: #0a0a0a; border: 1px solid #222; 
+            padding: 40px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,1); 
+        }
         .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8em; }
-        input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; font-family: 'Share Tech Mono', monospace; box-sizing: border-box; }
-        button.login-btn { width: 100%; padding: 12px; background: var(--neon-blue); border: none; color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8em; letter-spacing: 1px; }
+        input { 
+            width: 100%; padding: 12px; background: #000; border: 1px solid #333; 
+            color: #fff; font-family: 'Share Tech Mono', monospace; box-sizing: border-box; 
+        }
+        button.login-btn { 
+            width: 100%; padding: 12px; background: var(--neon-blue); border: none; 
+            color: #000; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+        }
 
         /* ANA PANEL */
         #main-content { display: none; width: 100%; padding: 20px; box-sizing: border-box; }
-        .container { max-width: 1100px; margin: 20px auto; background: rgba(10, 10, 10, 0.95); border: 1px solid #222; padding: 30px; position: relative; }
+        .container { 
+            max-width: 1100px; margin: 20px auto; background: rgba(10, 10, 10, 0.95); 
+            border: 1px solid #222; padding: 30px; position: relative; 
+        }
         
-        .security-msg { text-align: center; color: var(--neon-pink); font-weight: bold; margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; font-size: 0.9em; }
-        .countdown-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 20px; text-align: center; }
+        /* ÜST BUTONLAR */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .simco-btn { 
+            text-decoration: none; color: var(--neon-blue); border: 1px solid var(--neon-blue); 
+            padding: 6px 15px; font-size: 0.75em; font-weight: bold; transition: 0.3s; 
+        }
+        .simco-btn:hover { background: var(--neon-blue); color: #000; }
+        .logout-link { color: #444; text-decoration: none; font-size: 0.7em; }
+        .logout-link:hover { color: var(--neon-pink); }
+
+        .security-msg { 
+            text-align: center; color: var(--neon-pink); font-weight: bold; 
+            margin-bottom: 20px; border: 1px dashed var(--neon-pink); padding: 10px; font-size: 0.9em; 
+        }
+        .countdown-box { background: #111; padding: 15px; border-left: 5px solid var(--neon-pink); margin-bottom: 25px; text-align: center; }
         #timer { font-size: 2.2em; font-family: 'Share Tech Mono', monospace; color: var(--neon-pink); }
         
-        .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .predict-card { background: #0c0c0c; border: 1px solid #333; padding: 20px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--neon-blue); position: relative; }
-        .prob-value { font-size: 2.2em; font-weight: bold; color: var(--neon-blue); display: block; margin: 10px 0; }
+        .prediction-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 35px; }
+        .predict-card { background: #0c0c0c; border: 1px solid #333; padding: 20px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--neon-blue); }
+        .prob-value { font-size: 2.3em; font-weight: bold; color: var(--neon-blue); display: block; margin: 10px 0; }
 
         table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; margin-top: 20px; }
-        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; font-size: 0.85em; }
+        th { text-align: left; padding: 15px; color: #555; border-bottom: 2px solid #222; font-size: 0.8em; text-transform: uppercase; }
         td { padding: 15px; border-bottom: 1px solid #111; }
-        
         .row-high-pct { color: var(--neon-blue); font-weight: bold; }
-        .made-in { margin-top: 50px; text-align: center; color: #333; font-weight: 800; font-size: 1.5em; letter-spacing: 10px; border-top: 1px solid #111; padding-top: 20px; }
-        .logout-link { color: #444; text-decoration: none; font-size: 0.7em; position: absolute; right: 10px; top: 10px; }
+
+        .made-in { 
+            margin-top: 50px; text-align: center; color: #333; font-weight: 800; 
+            font-size: 1.5em; letter-spacing: 10px; border-top: 1px solid #111; padding-top: 20px; 
+        }
     </style>
 </head>
 <body>
@@ -46,161 +84,40 @@
 <div id="login-form">
     <h2 style="color: var(--neon-pink); letter-spacing: 5px; margin-bottom: 30px;">SAB LOGIN</h2>
     <div class="input-group">
-        <label>E-POSTA</label>
-        <input type="email" id="u-email" placeholder="ad@sab.com">
+        <label>E-POSTA (ad@sab.com)</label>
+        <input type="email" id="u-email" placeholder="burhan@sab.com">
     </div>
     <div class="input-group">
         <label>ŞİFRE</label>
         <input type="password" id="u-pass" placeholder="******">
     </div>
-    <button class="login-btn" onclick="login()">Giriş Yap</button>
-    <p id="err" style="color: #ff0055; font-size: 0.8em; margin-top: 15px;"></p>
+    <button class="login-btn" onclick="login()">Sisteme Bağlan</button>
+    <p id="err" style="color: #ff0055; font-size: 0.8em; margin-top: 15px; font-family: 'Share Tech Mono';"></p>
 </div>
 
 <div id="main-content">
     <div class="container">
-        <a href="#" class="logout-link" onclick="logout()">[ SİSTEMDEN ÇIK ]</a>
-        <div class="security-msg">BU VERİLER YALNIZCA SAB ÜYELERİNİN KULLANIMINA AÇIKTIR. HENÜZ TEST AŞAMASINDA OLUP DOĞRULUK DEĞERLERİNE GÖRE NİHAİ HALİNİ ALACAKTIR.</div>
+        <div class="top-nav">
+            <a href="https://simcotools.com/tr/realms/0/" target="_blank" class="simco-btn">
+                [ SİMCOTOOLS CANLI VERİ ]
+            </a>
+            <a href="#" class="logout-link" onclick="logout()">[ SİSTEMDEN ÇIK ]</a>
+        </div>
+
+        <div class="security-msg">SAB ÖZEL STRATEJİ HATTI | 17 MART İHALESİ TAHMİN VERİLERİ</div>
 
         <div class="countdown-box">
-            <div style="font-size: 0.7em; color: #888;">SIRADAKİ İHALE (SALI 16:00) KALAN SÜRE</div>
+            <div style="font-size: 0.7em; color: #888; letter-spacing: 2px;">SIRADAKİ İHALE (SALI 16:00) KALAN SÜRE</div>
             <div id="timer">00G 00S 00D 00S</div>
         </div>
 
-        <h2 style="text-align: center; letter-spacing: 3px; color: #fff; text-transform: uppercase; font-size: 1.2em;">10 Mart İhalesinde Gelme İhtimali Yüksek Ürünler</h2>
+        <h2 style="text-align: center; letter-spacing: 2px; color: #fff; font-size: 1.1em; text-transform: uppercase;">17 Mart İhalesinde Gelme İhtimali Yüksek Ürünler</h2>
         <div class="prediction-grid" id="prediction-cards"></div>
 
-        <h2 style="text-align: center; letter-spacing: 3px; color: #fff; margin-top: 50px; text-transform: uppercase; font-size: 1.2em;">Genel İhale Trafik Payı ve Geçmiş Veriler</h2>
+        <h2 style="text-align: center; letter-spacing: 2px; color: #fff; margin-top: 50px; font-size: 1.1em; text-transform: uppercase;">Tüm Ürünler ve Trafik Payı Verileri</h2>
         <table>
             <thead>
                 <tr>
                     <th>ÜRÜN ADI</th>
                     <th>TRAFİK PAYI (%)</th>
-                    <th>DURUM (HAFTA)</th>
-                    <th>GELME İHTİMALİ</th>
-                </tr>
-            </thead>
-            <tbody id="main-table-body"></tbody>
-        </table>
-
-        <div class="made-in">MADE IN: SAB</div>
-    </div>
-</div>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBTplbpl4cP8ATDIWE9Vb_BogSxHjvc0BM",
-        authDomain: "saboff.firebaseapp.com",
-        projectId: "saboff",
-        storageBucket: "saboff.firebasestorage.app",
-        messagingSenderId: "281123108112",
-        appId: "1:281123108112:web:a7fe2a95ba5a4c2d906195"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            document.getElementById('main-content').style.display = 'block';
-            document.getElementById('login-form').style.display = 'none';
-            document.body.style.alignItems = 'flex-start'; 
-            initDashboard(); 
-        } else {
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
-            document.body.style.alignItems = 'center';
-        }
-    });
-
-    function login() {
-        const email = document.getElementById('u-email').value;
-        const pass = document.getElementById('u-pass').value;
-        firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(e => document.getElementById('err').innerText = "YETKİSİZ ERİŞİM.");
-    }
-
-    function logout() { firebase.auth().signOut(); }
-
-    function initDashboard() {
-        const TODAY = new Date();
-        const rawData = [
-            {ad: "Robotlar", p: 12.4, last: "2026-03-04", maxH: 2},
-            {ad: "E-Bileşenler", p: 9.1, last: "2026-03-04", maxH: 2},
-            {ad: "Çelik", p: 7.8, last: "2025-11-05", maxH: 5},
-            {ad: "Pil", p: 6.9, last: "2025-11-05", maxH: 4},
-            {ad: "İşlemci", p: 5.5, last: "2025-12-31", maxH: 4},
-            {ad: "Yazılım", p: 4.4, last: "2025-11-12", maxH: 6},
-            {ad: "Ekranlar", p: 3.9, last: "2026-02-18", maxH: 4},
-            {ad: "Tabletler", p: 3.5, last: "2026-02-18", maxH: 4},
-            {ad: "Dizüstü", p: 3.1, last: "2026-02-18", maxH: 4},
-            {ad: "Samosa", p: 1.4, last: "2026-02-01", maxH: 3},
-            {ad: "Kamyon", p: 1.4, last: "2025-11-13", maxH: 8}
-        ];
-
-        let processed = rawData.map(item => {
-            const diffDays = Math.floor((TODAY - new Date(item.last)) / (1000 * 60 * 60 * 24));
-            const maxDays = item.maxH * 7;
-            const timeRatio = diffDays / maxDays;
-
-            // GÜVENLİ HESAPLAMA (Tavan %88 + Logaritmik Artış)
-            let baseScore = item.p * 1.5; 
-            let timeScore = timeRatio * 40; 
-            let finalProb = baseScore + timeScore;
-
-            if (finalProb > 85) finalProb = 85 + (finalProb / 40); // %85'ten sonra çok yavaşlar
-            if (timeRatio < 0.3) finalProb *= 0.5; // Yeni gelenin şansını kır
-
-            return { 
-                ...item, 
-                diffDays, 
-                diffWeeks: (diffDays / 7).toFixed(1),
-                prob: Math.min(91.2, finalProb).toFixed(1), // Mutlak tavan %91.2
-                riskLevel: timeRatio >= 1.0 ? 'KRİTİK' : (timeRatio > 0.7 ? 'YÜKSEK' : 'NORMAL')
-            };
-        });
-
-        // ÜST KARTLAR: Tahmini en yüksek 3 ürün
-        const cardZone = document.getElementById('prediction-cards');
-        cardZone.innerHTML = "";
-        [...processed].sort((a,b) => b.prob - a.prob).slice(0, 3).forEach(item => {
-            cardZone.innerHTML += `
-                <div class="predict-card" style="border-bottom: 3px solid ${item.riskLevel==='KRİTİK' ? 'var(--neon-pink)' : 'var(--neon-blue)'}">
-                    <div style="color:#888;font-size:0.8em;letter-spacing:1px;">${item.ad}</div>
-                    <span class="prob-value" style="color:${item.riskLevel==='KRİTİK' ? 'var(--neon-pink)' : 'var(--neon-blue)'}">%${item.prob}</span>
-                    <div style="font-size:0.7em; letter-spacing:2px; color:#555;">DURUM: ${item.riskLevel}</div>
-                </div>`;
-        });
-
-        // ALT TABLO: Tüm veriler
-        const tableBody = document.getElementById('main-table-body');
-        tableBody.innerHTML = "";
-        [...processed].sort((a,b) => b.p - a.p).forEach(item => {
-            tableBody.innerHTML += `
-                <tr>
-                    <td><b>${item.ad}</b></td>
-                    <td class="row-high-pct">%${item.p}</td>
-                    <td>${item.diffWeeks} / ${item.maxH} Hafta</td>
-                    <td style="color:${parseFloat(item.prob) > 80 ? 'var(--neon-pink)' : 'var(--neon-blue)'}; font-weight:bold;">%${item.prob}</td>
-                </tr>`;
-        });
-    }
-
-    function updateTimer() {
-        const now = new Date();
-        let target = new Date();
-        target.setDate(now.getDate() + (2 + 7 - now.getDay()) % 7);
-        target.setHours(16, 0, 0, 0);
-        if (now > target) target.setDate(target.getDate() + 7);
-        const d = target - now;
-        const days = Math.floor(d / 86400000);
-        const hrs = Math.floor((d % 86400000) / 3600000);
-        const mins = Math.floor((d % 3600000) / 60000);
-        const secs = Math.floor((d % 60000) / 1000);
-        const tElem = document.getElementById('timer');
-        if(tElem) tElem.innerText = `${days}G ${String(hrs).padStart(2, '0')}S ${String(mins).padStart(2, '0')}D ${String(secs).padStart(2, '0')}S`;
-    }
-    setInterval(updateTimer, 1000);
-    updateTimer();
-</script>
-</body>
-</html>
-
+                    <th>GEÇEN SÜ
