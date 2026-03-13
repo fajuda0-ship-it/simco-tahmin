@@ -3,159 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Frekans Analizi</title>
+    <title>SAB Proje Paketi Analizi</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon-pink: #ff00ff; --neon-blue: #00d4ff; --bg-dark: #050505; }
-        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 10px; }
-        .container { max-width: 1200px; margin: auto; background: rgba(10, 10, 10, 0.98); border: 1px solid #333; padding: 20px; }
+        body { background-color: var(--bg-dark); color: #eee; font-family: 'Rajdhani', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        .header-box { text-align: center; border-bottom: 2px solid var(--neon-pink); padding-bottom: 20px; margin-bottom: 20px; }
-        h2 { color: var(--neon-pink); letter-spacing: 5px; text-transform: uppercase; margin: 0; }
-        
-        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-item { background: #111; padding: 15px; border-top: 3px solid var(--neon-blue); text-align: center; }
-        .stat-label { font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 2px; }
-        .stat-num { display: block; font-family: 'Share Tech Mono'; font-size: 1.8em; color: var(--neon-blue); }
+        /* Sol Menü: Proje İsimleri */
+        .sidebar { width: 350px; background: #0a0a0a; border-right: 1px solid #333; overflow-y: auto; padding: 20px; }
+        .sidebar h3 { color: var(--neon-blue); font-size: 0.9em; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .project-item { 
+            padding: 12px; margin-bottom: 5px; cursor: pointer; border-left: 3px solid transparent; 
+            transition: 0.3s; font-size: 0.9em; color: #aaa; background: #111;
+        }
+        .project-item:hover { background: #1a1a1a; color: #fff; border-left-color: var(--neon-blue); }
+        .project-item.active { background: #1a1a1a; color: var(--neon-blue); border-left-color: var(--neon-pink); box-shadow: inset 5px 0 10px rgba(255,0,255,0.1); }
 
-        .table-wrapper { overflow-x: auto; max-height: 700px; overflow-y: auto; border: 1px solid #222; }
-        table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; font-size: 0.85em; }
-        th { position: sticky; top: 0; background: #1a1a1a; color: var(--neon-pink); padding: 15px; text-align: left; border-bottom: 2px solid var(--neon-pink); z-index: 10; }
-        td { padding: 12px 15px; border-bottom: 1px solid #222; }
-        tr:nth-child(even) { background: #0a0a0a; }
-        tr:hover { background: #1a1a1a; cursor: crosshair; }
-        
-        .q-tag { padding: 2px 8px; border-radius: 3px; font-weight: bold; }
-        .high { color: #00ff88; text-shadow: 0 0 5px #00ff88; }
-        .mid { color: #ffcc00; }
-        .low { color: #ff4444; }
-        .freq-count { color: var(--neon-blue); font-weight: bold; font-size: 1.2em; }
+        /* Sağ Panel: Ürün Havuzu */
+        .main-panel { flex: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #111, #050505); }
+        .pool-header { margin-bottom: 30px; border-bottom: 2px solid var(--neon-pink); padding-bottom: 15px; }
+        .pool-title { font-size: 2em; color: var(--neon-pink); text-transform: uppercase; margin: 0; }
+        .pool-stats { font-family: 'Share Tech Mono'; color: #888; font-size: 0.9em; margin-top: 10px; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .product-card { background: rgba(255,255,255,0.03); border: 1px solid #222; padding: 20px; text-align: center; border-radius: 4px; }
+        .product-name { display: block; font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: var(--neon-blue); }
+        .product-q { font-family: 'Share Tech Mono'; font-size: 0.8em; color: #ffcc00; background: rgba(255,204,0,0.1); padding: 3px 8px; border-radius: 10px; }
+
+        .empty-state { height: 80%; display: flex; align-items: center; justify-content: center; color: #333; font-size: 1.5em; letter-spacing: 5px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header-box">
-        <h2>SAB FREKANS ANALİZİ (V10.0)</h2>
-        <div style="font-size: 0.8em; color: #555; margin-top: 5px;">ÜRÜNLER EN ÇOK GELENDEN EN AZ GELENE SIRALANMIŞTIR</div>
+<div class="sidebar" id="project-list">
+    <h3>İhale Senaryoları (Paketler)</h3>
     </div>
 
-    <div class="stats-bar">
-        <div class="stat-item"><span class="stat-label">Toplam Analiz Edilen İhale</span><span class="stat-num">208</span></div>
-        <div class="stat-item"><span class="stat-label">En Çok Gelen Sektör</span><span class="stat-num" style="color:var(--neon-pink)">ROBOTİK</span></div>
-        <div class="stat-item"><span class="stat-label">Sıralama Modu</span><span class="stat-num">FREKANS (Z->A)</span></div>
-    </div>
-
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>ÜRÜN İSMİ</th>
-                    <th>TOPLAM GELİŞ (FREKANS)</th>
-                    <th>Q0+ OLASILIĞI</th>
-                    <th>SON GÖRÜLME</th>
-                </tr>
-            </thead>
-            <tbody id="data-table"></tbody>
-        </table>
-    </div>
-    
-    <div style="margin-top: 30px; text-align: center; color: #222; letter-spacing: 15px; font-weight: 900; font-size: 1.5em;">SAB STRATEGY SYSTEMS</div>
+<div class="main-panel" id="detail-panel">
+    <div class="empty-state">Analiz için bir paket seçin</div>
 </div>
 
 <script>
-    // Full Data Seti (Senin gönderdiğin listeye göre güncellenmiş rakamlar)
-    const fullData = [
-        {ad: "Robotlar", c: 15, qp: 11, l: "2026-03-04"},
-        {ad: "Çelik", c: 14, qp: 13, l: "2026-01-21"},
-        {ad: "Elektronik bileşenler", c: 12, qp: 8, l: "2026-03-04"},
-        {ad: "Pil", c: 11, qp: 8, l: "2026-01-14"},
-        {ad: "İşlemci", c: 10, qp: 10, l: "2025-12-31"},
-        {ad: "Roket Yakıtı", c: 9, qp: 8, l: "2026-03-11"},
-        {ad: "Yazılım", c: 9, qp: 0, l: "2025-11-12"},
-        {ad: "Ekranlar", c: 9, qp: 5, l: "2026-02-18"},
-        {ad: "İnşaat Gereci", c: 8, qp: 0, l: "2026-01-21"},
-        {ad: "Havacılık araştırması", c: 8, qp: 0, l: "2025-11-19"},
-        {ad: "Biftek", c: 7, qp: 5, l: "2026-02-11"},
-        {ad: "Su", c: 7, qp: 5, l: "2026-01-21"},
-        {ad: "Tabletler", c: 7, qp: 5, l: "2026-02-18"},
-        {ad: "Yıldız gemisi", c: 7, qp: 7, l: "2026-01-28"},
-        {ad: "Kimyasal", c: 7, qp: 7, l: "2026-01-21"},
-        {ad: "Dizüstü", c: 6, qp: 5, l: "2026-02-18"},
-        {ad: "Kumaş", c: 6, qp: 6, l: "2026-03-11"},
-        {ad: "İç Çamaşır", c: 6, qp: 4, l: "2025-05-07"},
-        {ad: "Çelik Kiriş", c: 6, qp: 4, l: "2026-02-18"},
-        {ad: "Eldiven", c: 5, qp: 5, l: "2026-03-11"},
-        {ad: "Kamyon", c: 5, qp: 3, l: "2025-11-05"},
-        {ad: "Monitör", c: 5, qp: 3, l: "2026-03-04"},
-        {ad: "Demir cevheri", c: 5, qp: 5, l: "2026-01-14"},
-        {ad: "Betonarme Blok", c: 5, qp: 5, l: "2026-01-21"},
-        {ad: "Süt", c: 5, qp: 5, l: "2025-10-01"},
-        {ad: "Elmalar", c: 5, qp: 4, l: "2025-10-01"},
-        {ad: "Portakal", c: 5, qp: 3, l: "2025-10-01"},
-        {ad: "El Çantası", c: 5, qp: 3, l: "2026-02-04"},
-        {ad: "Yerleşik bilgisayar", c: 5, qp: 3, l: "2025-12-31"},
-        {ad: "Metan", c: 5, qp: 5, l: "2026-01-15"},
-        {ad: "Etanol", c: 5, qp: 5, l: "2026-01-15"},
-        {ad: "Petrol", c: 5, qp: 5, l: "2026-01-15"},
-        {ad: "Deri", c: 4, qp: 4, l: "2026-03-11"},
-        {ad: "Uydu", c: 4, qp: 4, l: "2026-03-11"},
-        {ad: "Ekonomik araba", c: 4, qp: 4, l: "2026-03-04"},
-        {ad: "Oto karoseri", c: 4, qp: 4, l: "2026-03-04"},
-        {ad: "Temel iç kısım", c: 4, qp: 4, l: "2026-03-04"},
-        {ad: "Ekmek", c: 4, qp: 2, l: "2026-02-11"},
-        {ad: "Lüks Saat", c: 4, qp: 3, l: "2025-11-26"},
-        {ad: "Quadcopter", c: 4, qp: 4, l: "2026-02-11"},
-        {ad: "Yüksek seviye e-bilgisayar", c: 4, qp: 3, l: "2026-01-07"},
-        {ad: "Tahıl", c: 4, qp: 3, l: "2026-01-21"},
-        {ad: "Elektrik motoru", c: 4, qp: 4, l: "2026-01-14"},
-        {ad: "Altın cevheri", c: 4, qp: 4, l: "2025-12-10"},
-        {ad: "Külçe Altın", c: 4, qp: 4, l: "2025-12-10"},
-        {ad: "Samosa", c: 3, qp: 1, l: "2026-02-11"},
-        {ad: "Dondurulmuş pizza", c: 3, qp: 3, l: "2026-03-11"},
-        {ad: "Pencere", c: 3, qp: 3, l: "2026-02-18"},
-        {ad: "Tohum", c: 3, qp: 2, l: "2026-02-18"},
-        {ad: "Topuklu Ayakkabı", c: 3, qp: 3, l: "2026-02-04"},
-        {ad: "Cadı kostümü", c: 3, qp: 2, l: "2026-02-04"},
-        {ad: "Uçuş bilgisayarı", c: 3, qp: 2, l: "2026-02-11"},
-        {ad: "Karbon fiber", c: 3, qp: 0, l: "2026-01-07"},
-        {ad: "BFR", c: 3, qp: 3, l: "2026-01-07"},
-        {ad: "Yörüngesel güçlendirici", c: 3, qp: 3, l: "2026-01-07"},
-        {ad: "Kereste", c: 3, qp: 3, l: "2026-01-21"},
-        {ad: "Buldozer", c: 3, qp: 3, l: "2026-01-21"},
-        {ad: "Alet Takımı", c: 3, qp: 3, l: "2026-01-21"},
-        {ad: "Akıllı Telefonlar", c: 3, qp: 2, l: "2025-12-10"},
-        {ad: "Malzeme araştırması", c: 3, qp: 0, l: "2026-03-04"},
-        {ad: "Bal kabağı çorbası", c: 2, qp: 2, l: "2026-03-11"},
-        {ad: "Sosis", c: 2, qp: 2, l: "2026-02-04"},
-        {ad: "Kimya araştırması", c: 2, qp: 0, l: "2025-10-22"},
-        {ad: "Elektronik araştırması", c: 2, qp: 0, l: "2025-10-22"},
-        {ad: "Madencilik araştırması", c: 2, qp: 0, l: "2025-10-22"}
-    ];
+    // Attığın verilerden çıkarılan "Senaryo Bazlı" havuz yapısı
+    const scenarios = {
+        "İleri Robotik": { count: 5, items: ["Robotlar Q2", "Elektronik bileşenler Q3", "Yüksek seviye e-bilgisayar Q2"], last: "7 Oca 2026" },
+        "Ezilme Testleri": { count: 3, items: ["Ekonomik elektrikli araba Q1", "Oto karoseri Q2", "Temel iç kısım Q2", "Ekonomik araba Q1"], last: "4 Mar 2026" },
+        "E-öğrenme Cihazları": { count: 4, items: ["Tabletler Q3", "Dizüstü Q0", "Ekranlar Q3"], last: "18 Şub 2026" },
+        "Veri Merkezi": { count: 3, items: ["Yerleşik bilgisayar Q0", "İşlemci Q2"], last: "31 Ara 2025" },
+        "Güvenlik Ekipmanı": { count: 2, items: ["Deri Q1", "Eldiven Q1"], last: "11 Mar 2026" },
+        "Yıldız Gemisi Geliştirme": { count: 5, items: ["Yıldız gemisi Q3", "Roket Yakıtı Q3"], last: "28 Oca 2026" },
+        "Nükleer Santral": { count: 2, items: ["Çelik Q2", "Betonarme Blok Q1", "Kimyasal Q1", "Enerji araştırması Q0"], last: "21 Oca 2026" },
+        "Mars Gezgini": { count: 4, items: ["Pil Q3", "Havacılık araştırması Q0", "Robotlar Q3"], last: "19 Kas 2025" },
+        "Zirve ikramları": { count: 2, items: ["Tereyağı Q2", "Samosa Q0", "Salata Q2", "Ekmek Q0"], last: "11 Şub 2026" },
+        "Drone flosu": { count: 3, items: ["Quadcopter Q1", "Uçuş bilgisayarı Q2", "Elektronik bileşenler Q3", "Pil Q2"], last: "11 Şub 2026" },
+        "Moda Festivali": { count: 2, items: ["Kumaş Q2", "Moda araştırması Q0"], last: "1 Eki 2025" },
+        "Şehir Festivali": { count: 2, items: ["El Çantası Q3", "Cadı kostümü Q2", "Topuklu Ayakkabı Q2"], last: "4 Şub 2026" }
+    };
 
-    const tableBody = document.getElementById('data-table');
+    const projectList = document.getElementById('project-list');
+    const detailPanel = document.getElementById('detail-panel');
 
-    function renderTable() {
-        // EN ÖNEMLİ KISIM: Geliş sayısına (c) göre büyükten küçüğe sırala
-        const sorted = fullData.sort((a,b) => b.c - a.c);
-        
-        sorted.forEach(item => {
-            const prob = ((item.qp / item.c) * 100).toFixed(1);
-            let probClass = "mid";
-            if (prob >= 80) probClass = "high";
-            if (prob <= 30) probClass = "low";
-
-            const row = `<tr>
-                <td><b style="color:#fff">${item.ad}</b></td>
-                <td><span class="freq-count">${item.c} Kez</span></td>
-                <td><span class="q-tag ${probClass}">%${prob}</span></td>
-                <td style="color:#666">${item.l}</td>
-            </tr>`;
-            tableBody.innerHTML += row;
+    function init() {
+        Object.keys(scenarios).sort().forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'project-item';
+            div.innerText = name;
+            div.onclick = () => showDetail(name, div);
+            projectList.appendChild(div);
         });
     }
 
-    renderTable();
+    function showDetail(name, element) {
+        // Aktif sınıfını yönet
+        document.querySelectorAll('.project-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+
+        const data = scenarios[name];
+        let itemsHtml = data.items.map(item => `
+            <div class="product-card">
+                <span class="product-name">${item.split(' ')[0]}</span>
+                <span class="product-q">${item.split(' ')[1] || 'Q0'}</span>
+            </div>
+        `).join('');
+
+        detailPanel.innerHTML = `
+            <div class="pool-header">
+                <h1 class="pool-title">${name}</h1>
+                <div class="pool-stats">
+                    TOPLAM GÖRÜLME: ${data.count} KEZ | SON TARİH: ${data.last}
+                </div>
+            </div>
+            <div class="product-grid">
+                ${itemsHtml}
+            </div>
+            <div style="margin-top:50px; color:#333; font-size:0.8em; font-family:'Share Tech Mono'">
+                SAB STRATEGY ALGORITHM V11.0 // SİSTEM ÇALIŞIYOR
+            </div>
+        `;
+    }
+
+    init();
 </script>
 
 </body>
