@@ -219,69 +219,94 @@ renderProductList();
 </body>
 </html>
 <style>
-    /* ... önceki stiller ... */
+ <style>
+    /* ALT KAYAR PANEL (TICKER) AYARLARI */
     .ticker-wrapper {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        background: var(--crit);
-        color: white;
-        padding: 5px 0;
+        background: #990000; /* Daha koyu, göz yormayan bir kırmızı */
+        color: #ffffff;
+        padding: 8px 0;
         font-weight: bold;
         z-index: 1000;
         overflow: hidden;
-        border-top: 2px solid #fff;
+        border-top: 2px solid var(--neon);
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
     }
+
     .ticker {
         display: inline-block;
         white-space: nowrap;
         padding-left: 100%;
-        animation: ticker 30s linear infinite;
+        /* 150s: Çok daha sakin ve okunabilir bir hız */
+        animation: ticker 150s linear infinite; 
+        font-size: 14px;
+        text-transform: uppercase;
     }
+
+    .ticker-item {
+        display: inline-block;
+        padding: 0 80px; /* Uyarılar arası boşluk artırıldı */
+        border-right: 1px solid rgba(255,255,255,0.4);
+    }
+
+    /* Akış Animasyonu */
     @keyframes ticker {
         0% { transform: translate(0, 0); }
         100% { transform: translate(-100%, 0); }
     }
-    .ticker-item {
-        display: inline-block;
-        padding: 0 40px;
+
+    /* Mouse ile üzerine gelindiğinde durması için (İstersen silebilirsin) */
+    .ticker-wrapper:hover .ticker {
+        animation-play-state: paused;
     }
 </style>
 
 <div class="ticker-wrapper">
     <div class="ticker" id="tickerContent">
-        ANALİZ MOTORU BAŞLATILIYOR... EN ÇOK GECİKEN PROJELER HESAPLANIYOR...
+        [SAB-CORE] ANALİZ MOTORU VERİLERİ İŞLİYOR... LÜTFEN BEKLEYİN...
     </div>
 </div>
 
 <script>
-// Mevcut script'in sonuna bu fonksiyonu ekle ve renderTable içinde çağır
-
 function updateTicker() {
     const ticker = document.getElementById('tickerContent');
-    
+    if (!ticker) return;
+
     // Gecikmeleri hesapla ve sırala
     const sortedByDelay = [...tenderData].map(t => {
         const last = new Date(t.lastSeen);
-        const passed = Math.ceil((SYSTEM_DATE - last) / (1000*60*60*24));
+        const passed = Math.ceil((SYSTEM_DATE - last) / (1000 * 60 * 60 * 24));
         const delay = passed - t.cycle;
         return { name: t.name, delay: delay };
     }).sort((a, b) => b.delay - a.delay);
 
-    // En çok geciken ilk 10'u al
+    // En çok geciken (X en büyük olan) ilk 10 projeyi al
     const topDelays = sortedByDelay.slice(0, 10);
     
     let tickerHtml = "";
     topDelays.forEach(item => {
         if(item.delay > 0) {
-            tickerHtml += `<span class="ticker-item">⚠️ KRİTİK GECİKME: ${item.name} (+${item.delay} GÜN)</span>`;
+            // Görsel olarak daha belirgin hale getirildi
+            tickerHtml += `
+                <span class="ticker-item">
+                    <span style="color: #ffaa00;">[SAB-ALERT]</span> 
+                    ${item.name} >> <span style="font-size: 16px;">+${item.delay} GÜN</span> GECİKMELİ!
+                </span>`;
         }
     });
 
-    ticker.innerHTML = tickerHtml + tickerHtml; // Kesintisiz döngü için çift yazdırdık
+    // Eğer hiç geciken yoksa boş kalmasın
+    if (tickerHtml === "") {
+        tickerHtml = '<span class="ticker-item">[SAB-INFO] TÜM DÖNGÜLER NORMAL. KRİTİK GECİKME SAPTANMADI.</span>';
+    }
+
+    // Kesintisiz akış için içeriği çoğaltıyoruz
+    ticker.innerHTML = tickerHtml + tickerHtml + tickerHtml; 
 }
 
-// Sayfa yüklendiğinde çalıştır
-updateTicker();
+// Ana sistem tarihinden hemen sonra çalıştırılması için
+setTimeout(updateTicker, 500); 
 </script>
