@@ -4,6 +4,28 @@
     <meta charset="UTF-8">
     <title>SAB CORE TERMINAL v27.0</title>
     <style>
+        /* SAB Dijital Logo Ayarları */
+.sab-logo {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    width: 100px; /* Boyutu buradan ayarlayabilirsin */
+    height: auto;
+    z-index: 2000; /* En üstte görünmesi için */
+    border: 1px solid var(--neon);
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+    pointer-events: none; /* Mouse ile tıklamayı engellemez, altındaki butonlara basabilirsin */
+}
+
+/* Küçük ekranlarda başlığa çarpmasın diye */
+@media (max-width: 600px) {
+    .sab-logo {
+        width: 60px;
+        top: 10px;
+    }
+}
+        
         :root { --neon: #00ff41; --bg: #050505; --warn: #ffab00; --crit: #ff3131; --panel-bg: rgba(0, 255, 65, 0.05); }
         body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; font-size: 13px; margin: 0; overflow: hidden; }
         
@@ -40,7 +62,7 @@
     </style>
 </head>
 <body>
-
+<img src="5883966520075947218.jpg" class="sab-logo" alt="SAB DIJITAL">
 <div class="header">
     <h1 style="margin:0;">SAB CORE TERMINAL v27.0</h1>
     <div id="sysClock">SİSTEM TARİHİ: 16 MART 2026 | DURUM: OPERASYONEL</div>
