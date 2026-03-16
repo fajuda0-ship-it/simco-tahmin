@@ -218,3 +218,70 @@ renderProductList();
 
 </body>
 </html>
+<style>
+    /* ... önceki stiller ... */
+    .ticker-wrapper {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--crit);
+        color: white;
+        padding: 5px 0;
+        font-weight: bold;
+        z-index: 1000;
+        overflow: hidden;
+        border-top: 2px solid #fff;
+    }
+    .ticker {
+        display: inline-block;
+        white-space: nowrap;
+        padding-left: 100%;
+        animation: ticker 30s linear infinite;
+    }
+    @keyframes ticker {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(-100%, 0); }
+    }
+    .ticker-item {
+        display: inline-block;
+        padding: 0 40px;
+    }
+</style>
+
+<div class="ticker-wrapper">
+    <div class="ticker" id="tickerContent">
+        ANALİZ MOTORU BAŞLATILIYOR... EN ÇOK GECİKEN PROJELER HESAPLANIYOR...
+    </div>
+</div>
+
+<script>
+// Mevcut script'in sonuna bu fonksiyonu ekle ve renderTable içinde çağır
+
+function updateTicker() {
+    const ticker = document.getElementById('tickerContent');
+    
+    // Gecikmeleri hesapla ve sırala
+    const sortedByDelay = [...tenderData].map(t => {
+        const last = new Date(t.lastSeen);
+        const passed = Math.ceil((SYSTEM_DATE - last) / (1000*60*60*24));
+        const delay = passed - t.cycle;
+        return { name: t.name, delay: delay };
+    }).sort((a, b) => b.delay - a.delay);
+
+    // En çok geciken ilk 10'u al
+    const topDelays = sortedByDelay.slice(0, 10);
+    
+    let tickerHtml = "";
+    topDelays.forEach(item => {
+        if(item.delay > 0) {
+            tickerHtml += `<span class="ticker-item">⚠️ KRİTİK GECİKME: ${item.name} (+${item.delay} GÜN)</span>`;
+        }
+    });
+
+    ticker.innerHTML = tickerHtml + tickerHtml; // Kesintisiz döngü için çift yazdırdık
+}
+
+// Sayfa yüklendiğinde çalıştır
+updateTicker();
+</script>
