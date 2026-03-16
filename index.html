@@ -1,4 +1,45 @@
-// SAB CORE - FULL TENDER DATABASE
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>SAB CORE TERMINAL v24.2</title>
+    <style>
+        :root { --neon: #00ff41; --bg: #0a0a0a; --crit: #ff3131; --warn: #ffaa00; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; font-size: 13px; }
+        .container { border: 1px solid var(--neon); padding: 20px; box-shadow: 0 0 20px rgba(0,255,65,0.1); }
+        h2 { border-bottom: 1px solid var(--neon); padding-bottom: 10px; text-align: center; letter-spacing: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: rgba(0,255,65,0.2); padding: 10px; text-align: left; border: 1px solid var(--neon); }
+        td { padding: 8px; border: 1px solid rgba(0,255,65,0.3); }
+        .critical { color: var(--crit); font-weight: bold; }
+        .warning { color: var(--warn); }
+        .upcoming { color: #888; }
+        .search-box { background: #111; border: 1px solid var(--neon); color: var(--neon); padding: 10px; width: 100%; margin-bottom: 10px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>SAB CORE - TENDER TRACKER</h2>
+    <div style="margin-bottom: 10px;">SİSTEM TARİHİ: 16 MART 2026</div>
+    <input type="text" id="searchInput" class="search-box" placeholder="İHALE VEYA ÜRÜN ARA (Örn: Robot, Çelik, Yıldız Gemisi...)">
+    
+    <table id="tenderTable">
+        <thead>
+            <tr>
+                <th>PROJE İSMİ</th>
+                <th>İHTİYAÇ DUYULAN ÜRÜNLER</th>
+                <th>DÖNGÜ</th>
+                <th>SON GÖRÜLME</th>
+                <th>DURUM (TAHMİN)</th>
+            </tr>
+        </thead>
+        <tbody id="tenderBody"></tbody>
+    </table>
+</div>
+
+<script>
+const SYSTEM_DATE = new Date("2026-03-16");
 const tenderData = [
     { name: "Acil Durum Giysileri", items: "Kumaş, Spor Ayakkabı, Elbise, İç Çamaşır", cycle: 21, lastSeen: "2025-01-15" },
     { name: "Acil Durum Malzemeleri", items: "Su, Tahıl", cycle: 21, lastSeen: "2025-01-22" },
@@ -68,7 +109,6 @@ const tenderData = [
     { name: "Telemedikal Altyapı", items: "Tablet, Monitör, Ekran, TV", cycle: 28, lastSeen: "2025-11-19" },
     { name: "Tıbbi Malzemeler", items: "Tablet, Eldiven", cycle: 21, lastSeen: "2025-05-14" },
     { name: "Uçan Spagetti Canavarı", items: "Köfte, Çelik, Plastik, Makarna", cycle: 28, lastSeen: "2025-03-19" },
-    { name: "Uygun Fiyatlı Konut", items: "Çimento, Pencere, Tuğla", cycle: 21, lastSeen: "2025-01-15" },
     { name: "Uydu Gözetimi", items: "Uydu, E-Bileşen", cycle: 28, lastSeen: "2025-07-09" },
     { name: "Uzay Keşfi", items: "Karbon Fiber, BFR, Güçlendirici", cycle: 63, lastSeen: "2026-01-07" },
     { name: "Üretim Desteği", items: "Demir, Çelik", cycle: 42, lastSeen: "2025-12-10" },
@@ -78,3 +118,37 @@ const tenderData = [
     { name: "Yıldız Gemisi Geliştirme", items: "Yıldız Gemisi, Roket Yakıtı", cycle: 42, lastSeen: "2026-01-28" },
     { name: "Zirve İkramları", items: "Tereyağı, Samosa, Salata, Ekmek", cycle: 28, lastSeen: "2026-02-11" }
 ];
+
+function updateTable(filter = "") {
+    const tbody = document.getElementById('tenderBody');
+    tbody.innerHTML = "";
+    
+    tenderData.forEach(t => {
+        if (!t.name.toLowerCase().includes(filter.toLowerCase()) && 
+            !t.items.toLowerCase().includes(filter.toLowerCase())) return;
+
+        const last = new Date(t.lastSeen);
+        const diff = Math.ceil((SYSTEM_DATE - last) / (1000*60*60*24));
+        const rem = t.cycle - diff;
+        
+        let statusClass = rem <= 0 ? "critical" : (rem <= 3 ? "warning" : "upcoming");
+        let statusText = rem <= 0 ? `GECİKTİ (+${Math.abs(rem)} GÜN)` : `${rem} GÜN KALDI`;
+
+        tbody.innerHTML += `
+            <tr class="${statusClass}">
+                <td>${t.name}</td>
+                <td style="font-size: 11px;">${t.items}</td>
+                <td>${t.cycle} G</td>
+                <td>${t.lastSeen}</td>
+                <td>${statusText}</td>
+            </tr>
+        `;
+    });
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => updateTable(e.target.value));
+updateTable();
+</script>
+
+</body>
+</html>
