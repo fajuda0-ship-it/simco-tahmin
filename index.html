@@ -2,62 +2,388 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB CORE v26.5 // ANALYTICS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAB CORE TERMINAL v27.0 // PREDICTION ENGINE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --accent: #2f81f7; --text: #c9d1d9; --hot: #f85149; --warm: #d29922; --cold: #3fb950; }
-        body { background: var(--bg); color: var(--text); font-family: 'Roboto Mono', monospace; margin: 0; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
-        .card { background: var(--card); border: 1px solid #30363d; padding: 15px; border-radius: 6px; }
-        .heat-bar { height: 4px; width: 100%; background: #30363d; margin: 10px 0; border-radius: 2px; overflow: hidden; }
-        .heat-fill { height: 100%; transition: 0.5s; }
-        .status { font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
-        table { width: 100%; margin-top: 30px; border-collapse: collapse; font-size: 0.8em; }
-        th { text-align: left; color: #8b949e; border-bottom: 1px solid #30363d; padding: 10px; }
-        td { padding: 10px; border-bottom: 1px solid #21262d; }
+        :root {
+            /* Renk Paleti (Paylaşılan görselden esinlenildi) */
+            --bg-color: #0d1117; /* Arka plan */
+            --container-bg: #161b22; /* Kartlar ve paneller */
+            --accent-color: #fca311; /* Cooper's Tools Sarısı */
+            --text-color: #c9d1d9; /* Genel metin */
+            --border-color: #30363d; /* Çizgiler */
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+            
+            /* Tahmin Sıcaklık Renkleri */
+            --heat-cold: #3fb950; /* Soğuk/Beklemede (Yeşil) */
+            --heat-warm: #fca311; /* Ilık/Takipte (Sarı) */
+            --heat-hot: #f85149; /* Sıcak/Kritik (Kırmızı) */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Üst Menü (Görseldeki gibi) */
+        .header {
+            background: var(--container-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .nav {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+        }
+
+        .nav-link {
+            color: #8b949e;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nav-link.active {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* Ana İçerik Alanı */
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Yan Menü */
+        .sidebar {
+            width: 260px;
+            background: var(--container-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 10px;
+            gap: 10px;
+        }
+
+        .cat-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            transition: 0.2s;
+        }
+
+        .cat-btn:hover {
+            background: #21262d;
+        }
+
+        .cat-btn.active {
+            background: #21262d;
+            border-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        /* İçerik Panel */
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* Tahmin Kartları (Grid Düzeni) */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .cat-badge {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            color: #8b949e;
+            font-family: var(--font-mono);
+        }
+
+        .heat-status {
+            font-size: 0.75em;
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .proj-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .proj-items {
+            font-size: 0.85em;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        /* Sıcaklık Çubuğu */
+        .heat-bar {
+            height: 4px;
+            width: 100%;
+            background: #30363d;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .heat-fill {
+            height: 100%;
+            transition: 0.4s ease-out;
+        }
+
+        .card-footer {
+            font-size: 0.75em;
+            color: #8b949e;
+            margin-top: 15px;
+            font-family: var(--font-mono);
+        }
+
+        /* Tablo Düzeni (Veri Listesi) */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            margin-top: 20px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            color: #8b949e;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .tag {
+            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: #30363d;
+            color: #ffffff;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <h2>İHALE SICAKLIK ANALİZİ (18 MART TAHMİNİ)</h2>
-    <div class="grid" id="main-grid"></div>
+    <div class="header">
+        <div class="logo">SAB CORE TERMINAL</div>
+        <div class="nav">
+            <span class="nav-link active">Prediction</span>
+            <span class="nav-link">Log</span>
+            <span class="nav-link">Cooper's Tools (Sim)</span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--accent-color);">16 MART 2026 // v27.0</div>
+    </div>
 
-    <script>
-        const TODAY = new Date("2026-03-16");
+    <div class="main-container">
+        <div class="sidebar" id="sidebar">
+            <h2>Kategoriler</h2>
+            <button class="cat-btn active" onclick="showCategory('HOT')">🔥 EN SICAK</button>
+            <div style="border-top:1px solid #30363d; margin:10px 0;"></div>
+            </div>
+
+        <div class="content" id="content">
+            </div>
+    </div>
+
+<script>
+    // Bugünün Tarihi (Simülasyon İçin Sabit)
+    const TODAY_DATE_STR = "2026-03-16";
+    const TODAY = new Date(TODAY_DATE_STR);
+
+    // --- ANA VERİ SETİ (11 Kategori, senin listendeki ürünler ve periyotlar) ---
+    const allContracts = [
+        // 1. HAVACILIK VE UZAY
+        { ad: "Navigasyon Takımyıldızı", cat: "Uzay", period: 31, items: ["Roket Yakıtı", "Uydu"], last: "2026-03-11" },
+        { ad: "Yıldız Gemisi", cat: "Uzay", period: 42, items: ["Yıldız Gemisi", "Roket Yakıtı"], last: "2026-01-28" },
+        { ad: "Uydu Gözetimi", cat: "Uzay", period: 28, items: ["Uydu", "E-Bileşenler"], last: "2026-02-14" },
+        // 2. ELEKTRONİK
+        { ad: "İleri Robotik", cat: "Tech", period: 18, items: ["Robot", "E-Bileşen", "e-Bilgisayar"], last: "2026-03-04" },
+        { ad: "Veri Merkezi", cat: "Tech", period: 18, items: ["Bilgisayar", "İşlemci"], last: "2026-02-18" },
+        { ad: "E-öğrenme Cihazları", cat: "Tech", period: 21, items: ["Tablet", "Dizüstü", "Ekran"], last: "2026-02-04" },
+        // 3. AĞIR SANAYİ
+        { ad: "Ezilme Testleri", cat: "Heavy", period: 21, items: ["E.Araba", "Karoseri", "İç Kısım"], last: "2026-03-04" },
+        { ad: "Nükleer Santral", cat: "Heavy", period: 35, items: ["Çelik", "Beton", "Kimyasal"], last: "2026-01-21" },
+        { ad: "Metal İşleme", cat: "Heavy", period: 21, items: ["Alüminyum", "Cevher", "Çelik"], last: "2026-02-11" },
+        // 4. GIDA
+        { ad: "Zirve İkramları (BM)", cat: "Gıda", period: 14, items: ["Pasta", "Lazanya", "Hamburger"], last: "2026-03-11" },
+        { ad: "Protein Reserves", cat: "Gıda", period: 18, items: ["Sosis", "Biftek", "İnek"], last: "2026-02-25" },
+        // 5. LÜKS
+        { ad: "Özel Ürünler", cat: "Lüks", period: 45, items: ["Kolye", "Lüks Saat"], last: "2026-01-28" },
+        { ad: "Moda Festivali", cat: "Lüks", period: 35, items: ["Çanta", "Kostüm", "Ayakkabı"], last: "2026-02-18" },
+        // 6. HAMMADDE
+        { ad: "Değerli Metaller", cat: "Hammadde", period: 28, items: ["Altın", "Cevher"], last: "2026-03-12" },
+        { ad: "Hammadde Çıkarımı", cat: "Hammadde", period: 35, items: ["Boksit", "Silikon"], last: "2025-06-18" }, // Çok eski
+        // 7. ENERJİ
+        { ad: "Yakıt Rezervleri", cat: "Enerji", period: 28, items: ["Dizel", "Petrol", "R.Yakıtı"], last: "2026-02-25" },
+        // 8. ARAŞTIRMA (R&D)
+        { ad: "Havacılık Araştırması", cat: "R&D", period: 35, items: ["Puanlar", "Uzay Bilgisi"], last: "2026-02-11" },
+        // 9. SEZONLUK
+        { ad: "Uçan Spagetti Canavarı", cat: "Sezonluk", period: 999, items: ["Pasta", "Çelik", "Köfte"], last: "2025-01-01" }, // Özel döngü
+        // 10. SOSYAL
+        { ad: "Evsizleri Besleyin", cat: "Sosyal", period: 21, items: ["Çorba", "Pizza"], last: "2026-03-11" },
+        // 11. ALTYAPI
+        { ad: "Metro Altyapısı", cat: "Altyapı", period: 35, items: ["Beton", "Çelik", "Gereç"], last: "2026-02-11" }
+    ];
+
+    const categories = [...new Set(allContracts.map(c => c.cat))].sort();
+
+    // --- ALGORİTMA: Sıcaklık Hesaplama (Gecikme Oranı) ---
+    function calculateContracts() {
+        return allContracts.map(c => {
+            const lastDate = new Date(c.last);
+            const diffDays = Math.floor((TODAY - lastDate) / (1000 * 60 * 60 * 24)); // Geçen gün
+            const ratio = Math.min(1.2, diffDays / c.period); // Gecikme oranı (Max %120)
+            
+            let status = "Beklemede";
+            let color = "var(--heat-cold)";
+            
+            // Sıcaklık eşikleri (Gecikme oranına göre)
+            if(ratio >= 0.85) { status = "KRİTİK (Sıcak)"; color = "var(--heat-hot)"; }
+            else if(ratio >= 0.50) { status = "Takipte (Ilık)"; color = "var(--heat-warm)"; }
+
+            return { ...c, diffDays, ratio: ratio * 100, status, color };
+        }).sort((a, b) => b.ratio - a.ratio); // En yüksek orana göre sırala
+    }
+
+    // --- UI: Yan Menü Dolum ---
+    function populateSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.id = `btn-${cat}`;
+            btn.innerText = cat.toUpperCase();
+            btn.onclick = () => showCategory(cat);
+            sidebar.appendChild(btn);
+        });
+    }
+
+    // --- UI: Kategori Gösterimi ---
+    function showCategory(selectedCat) {
+        // Aktif butonu güncelle
+        const buttons = document.querySelectorAll('.cat-btn');
+        buttons.forEach(b => b.classList.remove('active'));
+        document.getElementById(`btn-${selectedCat === 'HOT' ? 'HOT' : selectedCat}`).classList.add('active');
+
+        const content = document.getElementById('content');
+        const data = calculateContracts();
         
-        // Periyotlar senin listendeki gerçek aralıklardır
-        const data = [
-            { ad: "İleri Robotik", cat: "Elektronik", last: "2026-03-04", avg: 18, items: "Robot, E-Bileşen" },
-            { ad: "E-öğrenme Cihazları", cat: "Elektronik", last: "2026-02-18", avg: 24, items: "Tablet, Ekran" },
-            { ad: "Nükleer Santral", cat: "Ağır Sanayi", last: "2026-01-21", avg: 35, items: "Çelik, Beton" },
-            { ad: "Yıldız Gemisi", cat: "Uzay", last: "2026-01-28", avg: 42, items: "Gemisi, Yakıt" },
-            { ad: "Değerli Metaller", cat: "Hammadde", last: "2026-03-12", avg: 28, items: "Altın, Cevher" },
-            { ad: "Hammadde Çıkarımı", cat: "Hammadde", last: "2025-06-18", avg: 35, items: "Boksit, Silikon" }
-        ];
+        let filteredData = data;
+        let title = "18 Mart Çarşamba Analizi";
 
-        function render() {
-            const container = document.getElementById('main-grid');
-            container.innerHTML = data.map(p => {
-                const diff = Math.floor((TODAY - new Date(p.last)) / (1000*60*60*24));
-                const ratio = Math.min(100, (diff / p.avg) * 100);
-                let color = "var(--cold)";
-                let status = "Beklemede";
-                
-                if(ratio > 80) { color = "var(--hot)"; status = "KRİTİK (Sıcak)"; }
-                else if(ratio > 50) { color = "var(--warm)"; status = "Takipte (Ilık)"; }
-
-                return `
-                    <div class="card">
-                        <div class="status" style="color:${color}">${status}</div>
-                        <div style="font-size: 1.1em; margin: 5px 0;">${p.ad}</div>
-                        <div style="font-size: 0.7em; color:#8b949e">${p.cat} // ${p.items}</div>
-                        <div class="heat-bar"><div class="heat-fill" style="width:${ratio}%; background:${color}"></div></div>
-                        <div style="font-size: 0.7em;">Son ihaleden beri: ${diff} gün (Ort: ${p.avg} gün)</div>
-                    </div>
-                `;
-            }).join('');
+        if(selectedCat === 'HOT') {
+            title = "⚠️ Kritik Sıcaklıktaki İhaleler";
+            filteredData = data.filter(c => c.ratio >= 85).slice(0, 6); // En sıcak 6'yı göster
+        } else {
+            title = `${selectedCat.toUpperCase()} Kategorisi Havuzu`;
+            filteredData = data.filter(c => c.cat === selectedCat);
         }
-        render();
-    </script>
+
+        // --- Kart Grid Düzeni (UI) ---
+        const cardsHtml = filteredData.map(p => `
+            <div class="card">
+                <div class="card-header">
+                    <span class="cat-badge">${p.cat} // ${p.period} Günlük Döngü</span>
+                    <span class="heat-status" style="color:${p.color}">${p.status}</span>
+                </div>
+                <div class="proj-name">${p.ad}</div>
+                <div class="proj-items">${p.items.join(', ')}</div>
+                
+                <div style="font-size: 0.75em; color: #8b949e;">Döngü Tamamlanma Oranı: ${Math.round(p.ratio)}%</div>
+                <div class="heat-bar">
+                    <div class="heat-fill" style="width:${Math.min(100, p.ratio)}%; background:${p.color}"></div>
+                </div>
+                <div class="card-footer">Son İhale: ${p.last} // ${p.diffDays} gün önce</div>
+            </div>
+        `).join('');
+
+        // --- Veri Tablosu (UI) ---
+        const tableRows = filteredData.map(p => `
+            <tr>
+                <td><b>${p.ad}</b></td>
+                <td><span class="tag">${p.cat}</span> ${p.items.join(', ')}</td>
+                <td>${p.period} G</td>
+                <td>${p.diffDays} G Önce</td>
+                <td style="font-weight:bold; color:${p.color}">${Math.round(p.ratio)}%</td>
+            </tr>
+        `).join('');
+
+        content.innerHTML = `
+            <h2>${title}</h2>
+            <div class="grid">${cardsHtml || '<p style="font-size:0.8em; color:#555">Sıcaklık eşiğinde ihale bulunamadı.</p>'}</div>
+            
+            <h3>Tüm Veri Havuzu (${selectedCat === 'HOT' ? 'En Sıcaklar' : selectedCat})</h3>
+            <table>
+                <tr><th>İHALE ADI</th><th>ÜRÜNLER & KATEGORİ</th><th>DÖNGÜ</th><th>SON GELİŞ</th><th>SICAKLIK</th></tr>
+                ${tableRows}
+            </table>
+        `;
+    }
+
+    // Başlangıç
+    populateSidebar();
+    showCategory('HOT'); // Açılışta en sıcakları göster
+
+</script>
 </body>
 </html>
