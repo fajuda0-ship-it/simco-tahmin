@@ -2,109 +2,128 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB CORE - ULTIMATE TENDER ANALYZER v26.0</title>
+    <title>SAB CORE TERMINAL v27.0</title>
     <style>
         :root { --neon: #00ff41; --bg: #050505; --warn: #ffab00; --crit: #ff3131; --panel-bg: rgba(0, 255, 65, 0.05); }
-        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; font-size: 13px; margin: 0; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; font-size: 13px; margin: 0; overflow: hidden; }
+        
         .header { text-align: center; border-bottom: 2px solid var(--neon); padding-bottom: 15px; margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; height: 85vh; }
+        .grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; height: calc(100vh - 180px); }
         .panel { border: 1px solid var(--neon); padding: 15px; background: var(--panel-bg); overflow-y: auto; display: flex; flex-direction: column; }
         h2 { font-size: 1rem; border-bottom: 1px solid var(--neon); padding-bottom: 5px; margin-top: 0; letter-spacing: 2px; }
         
-        /* Ürün Listesi Stili */
-        .product-item { padding: 10px; cursor: pointer; border-bottom: 1px solid rgba(0,255,65,0.2); display: flex; justify-content: space-between; transition: 0.2s; }
-        .product-item:hover { background: rgba(0,255,65,0.15); padding-left: 15px; }
-        .product-item.active { background: var(--neon); color: var(--bg); font-weight: bold; }
-        
-        /* Detay Kartı Stili */
-        .project-card { border: 1px solid var(--neon); margin-bottom: 15px; padding: 15px; position: relative; }
-        .tag { position: absolute; top: 10px; right: 10px; padding: 3px 8px; font-size: 0.7rem; font-weight: bold; }
+        /* Arama ve Mod Butonları */
+        .search-container { margin-bottom: 15px; }
+        .mode-btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; cursor: pointer; font-family: inherit; font-size: 11px; transition: 0.3s; margin-right: 5px; outline: none; }
+        .mode-btn.active { background: var(--neon); color: var(--bg); font-weight: bold; box-shadow: 0 0 10px var(--neon); }
+        .search-box { background: rgba(255,255,255,0.05); border: 1px solid var(--neon); color: var(--neon); padding: 12px; width: 100%; box-sizing: border-box; outline: none; margin-top: 10px; }
+
+        /* Liste Öğeleri */
+        .list-item { padding: 10px; cursor: pointer; border-bottom: 1px solid rgba(0,255,65,0.2); display: flex; justify-content: space-between; transition: 0.2s; }
+        .list-item:hover { background: rgba(0,255,65,0.15); padding-left: 15px; }
+        .list-item.active { background: var(--neon); color: var(--bg); font-weight: bold; }
+
+        /* Detay Kartları */
+        .card { border: 1px solid var(--neon); margin-bottom: 15px; padding: 15px; position: relative; background: rgba(0,0,0,0.3); }
+        .tag { position: absolute; top: 10px; right: 10px; padding: 4px 8px; font-size: 0.75rem; font-weight: bold; }
         .tag-crit { background: var(--crit); color: white; animation: blink 1s infinite; }
         .tag-ok { border: 1px solid var(--neon); color: var(--neon); }
         .tag-warn { background: var(--warn); color: black; }
-        
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        .search-box { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; width: 100%; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        .resource-list { color: #888; font-size: 0.75rem; margin-top: 5px; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* ALT KAYAR BANT (TICKER) */
+        .ticker-wrapper { position: fixed; bottom: 0; left: 0; width: 100%; background: #800000; color: white; padding: 10px 0; z-index: 1000; overflow: hidden; border-top: 2px solid var(--neon); box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
+        .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 280s linear infinite; font-size: 15px; font-weight: bold; }
+        .ticker-item { display: inline-block; padding: 0 100px; border-right: 1px solid rgba(255,255,255,0.3); }
+        @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        .ticker-wrapper:hover .ticker { animation-play-state: paused; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>SAB CORE TERMINAL - CROSS PRODUCT ANALYZER</h1>
-    <div>SİSTEM TARİHİ: 16 MART 2026 | DURUM: AKTİF</div>
+    <h1 style="margin:0;">SAB CORE TERMINAL v27.0</h1>
+    <div id="sysClock">SİSTEM TARİHİ: 16 MART 2026 | DURUM: OPERASYONEL</div>
 </div>
 
 <div class="grid">
     <div class="panel">
-        <h2>ÜRÜNLER</h2>
-        <input type="text" id="productSearch" class="search-box" placeholder="Ürün ara (Örn: Çelik)">
-        <div id="productList"></div>
+        <div class="search-container">
+            <button id="btnProd" class="mode-btn active" onclick="setMode('product')">ÜRÜN ARA</button>
+            <button id="btnTend" class="mode-btn" onclick="setMode('tender')">İHALE ARA</button>
+            <input type="text" id="mainSearch" class="search-box" placeholder="Ürün ismi yazın...">
+        </div>
+        <div id="dataList"></div>
     </div>
 
     <div class="panel">
-        <h2>ÜRÜNÜN DAHİL OLDUĞU PROJELER VE TAHMİNLER</h2>
-        <div id="noSelection" style="text-align: center; margin-top: 50px; color: #555;">SOL TARAFTAN BİR ÜRÜN SEÇEREK ANALİZİ BAŞLATIN</div>
-        <div id="detailContainer"></div>
+        <h2 id="detailTitle">ANALİZ MERKEZİ</h2>
+        <div id="noSelection" style="text-align: center; margin-top: 50px; color: #444;">BİR ÖĞE SEÇEREK VERİLERİ ÇEKİN</div>
+        <div id="detailView"></div>
     </div>
+</div>
+
+<div class="ticker-wrapper">
+    <div class="ticker" id="tickerContent">BAĞLANTI KURULUYOR... VERİLER ANALİZ EDİLİYOR...</div>
 </div>
 
 <script>
 const SYSTEM_DATE = new Date("2026-03-16");
+let currentMode = 'product';
 
-// --- VERİ TABANI (77 İHALE) ---
+// --- 77 İHALE VERİ SETİ ---
 const tenderData = [
     { name: "Acil Durum Giysileri", items: ["Kumaş", "Spor Ayakkabı", "Elbise", "İç Çamaşır"], cycle: 21, lastSeen: "2025-01-15" },
     { name: "Acil Durum Malzemeleri", items: ["Su", "Tahıl"], cycle: 21, lastSeen: "2025-01-22" },
     { name: "Acil Enerji", items: ["Pil", "Enerji"], cycle: 21, lastSeen: "2025-01-01" },
-    { name: "Akıllı Yollar", items: ["Monitör", "Malzeme Araştırması", "Akıllı Telefon", "E-Bileşen"], cycle: 91, lastSeen: "2026-03-04" },
-    { name: "Araştırma Fonları", items: ["Kimya Araştırması", "Madencilik Araştırması", "Malzeme Araştırması", "Elektronik Araştırması"], cycle: 147, lastSeen: "2025-10-22" },
-    { name: "Aşı Araştırması", items: ["Kimyasal", "Bitki Araştırması"], cycle: 21, lastSeen: "2025-02-26" },
-    { name: "Balistik Füzeler", items: ["Suborbital 2nd Stage", "Uçak Gövdesi", "Suborbital Roket"], cycle: 35, lastSeen: "2025-09-10" },
-    { name: "BM Zirvesi İkramları", items: ["Ekmek", "Kahve Çekirdeği", "Kahve Tozu", "Çikolata", "Zencefilli Bira"], cycle: 273, lastSeen: "2025-09-24" },
+    { name: "Akıllı Yollar", items: ["Monitör", "Akıllı Telefon", "E-Bileşen"], cycle: 91, lastSeen: "2026-03-04" },
+    { name: "Araştırma Fonları", items: ["Kimyasal", "E-Bileşen"], cycle: 147, lastSeen: "2025-10-22" },
+    { name: "Aşı Araştırması", items: ["Kimyasal", "Bitki Araştırma"], cycle: 21, lastSeen: "2025-02-26" },
+    { name: "Balistik Füzeler", items: ["Uçak Gövdesi", "Roket"], cycle: 35, lastSeen: "2025-09-10" },
+    { name: "BM Zirvesi İkramları", items: ["Ekmek", "Kahve", "Çikolata", "Bira"], cycle: 273, lastSeen: "2025-09-24" },
     { name: "Çevreci Binalar", items: ["Çelik Kiriş", "Pencere"], cycle: 203, lastSeen: "2026-02-18" },
     { name: "Çevreci Otobüsler", items: ["Elektrik Motoru", "Pil", "Çelik"], cycle: 63, lastSeen: "2026-01-14" },
     { name: "Değerli Metaller", items: ["Külçe Altın", "Altın Cevheri"], cycle: 42, lastSeen: "2025-12-10" },
     { name: "Dijital Altyapı", items: ["Yazılım", "İşlemci"], cycle: 42, lastSeen: "2025-10-08" },
     { name: "Dijital Ödeme Sistemi", items: ["Yazılım", "E-Bileşen"], cycle: 91, lastSeen: "2025-10-29" },
     { name: "Diplomatik Misyonlar", items: ["Lüks Saat", "El Çantası", "Kolye"], cycle: 45, lastSeen: "2025-07-23" },
-    { name: "Drone Flosu", items: ["Quadcopter", "Uçuş Bilgisayarı", "Pil", "E-Bileşen"], cycle: 21, lastSeen: "2026-02-11" },
-    { name: "Drone Programı", items: ["Kanat", "Uçak Gövdesi", "Uçuş Bilgisayarı"], cycle: 21, lastSeen: "2025-12-24" },
+    { name: "Drone Flosu", items: ["Quadcopter", "Pil", "E-Bileşen"], cycle: 21, lastSeen: "2026-02-11" },
+    { name: "Drone Programı", items: ["Kanat", "Uçak Gövdesi"], cycle: 21, lastSeen: "2025-12-24" },
     { name: "E-öğrenme Cihazları", items: ["Tablet", "Dizüstü", "Ekran", "Monitör"], cycle: 28, lastSeen: "2026-02-18" },
     { name: "Ekonomik Destek", items: ["Yazılım", "Tablet"], cycle: 91, lastSeen: "2025-11-12" },
     { name: "Elektronik İnovasyon", items: ["İşlemci", "Yüksek Bilgisayar"], cycle: 21, lastSeen: "2025-01-01" },
     { name: "Etçil Hayvan Beslenmesi", items: ["İnek", "Domuz"], cycle: 42, lastSeen: "2025-11-26" },
-    { name: "Evsizleri Besleyin", items: ["Bal Kabağı Çorbası", "Dondurulmuş Pizza"], cycle: 21, lastSeen: "2026-03-11" },
-    { name: "Evsizleri Giydirin", items: ["Kumaş", "İç Çamaşır", "Pamuk"], cycle: 7, lastSeen: "2025-05-07" },
+    { name: "Evsizleri Besleyin", items: ["Bal Kabağı Çorbası", "Pizza"], cycle: 21, lastSeen: "2026-03-11" },
+    { name: "Evsizleri Giydirin", items: ["Kumaş", "İç Çamaır", "Pamuk"], cycle: 7, lastSeen: "2025-05-07" },
     { name: "Ezilme Testleri", items: ["E-Araba", "Karoseri", "İç Kısım"], cycle: 120, lastSeen: "2026-03-04" },
-    { name: "G10 Zirvesi İkramları", items: ["Hamburger", "Elmalı Turta", "Lazanya", "Portakal Suyu"], cycle: 301, lastSeen: "2025-12-17" },
+    { name: "G10 Zirvesi İkramları", items: ["Hamburger", "Turta", "Lazanya", "Portakal Suyu"], cycle: 301, lastSeen: "2025-12-17" },
     { name: "G6 Zirvesi İkramları", items: ["Makarna", "Elma Suyu", "Kokteyl", "Köfte"], cycle: 182, lastSeen: "2025-07-09" },
-    { name: "Gelişmiş İtici", items: ["Aero Araştırma", "Roket Motoru", "İyon Sürücü"], cycle: 21, lastSeen: "2025-08-27" },
-    { name: "Güneş Enerjisi Girişimi", items: ["Pil", "Silikon", "Enerji Araştırması"], cycle: 14, lastSeen: "2025-04-30" },
+    { name: "Gelişmiş İtici", items: ["Aero Araştırma", "Roket Motoru"], cycle: 21, lastSeen: "2025-08-27" },
+    { name: "Güneş Enerjisi Girişimi", items: ["Pil", "Silikon"], cycle: 14, lastSeen: "2025-04-30" },
     { name: "Güvenlik Ekipmanı", items: ["Deri", "Eldiven"], cycle: 112, lastSeen: "2026-03-11" },
     { name: "Güvenlik Kuralları", items: ["Otomotiv Araştırması"], cycle: 21, lastSeen: "2025-06-11" },
-    { name: "Hava Kalitesi İzleme", items: ["Kimyasal", "Akıllı Telefon", "Ekran", "E-Bileşen"], cycle: 28, lastSeen: "2025-12-10" },
+    { name: "Hava Kalitesi İzleme", items: ["Kimyasal", "Telefon", "Ekran", "E-Bileşen"], cycle: 28, lastSeen: "2025-12-10" },
     { name: "Hammadde Çıkarımı", items: ["Mineral", "Silikon", "Boksit"], cycle: 21, lastSeen: "2025-01-08" },
-    { name: "Hayvan Yetiştiriciliği", items: ["Damızlık Araştırması", "İnek"], cycle: 147, lastSeen: "2025-02-26" },
-    { name: "İleri Robotik", items: ["E-Bileşen", "Robotlar", "Yüksek Bilgisayar"], cycle: 21, lastSeen: "2026-03-04" },
+    { name: "Hayvan Yetiştiriciliği", items: ["İnek"], cycle: 147, lastSeen: "2025-02-26" },
+    { name: "İleri Robotik", items: ["E-Bileşen", "Robot", "Yüksek Bilgisayar"], cycle: 21, lastSeen: "2026-03-04" },
     { name: "İletişim Yükseltmeleri", items: ["Uydu", "Akıllı Telefon"], cycle: 21, lastSeen: "2025-02-12" },
-    { name: "İlk Müdahale", items: ["Kereste", "İnşaat Gereci", "Buldozer", "Alet Takımı"], cycle: 182, lastSeen: "2026-01-21" },
-    { name: "İtici Roket Testi", items: ["İtici Tankı", "Katı Yakıt Güçlendirici"], cycle: 175, lastSeen: "2026-01-28" },
+    { name: "İlk Müdahale", items: ["Kereste", "İnşaat Gereci", "Buldozer"], cycle: 182, lastSeen: "2026-01-21" },
+    { name: "İtici Roket Testi", items: ["İtici Tankı", "Katı Yakıt"], cycle: 175, lastSeen: "2026-01-28" },
     { name: "İtfaiye Araçları", items: ["Kamyon"], cycle: 35, lastSeen: "2025-02-05" },
     { name: "Kritik Rezervler", items: ["Ham Petrol", "Demir Cevheri", "Metan"], cycle: 175, lastSeen: "2025-08-06" },
-    { name: "Mahsul Çeşitliliği Pro.", items: ["Bitki Araştırması", "Tohum"], cycle: 147, lastSeen: "2025-08-20" },
-    { name: "Mars Gezgini", items: ["Pil", "Aero Araştırma", "Robotlar"], cycle: 45, lastSeen: "2025-11-19" },
+    { name: "Mahsul Çeşitliliği Pro.", items: ["Bitki Araştırma", "Tohum"], cycle: 147, lastSeen: "2025-08-20" },
+    { name: "Mars Gezgini", items: ["Pil", "Robot"], cycle: 45, lastSeen: "2025-11-19" },
     { name: "Meat Supply", items: ["Sosis", "Biftek"], cycle: 35, lastSeen: "2026-02-04" },
-    { name: "Metal İşleme", items: ["Alüminyum", "Demir Cevheri", "Çelik"], cycle: 182, lastSeen: "2026-02-25" },
-    { name: "Metro Altyapısı Gen.", items: ["Betonarme Blok", "İnşaat Gereci", "Çelik Kiriş"], cycle: 105, lastSeen: "2025-11-26" },
+    { name: "Metal İşleme", items: ["Alüminyum", "Demir", "Çelik"], cycle: 182, lastSeen: "2026-02-25" },
+    { name: "Metro Altyapısı Gen.", items: ["Beton", "İnşaat Gereci", "Çelik Kiriş"], cycle: 105, lastSeen: "2025-11-26" },
     { name: "Moda Festivali", items: ["Kumaş", "Moda Araştırması"], cycle: 21, lastSeen: "2025-10-01" },
     { name: "Motor Testleri", items: ["Elektrik Motoru", "Yanma Motoru"], cycle: 259, lastSeen: "2025-08-13" },
-    { name: "Mutfak Araştırması", items: ["Bitkisel Yağ", "Yemek Tarifi", "Un"], cycle: 77, lastSeen: "2025-03-05" },
+    { name: "Mutfak Araştırması", items: ["Bitkisel Yağ", "Tarif", "Un"], cycle: 77, lastSeen: "2025-03-05" },
     { name: "Navigasyon Takımyıldızı", items: ["Roket Yakıtı", "Uydu"], cycle: 35, lastSeen: "2026-03-11" },
-    { name: "Nükleer Santral", items: ["Çelik", "Betonarme Blok", "Kimyasal", "Enerji Araştırması"], cycle: 49, lastSeen: "2026-01-21" },
+    { name: "Nükleer Santral", items: ["Çelik", "Beton", "Kimyasal"], cycle: 49, lastSeen: "2026-01-21" },
     { name: "Okul Öğle Yemeği Malz.", items: ["Kakao", "Hamur", "Şeker", "Sos"], cycle: 21, lastSeen: "2026-02-25" },
     { name: "Okul Öğle Yemeği Pro.", items: ["Portakal", "Süt", "Elmalar"], cycle: 42, lastSeen: "2025-10-01" },
-    { name: "Orman Restorasyonu", items: ["Tohum", "Bitki Araştırması"], cycle: 35, lastSeen: "2026-02-18" },
+    { name: "Orman Restorasyonu", items: ["Tohum", "Bitki Araştırma"], cycle: 35, lastSeen: "2026-02-18" },
     { name: "Otçul Hayvan Beslenmesi", items: ["Sebze", "Yem", "Şekerkamışı"], cycle: 42, lastSeen: "2025-11-12" },
     { name: "Otomatik Trafik Sist.", items: ["E-Bileşen", "Yazılım", "Monitör"], cycle: 21, lastSeen: "2025-03-26" },
     { name: "Özel Ürünler", items: ["Kolye", "Lüks Saat"], cycle: 21, lastSeen: "2025-11-26" },
@@ -115,17 +134,17 @@ const tenderData = [
     { name: "Su ve Kanal. İdaresi", items: ["Su"], cycle: 84, lastSeen: "2025-09-03" },
     { name: "Sürdürülebilir Tarım", items: ["Su", "Tahıl"], cycle: 77, lastSeen: "2026-01-21" },
     { name: "Süt Ürünleri Üretimi", items: ["Süt", "Peynir"], cycle: 63, lastSeen: "2025-06-11" },
-    { name: "Şehir Dekorasyonları", items: ["Bal Kabağı Feneri", "Bal Kabağı"], cycle: 6, lastSeen: "2026-02-04" },
-    { name: "Şehir Festivali", items: ["El Çantası", "Cadı Kostümü", "Topuklu Ayakkabı"], cycle: 154, lastSeen: "2026-02-04" },
-    { name: "Tahliye Araçları", items: ["Taşıma", "Kamyon", "Dizel"], cycle: 49, lastSeen: "2025-11-05" },
-    { name: "Taşımacılık Yükseltmesi", items: ["Lüks Jet", "Jumbo Jet", "Tek Motorlu Uçak"], cycle: 21, lastSeen: "2024-11-20" },
-    { name: "Telemedikal Altyapı", items: ["Tablet", "Monitör", "Ekran", "Televizyon"], cycle: 28, lastSeen: "2025-11-19" },
+    { name: "Şehir Dekorasyonları", items: ["Fener", "Bal Kabağı"], cycle: 6, lastSeen: "2026-02-04" },
+    { name: "Şehir Festivali", items: ["El Çantası", "Kostüm", "Topuklu"], cycle: 154, lastSeen: "2026-02-04" },
+    { name: "Tahliye Araçları", items: ["Kamyon", "Dizel"], cycle: 49, lastSeen: "2025-11-05" },
+    { name: "Taşımacılık Yükseltmesi", items: ["Jet", "Jumbo", "Uçak"], cycle: 21, lastSeen: "2024-11-20" },
+    { name: "Telemedikal Altyapı", items: ["Tablet", "Monitör", "Ekran", "TV"], cycle: 28, lastSeen: "2025-11-19" },
     { name: "Tıbbi Malzemeler", items: ["Tablet", "Eldiven"], cycle: 21, lastSeen: "2025-05-14" },
-    { name: "Uçan Spagetti Canavarı", items: ["Köfte", "Çelik", "Plastik", "Makarna"], cycle: 28, lastSeen: "2025-03-19" },
+    { name: "Uçan Spagetti Canavarı", items: ["Köfte", "Çelik", "Makarna"], cycle: 28, lastSeen: "2025-03-19" },
     { name: "Uygun Fiyatlı Konut", items: ["Çimento", "Pencere", "Tuğla"], cycle: 21, lastSeen: "2025-01-15" },
     { name: "Uydu Gözetimi", items: ["Uydu", "E-Bileşen"], cycle: 28, lastSeen: "2025-07-09" },
-    { name: "Uzay Keşfi", items: ["Karbon Fiber", "BFR", "Yörüngesel Güçlendirici"], cycle: 63, lastSeen: "2026-01-07" },
-    { name: "Üretim Desteği", items: ["Demir Cevheri", "Çelik"], cycle: 42, lastSeen: "2025-12-10" },
+    { name: "Uzay Keşfi", items: ["Karbon Fiber", "BFR", "Güçlendirici"], cycle: 63, lastSeen: "2026-01-07" },
+    { name: "Üretim Desteği", items: ["Demir", "Çelik"], cycle: 42, lastSeen: "2025-12-10" },
     { name: "Veri Merkezi", items: ["Yerleşik Bilgisayar", "İşlemci"], cycle: 14, lastSeen: "2025-12-17" },
     { name: "Yaşam Alanı Rest.", items: ["Odun", "Kil", "Kireç Taşı"], cycle: 105, lastSeen: "2025-09-17" },
     { name: "Yakıt Rezervleri", items: ["Metan", "Etanol", "Petrol"], cycle: 28, lastSeen: "2025-11-12" },
@@ -133,180 +152,117 @@ const tenderData = [
     { name: "Zirve İkramları", items: ["Tereyağı", "Samosa", "Salata", "Ekmek"], cycle: 28, lastSeen: "2026-02-11" }
 ];
 
-// --- MANTIK KATMANI ---
-function getAnalyzedProducts() {
-    const products = {};
-    tenderData.forEach(tender => {
-        tender.items.forEach(item => {
-            if (!products[item]) {
-                products[item] = { name: item, projects: [] };
+// --- MANTIK ---
+function getProducts() {
+    const p = {};
+    tenderData.forEach(t => t.items.forEach(i => {
+        if(!p[i]) p[i] = { name: i, projects: [] };
+        p[i].projects.push(t);
+    }));
+    return Object.values(p).sort((a,b) => a.name.localeCompare(b.name));
+}
+
+const allProducts = getProducts();
+
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('btnProd').classList.toggle('active', mode === 'product');
+    document.getElementById('btnTend').classList.toggle('active', mode === 'tender');
+    document.getElementById('mainSearch').placeholder = mode === 'product' ? "Ürün ismi yazın..." : "İhale ismi yazın...";
+    document.getElementById('mainSearch').value = "";
+    renderList("");
+}
+
+function renderList(filter) {
+    const list = document.getElementById('dataList');
+    list.innerHTML = "";
+    const f = filter.toLowerCase();
+
+    if(currentMode === 'product') {
+        allProducts.forEach(prod => {
+            if(prod.name.toLowerCase().includes(f)) {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${prod.name}</span> <small>(${prod.projects.length} İHALE)</small>`;
+                div.onclick = () => showProductDetails(prod, div);
+                list.appendChild(div);
             }
-            products[item].projects.push(tender);
         });
-    });
-    return Object.values(products).sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+        tenderData.forEach(tend => {
+            if(tend.name.toLowerCase().includes(f)) {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${tend.name}</span>`;
+                div.onclick = () => showTenderDetails(tend, div);
+                list.appendChild(div);
+            }
+        });
+    }
 }
 
-const allProducts = getAnalyzedProducts();
-
-function renderProductList(filter = "") {
-    const listDiv = document.getElementById('productList');
-    listDiv.innerHTML = "";
-    
-    allProducts.forEach(prod => {
-        if (!prod.name.toLowerCase().includes(filter.toLowerCase())) return;
-        
-        const div = document.createElement('div');
-        div.className = 'product-item';
-        div.innerHTML = `<span>${prod.name}</span> <span style="font-size:0.7rem;">(${prod.projects.length} PROJE)</span>`;
-        div.onclick = () => selectProduct(prod, div);
-        listDiv.appendChild(div);
-    });
-}
-
-function selectProduct(prod, element) {
-    // UI Güncelleme
-    document.querySelectorAll('.product-item').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
-    document.getElementById('noSelection').style.display = 'none';
-    
-    const container = document.getElementById('detailContainer');
-    container.innerHTML = `<h3 style="color:var(--warn); margin-bottom:20px;">> ANALİZ: ${prod.name}</h3>`;
-    
-    // Projeleri gecikme sırasına göre sırala
-    const sortedProjects = [...prod.projects].sort((a, b) => {
-        const diffA = (SYSTEM_DATE - new Date(a.lastSeen)) / (1000*60*60*24);
-        const diffB = (SYSTEM_DATE - new Date(b.lastSeen)) / (1000*60*60*24);
-        return (b.cycle - diffB) - (a.cycle - diffA);
-    });
-
-    sortedProjects.forEach(p => {
+function showProductDetails(prod, el) {
+    updateUISelection(el);
+    const view = document.getElementById('detailView');
+    view.innerHTML = `<h3>ÜRÜN ANALİZİ: ${prod.name}</h3>`;
+    prod.projects.forEach(p => {
         const last = new Date(p.lastSeen);
-        const passed = Math.ceil((SYSTEM_DATE - last) / (1000*60*60*24));
-        const rem = p.cycle - passed;
-        
-        let statusClass = "tag-ok";
-        let statusText = `${rem} GÜN VAR`;
-        
-        if (rem <= 0) {
-            statusClass = "tag-crit";
-            statusText = `GECİKTİ (+${Math.abs(rem)} G)`;
-        } else if (rem <= 3) {
-            statusClass = "tag-warn";
-            statusText = "ELI KULAĞINDA";
-        }
-
-        container.innerHTML += `
-            <div class="project-card">
-                <span class="tag ${statusClass}">${statusText}</span>
-                <div style="font-weight:bold; font-size:1.1rem; color:var(--neon);">${p.name}</div>
-                <div style="margin-top:5px;">Döngü: ${p.cycle} Gün | Son Görülme: ${p.lastSeen}</div>
-                <div class="resource-list">GEREKSİNİMLER: ${p.items.join(", ")}</div>
-            </div>
-        `;
+        const rem = p.cycle - Math.ceil((SYSTEM_DATE - last) / 86400000);
+        view.innerHTML += `
+            <div class="card">
+                <span class="tag ${rem <= 0 ? 'tag-crit' : 'tag-ok'}">${rem <= 0 ? 'GECİKTİ' : rem + ' GÜN'}</span>
+                <strong>${p.name}</strong><br>
+                <small style="color:var(--warn)">İçerik: ${p.items.join(", ")}</small>
+            </div>`;
     });
 }
 
-// Arama kutusu kontrolü
-document.getElementById('productSearch').addEventListener('input', (e) => {
-    renderProductList(e.target.value);
-});
+function showTenderDetails(tend, el) {
+    updateUISelection(el);
+    const view = document.getElementById('detailView');
+    const last = new Date(tend.lastSeen);
+    const passed = Math.ceil((SYSTEM_DATE - last) / 86400000);
+    const rem = tend.cycle - passed;
 
-// İlk Başlatma
-renderProductList();
+    view.innerHTML = `
+        <div class="card" style="border-width:2px;">
+            <span class="tag ${rem <= 0 ? 'tag-crit' : 'tag-ok'}" style="font-size:1rem;">${rem <= 0 ? 'GECİKTİ (+'+Math.abs(rem)+')' : 'KALAN: '+rem+' G'}</span>
+            <h2 style="color:var(--warn);">${tend.name}</h2>
+            <hr border="0" style="border-top:1px solid var(--neon); opacity:0.3;">
+            <p><strong>DÖNGÜ:</strong> ${tend.cycle} GÜN</p>
+            <p><strong>SON GÖRÜLME:</strong> ${tend.lastSeen}</p>
+            <p><strong>GEREKLİ MATERYALLER:</strong></p>
+            <ul style="color:var(--neon); font-size:1.1rem;">
+                ${tend.items.map(i => `<li>${i}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+}
+
+function updateUISelection(el) {
+    document.querySelectorAll('.list-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('noSelection').style.display = 'none';
+}
+
+function updateTicker() {
+    const content = document.getElementById('tickerContent');
+    const criticals = tenderData.map(t => {
+        const d = Math.ceil((SYSTEM_DATE - new Date(t.lastSeen)) / 86400000) - t.cycle;
+        return { n: t.name, d: d };
+    }).filter(x => x.d > 0).sort((a,b) => b.d - a.d).slice(0, 10);
+
+    if(criticals.length > 0) {
+        const html = criticals.map(i => `<span class="ticker-item">⚠️ [KRİTİK GECİKME] ${i.n} (+${i.d} GÜN)</span>`).join("");
+        content.innerHTML = html + html; 
+    } else {
+        content.innerHTML = "<span class='ticker-item'>[SAB-INFO] TÜM SİSTEMLER NORMAL. GECİKMELİ PROJE YOK.</span>";
+    }
+}
+
+document.getElementById('mainSearch').addEventListener('input', e => renderList(e.target.value));
+renderList("");
+updateTicker();
 </script>
-
 </body>
 </html>
-<style>
- <style>
-    /* ALT KAYAR PANEL (TICKER) AYARLARI */
-    .ticker-wrapper {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: #990000; /* Daha koyu, göz yormayan bir kırmızı */
-        color: #ffffff;
-        padding: 8px 0;
-        font-weight: bold;
-        z-index: 1000;
-        overflow: hidden;
-        border-top: 2px solid var(--neon);
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-    }
-
-    .ticker {
-        display: inline-block;
-        white-space: nowrap;
-        padding-left: 100%;
-        /* 150s: Çok daha sakin ve okunabilir bir hız */
-        animation: ticker 150s linear infinite; 
-        font-size: 14px;
-        text-transform: uppercase;
-    }
-
-    .ticker-item {
-        display: inline-block;
-        padding: 0 80px; /* Uyarılar arası boşluk artırıldı */
-        border-right: 1px solid rgba(255,255,255,0.4);
-    }
-
-    /* Akış Animasyonu */
-    @keyframes ticker {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(-100%, 0); }
-    }
-
-    /* Mouse ile üzerine gelindiğinde durması için (İstersen silebilirsin) */
-    .ticker-wrapper:hover .ticker {
-        animation-play-state: paused;
-    }
-</style>
-
-<div class="ticker-wrapper">
-    <div class="ticker" id="tickerContent">
-        [SAB-CORE] ANALİZ MOTORU VERİLERİ İŞLİYOR... LÜTFEN BEKLEYİN...
-    </div>
-</div>
-
-<script>
-function updateTicker() {
-    const ticker = document.getElementById('tickerContent');
-    if (!ticker) return;
-
-    // Gecikmeleri hesapla ve sırala
-    const sortedByDelay = [...tenderData].map(t => {
-        const last = new Date(t.lastSeen);
-        const passed = Math.ceil((SYSTEM_DATE - last) / (1000 * 60 * 60 * 24));
-        const delay = passed - t.cycle;
-        return { name: t.name, delay: delay };
-    }).sort((a, b) => b.delay - a.delay);
-
-    // En çok geciken (X en büyük olan) ilk 10 projeyi al
-    const topDelays = sortedByDelay.slice(0, 10);
-    
-    let tickerHtml = "";
-    topDelays.forEach(item => {
-        if(item.delay > 0) {
-            // Görsel olarak daha belirgin hale getirildi
-            tickerHtml += `
-                <span class="ticker-item">
-                    <span style="color: #ffaa00;">[SAB-ALERT]</span> 
-                    ${item.name} >> <span style="font-size: 16px;">+${item.delay} GÜN</span> GECİKMELİ!
-                </span>`;
-        }
-    });
-
-    // Eğer hiç geciken yoksa boş kalmasın
-    if (tickerHtml === "") {
-        tickerHtml = '<span class="ticker-item">[SAB-INFO] TÜM DÖNGÜLER NORMAL. KRİTİK GECİKME SAPTANMADI.</span>';
-    }
-
-    // Kesintisiz akış için içeriği çoğaltıyoruz
-    ticker.innerHTML = tickerHtml + tickerHtml + tickerHtml; 
-}
-
-// Ana sistem tarihinden hemen sonra çalıştırılması için
-setTimeout(updateTicker, 500); 
-</script>
