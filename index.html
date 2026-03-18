@@ -2,107 +2,103 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sim Companies Maliyet Hesaplayıcı</title>
+    <title>SimCo Otomatik Maliyet Hesaplayıcı</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 100%; max-width: 450px; }
-        h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #5f6368; }
-        select, input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; }
-        .price-item { font-size: 12px; color: #70757a; }
-        .result { margin-top: 25px; padding: 20px; background: #e7f3ff; border-radius: 10px; border: 1px solid #c2e0ff; }
-        .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #d1e3f8; }
-        .total-row:last-child { border-bottom: none; font-weight: bold; font-size: 18px; color: #d93025; margin-top: 10px; }
-        .unit { font-weight: bold; color: #1967d2; }
-        button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #1765cc; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        .price-status { font-size: 12px; color: #27ae60; text-align: center; margin-bottom: 10px; font-weight: bold; }
+        .loading { color: #f39c12; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .result { margin-top: 20px; padding: 15px; background: #eef7ff; border-radius: 10px; }
+        .row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #dceeff; }
+        .total { font-weight: bold; color: #d32f2f; font-size: 1.2em; border-top: 2px solid #3498db; margin-top: 10px; padding-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🏗️ İnşaat Bütçe Planı</h2>
+    <div id="status" class="price-status loading">Fiyatlar güncelleniyor...</div>
+    <h2 style="text-align:center; color: #1a73e8;">🏗️ Bina Planlayıcı</h2>
     
-    <label>Bina Türü:</label>
+    <label>Bina Seç:</label>
     <select id="binaSec" onchange="hesapla()">
         <option value="bakkal">Bakkal (Grocery Store)</option>
         <option value="fabrika">Fabrika (Factory)</option>
     </select>
 
-    <div style="display: flex; gap: 10px;">
-        <div style="flex: 1;">
-            <label>Mevcut Lvl:</label>
-            <input type="number" id="mevcutLvl" value="1" min="1" oninput="hesapla()">
-        </div>
-        <div style="flex: 1;">
-            <label>Hedef Lvl:</label>
-            <input type="number" id="hedefLvl" value="2" min="2" oninput="hesapla()">
-        </div>
-    </div>
-
-    <label>Borsa Birim Fiyatları ($):</label>
-    <div class="price-grid">
-        <div class="price-item">Betonarme: <input type="number" id="p_beton" value="216" oninput="hesapla()"></div>
-        <div class="price-item">Tuğla: <input type="number" id="p_tugla" value="2.5" oninput="hesapla()"></div>
-        <div class="price-item">Kereste: <input type="number" id="p_kereste" value="10.5" oninput="hesapla()"></div>
-        <div class="price-item">İnşaat Ger.: <input type="number" id="p_arac" value="2400" oninput="hesapla()"></div>
+    <div style="display:flex; gap:10px;">
+        <div style="flex:1"><label>Mevcut Lvl:</label><input type="number" id="mevcutLvl" value="1" oninput="hesapla()"></div>
+        <div style="flex:1"><label>Hedef Lvl:</label><input type="number" id="hedefLvl" value="2" oninput="hesapla()"></div>
     </div>
 
     <div class="result" id="sonuc">
-        <div id="liste"></div>
-    </div>
-
-    <button onclick="fiyatlariGuncelle()">Fiyatları SimCo'dan Çek (API)</button>
+        </div>
 </div>
 
 <script>
+    // Temel Veriler
     const binalar = {
         bakkal: { beton: 12, tugla: 165, kereste: 48, arac: 3 },
         fabrika: { beton: 56, tugla: 770, kereste: 224, arac: 14 }
     };
 
-    function hesapla() {
-        const bina = document.getElementById('binaSec').value;
-        const mevcut = parseInt(document.getElementById('mevcutLvl').value);
-        const hedef = parseInt(document.getElementById('hedefLvl').value);
-        
-        // Fiyatlar
-        const fBeton = parseFloat(document.getElementById('p_beton').value) || 0;
-        const fTugla = parseFloat(document.getElementById('p_tugla').value) || 0;
-        const fKereste = parseFloat(document.getElementById('p_kereste').value) || 0;
-        const fArac = parseFloat(document.getElementById('p_arac').value) || 0;
+    // Global Fiyatlar (Varsayılan)
+    let fiyatlar = { beton: 216, tugla: 2.5, kereste: 10, arac: 2400 };
 
-        const temel = binalar[bina];
+    // Fiyatları Sim Companies API'den Çekme Fonksiyonu
+    async function fiyatlariGetir() {
+        try {
+            // SimCo API'den verileri çekiyoruz (CORS Proxy kullanarak)
+            const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.simcompanies.com/api/v2/market-v2/0/'));
+            const data = await res.json();
+            const borsa = JSON.parse(data.contents);
+
+            // API'den gelen verileri ID'ye göre eşleştiriyoruz
+            // 67: Betonarme, 10: Tuğla, 12: Kereste, 74: İnşaat Gereci
+            const bul = (id) => borsa.find(i => i.kind === id)?.price || 0;
+
+            fiyatlar.beton = bul(67) || 216;
+            fiyatlar.tugla = bul(10) || 2.5;
+            fiyatlar.kereste = bul(12) || 10;
+            fiyatlar.arac = bul(74) || 2400;
+
+            document.getElementById('status').innerText = "✅ Borsa Fiyatları Güncellendi!";
+            document.getElementById('status').classList.remove('loading');
+            hesapla();
+        } catch (e) {
+            document.getElementById('status').innerText = "⚠️ Fiyatlar çekilemedi, manuel değerler kullanılıyor.";
+            document.getElementById('status').style.color = "red";
+        }
+    }
+
+    function hesapla() {
+        const bina = binalar[document.getElementById('binaSec').value];
+        const m = parseInt(document.getElementById('mevcutLvl').value);
+        const h = parseInt(document.getElementById('hedefLvl').value);
+        
         let tBeton = 0, tTugla = 0, tKereste = 0, tArac = 0;
 
-        for (let i = mevcut; i < hedef; i++) {
-            tBeton += i * temel.beton;
-            tTugla += i * temel.tugla;
-            tKereste += i * temel.kereste;
-            tArac += i * temel.arac;
+        for (let i = m; i < h; i++) {
+            tBeton += i * bina.beton;
+            tTugla += i * bina.tugla;
+            tKereste += i * bina.kereste;
+            tArac += i * bina.arac;
         }
 
-        const toplamMaliyet = (tBeton * fBeton) + (tTugla * fTugla) + (tKereste * fKereste) + (tArac * fArac);
+        const maliyet = (tBeton * fiyatlar.beton) + (tTugla * fiyatlar.tugla) + (tKereste * fiyatlar.kereste) + (tArac * fiyatlar.arac);
 
-        document.getElementById('liste').innerHTML = `
-            <div class="total-row"><span>Toplam Beton:</span> <span class="unit">${tBeton} ad.</span></div>
-            <div class="total-row"><span>Toplam Tuğla:</span> <span class="unit">${tTugla} ad.</span></div>
-            <div class="total-row"><span>Toplam Kereste:</span> <span class="unit">${tKereste} ad.</span></div>
-            <div class="total-row"><span>İnşaat Gereci:</span> <span class="unit">${tArac} ad.</span></div>
-            <div class="total-row"><span>TOPLAM BÜTÇE:</span> <span class="unit">$ ${toplamMaliyet.toLocaleString()}</span></div>
+        document.getElementById('sonuc').innerHTML = `
+            <div class="row"><span>Betonarme ($${fiyatlar.beton}):</span> <b>${tBeton}</b></div>
+            <div class="row"><span>Tuğla ($${fiyatlar.tugla}):</span> <b>${tTugla}</b></div>
+            <div class="row"><span>Kereste ($${fiyatlar.kereste}):</span> <b>${tKereste}</b></div>
+            <div class="row"><span>İnş. Gereci ($${fiyatlar.arac}):</span> <b>${tArac}</b></div>
+            <div class="total"><span>TOPLAM:</span> <span>$${maliyet.toLocaleString()}</span></div>
         `;
     }
 
-    async function fiyatlariGuncelle() {
-        alert("API bağlantısı kuruluyor... Lütfen bekleyin.");
-        // Not: Gerçek API kullanımı için genelde bir proxy veya API key gerekir.
-        // Şimdilik borsa fiyatlarını manuel güncelleyebilirsin, SimCo API entegrasyonu için 
-        // tarayıcı izinlerini aşan özel bir köprü kurmamız gerekebilir.
-    }
-
-    hesapla();
+    // Sayfa açıldığında fiyatları çek
+    window.onload = fiyatlariGetir;
 </script>
 
 </body>
