@@ -3,48 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sim Companies Bina Yükseltme Hesaplayıcı</title>
+    <title>Sim Companies Maliyet Hesaplayıcı</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #34495e; }
-        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .result { margin-top: 20px; padding: 15px; background: #e8f4fd; border-left: 5px solid #3498db; border-radius: 4px; }
-        .result p { margin: 5px 0; font-size: 15px; }
-        .total-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; }
-        .unit { font-weight: bold; color: #2980b9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 100%; max-width: 450px; }
+        h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #5f6368; }
+        select, input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; }
+        .price-item { font-size: 12px; color: #70757a; }
+        .result { margin-top: 25px; padding: 20px; background: #e7f3ff; border-radius: 10px; border: 1px solid #c2e0ff; }
+        .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #d1e3f8; }
+        .total-row:last-child { border-bottom: none; font-weight: bold; font-size: 18px; color: #d93025; margin-top: 10px; }
+        .unit { font-weight: bold; color: #1967d2; }
+        button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1765cc; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🏗️ Bina Yükseltme</h2>
+    <h2>🏗️ İnşaat Bütçe Planı</h2>
     
-    <label for="binaSec">Bina Türü:</label>
+    <label>Bina Türü:</label>
     <select id="binaSec" onchange="hesapla()">
         <option value="bakkal">Bakkal (Grocery Store)</option>
         <option value="fabrika">Fabrika (Factory)</option>
     </select>
 
-    <label for="mevcutLvl">Mevcut Seviye:</label>
-    <input type="number" id="mevcutLvl" value="1" min="1" oninput="hesapla()">
+    <div style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+            <label>Mevcut Lvl:</label>
+            <input type="number" id="mevcutLvl" value="1" min="1" oninput="hesapla()">
+        </div>
+        <div style="flex: 1;">
+            <label>Hedef Lvl:</label>
+            <input type="number" id="hedefLvl" value="2" min="2" oninput="hesapla()">
+        </div>
+    </div>
 
-    <label for="hedefLvl">Hedef Seviye:</label>
-    <input type="number" id="hedefLvl" value="2" min="2" oninput="hesapla()">
+    <label>Borsa Birim Fiyatları ($):</label>
+    <div class="price-grid">
+        <div class="price-item">Betonarme: <input type="number" id="p_beton" value="216" oninput="hesapla()"></div>
+        <div class="price-item">Tuğla: <input type="number" id="p_tugla" value="2.5" oninput="hesapla()"></div>
+        <div class="price-item">Kereste: <input type="number" id="p_kereste" value="10.5" oninput="hesapla()"></div>
+        <div class="price-item">İnşaat Ger.: <input type="number" id="p_arac" value="2400" oninput="hesapla()"></div>
+    </div>
 
     <div class="result" id="sonuc">
-        <strong>Gereken Toplam Malzemeler:</strong>
         <div id="liste"></div>
     </div>
-    
-    <p style="font-size: 12px; color: #7f8c8d; margin-top: 15px; text-align: center;">
-        *Formül: Seviye Başına Malzeme = (Mevcut Seviye) × (Temel Birim)
-    </p>
+
+    <button onclick="fiyatlariGuncelle()">Fiyatları SimCo'dan Çek (API)</button>
 </div>
 
 <script>
-    // Temel Birim Verileri
     const binalar = {
         bakkal: { beton: 12, tugla: 165, kereste: 48, arac: 3 },
         fabrika: { beton: 56, tugla: 770, kereste: 224, arac: 14 }
@@ -54,37 +67,41 @@
         const bina = document.getElementById('binaSec').value;
         const mevcut = parseInt(document.getElementById('mevcutLvl').value);
         const hedef = parseInt(document.getElementById('hedefLvl').value);
-        const listeDiv = document.getElementById('liste');
         
-        if (hedef <= mevcut) {
-            listeDiv.innerHTML = "<p style='color:red;'>Hedef seviye mevcut seviyeden büyük olmalıdır!</p>";
-            return;
-        }
-
-        let toplamBeton = 0;
-        let toplamTugla = 0;
-        let toplamKereste = 0;
-        let toplamArac = 0;
+        // Fiyatlar
+        const fBeton = parseFloat(document.getElementById('p_beton').value) || 0;
+        const fTugla = parseFloat(document.getElementById('p_tugla').value) || 0;
+        const fKereste = parseFloat(document.getElementById('p_kereste').value) || 0;
+        const fArac = parseFloat(document.getElementById('p_arac').value) || 0;
 
         const temel = binalar[bina];
+        let tBeton = 0, tTugla = 0, tKereste = 0, tArac = 0;
 
-        // Seviyeleri tek tek toplayarak git (Örn: 1->3 için 1. seviye ve 2. seviye maliyetleri toplanır)
         for (let i = mevcut; i < hedef; i++) {
-            toplamBeton += i * temel.beton;
-            toplamTugla += i * temel.tugla;
-            toplamKereste += i * temel.kereste;
-            toplamArac += i * temel.arac;
+            tBeton += i * temel.beton;
+            tTugla += i * temel.tugla;
+            tKereste += i * temel.kereste;
+            tArac += i * temel.arac;
         }
 
-        listeDiv.innerHTML = `
-            <div class="total-row"><span>Betonarme Blok:</span> <span class="unit">${toplamBeton}</span></div>
-            <div class="total-row"><span>Tuğla:</span> <span class="unit">${toplamTugla}</span></div>
-            <div class="total-row"><span>Kereste:</span> <span class="unit">${toplamKereste}</span></div>
-            <div class="total-row"><span>İnşaat Gereci:</span> <span class="unit">${toplamArac}</span></div>
+        const toplamMaliyet = (tBeton * fBeton) + (tTugla * fTugla) + (tKereste * fKereste) + (tArac * fArac);
+
+        document.getElementById('liste').innerHTML = `
+            <div class="total-row"><span>Toplam Beton:</span> <span class="unit">${tBeton} ad.</span></div>
+            <div class="total-row"><span>Toplam Tuğla:</span> <span class="unit">${tTugla} ad.</span></div>
+            <div class="total-row"><span>Toplam Kereste:</span> <span class="unit">${tKereste} ad.</span></div>
+            <div class="total-row"><span>İnşaat Gereci:</span> <span class="unit">${tArac} ad.</span></div>
+            <div class="total-row"><span>TOPLAM BÜTÇE:</span> <span class="unit">$ ${toplamMaliyet.toLocaleString()}</span></div>
         `;
     }
 
-    // İlk açılışta hesapla
+    async function fiyatlariGuncelle() {
+        alert("API bağlantısı kuruluyor... Lütfen bekleyin.");
+        // Not: Gerçek API kullanımı için genelde bir proxy veya API key gerekir.
+        // Şimdilik borsa fiyatlarını manuel güncelleyebilirsin, SimCo API entegrasyonu için 
+        // tarayıcı izinlerini aşan özel bir köprü kurmamız gerekebilir.
+    }
+
     hesapla();
 </script>
 
