@@ -2,93 +2,141 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimCo İnşaat & Yıkım Planlayıcı</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #2c3e50; color: white; display: flex; justify-content: center; padding: 20px; }
-        .app-container { background: #34495e; padding: 25px; border-radius: 15px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .bina-header { text-align: center; margin-bottom: 20px; }
-        .bina-img { width: 120px; filter: drop-shadow(0 0 5px #fff); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 10px; }
+        .bina-img { display: block; margin: 0 auto; width: 80px; }
         
-        select, input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: none; font-size: 16px; }
+        .section-title { font-weight: bold; margin-top: 20px; color: #34495e; border-left: 4px solid #3498db; padding-left: 10px; }
+        .yikim-title { border-left-color: #e74c3c; color: #c0392b; }
         
-        .section { margin-top: 20px; padding: 15px; border-radius: 10px; }
-        .yikim-box { border: 2px solid #e74c3c; background: rgba(231, 76, 60, 0.1); }
-        .yapim-box { border: 2px solid #2ecc71; background: rgba(46, 204, 113, 0.1); }
+        label { display: block; margin-top: 10px; font-size: 14px; color: #7f8c8d; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #dcdde1; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         
-        button { width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 10px; }
-        .btn-yikim { background: #e74c3c; color: white; }
-        .btn-yapim { background: #2ecc71; color: white; }
-        button:hover { opacity: 0.8; }
+        .price-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; background: #f9f9f9; padding: 10px; border-radius: 8px; }
         
-        #sonuc-ekrani { margin-top: 20px; padding: 15px; background: #ecf0f1; color: #2c3e50; border-radius: 8px; font-weight: bold; text-align: center; min-height: 40px; }
+        .result-box { margin-top: 25px; padding: 15px; border-radius: 10px; }
+        .res-yapim { background: #ebf5fb; border: 1px solid #d6eaf8; }
+        .res-yikim { background: #fdf2f2; border: 1px solid #fadbd8; margin-top: 15px; }
+        
+        .res-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; }
+        .total-price { font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; padding-top: 5px; border-top: 1px solid rgba(0,0,0,0.1); }
+        .color-yapim { color: #2980b9; }
+        .color-yikim { color: #c0392b; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="bina-header">
-        <img src="image_f149ed.png" alt="Bina Görseli" class="bina-img">
-        <h2>Bina Yönetimi</h2>
-        
-        <label>Bina Türü Seç:</label>
-        <select id="bina-tipi">
-            <option value="bakkal">Bakkal (Grocery Store)</option>
-            <option value="fabrika">Fabrika (Factory)</option>
-        </select>
+<div class="card">
+    <img src="image_f149ed.png" alt="Bina" class="bina-img">
+    <h2>🏗️ Bina Planlayıcı</h2>
+
+    <label>Bina Seç:</label>
+    <select id="binaSec" onchange="hesapla()">
+        <option value="bakkal">Bakkal (Grocery Store)</option>
+        <option value="fabrika">Fabrika (Factory)</option>
+    </select>
+
+    <div class="section-title">Yapım / Geliştirme</div>
+    <div style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+            <label>Mevcut Seviye:</label>
+            <input type="number" id="mevcutLvl" value="1" min="0" oninput="hesapla()">
+        </div>
+        <div style="flex: 1;">
+            <label>Hedef Seviye:</label>
+            <input type="number" id="hedefLvl" value="2" min="1" oninput="hesapla()">
+        </div>
     </div>
 
-    <div class="section yikim-box">
-        <h3 style="color:#e74c3c; margin-top:0;">Bina Yıkımı</h3>
-        <label>Mevcut Seviye:</label>
-        <input type="number" id="yikim-seviye" placeholder="Kaçıncı seviye?" min="1">
-        <button class="btn-yikim" onclick="yikimHesapla()">Yıkım İadesini Gör</button>
+    <div class="section-title yikim-title">Yıkım</div>
+    <label>Yıkılacak Mevcut Seviye:</label>
+    <input type="number" id="yikimLvl" value="1" min="1" oninput="hesapla()">
+
+    <div class="section-title">Birim Fiyatlar ($)</div>
+    <div class="price-inputs">
+        <div><label>Beton:</label><input type="number" id="p_beton" value="216" oninput="hesapla()"></div>
+        <div><label>Tuğla:</label><input type="number" id="p_tugla" value="2.50" oninput="hesapla()"></div>
+        <div><label>Kereste:</label><input type="number" id="p_kereste" value="10.50" oninput="hesapla()"></div>
+        <div><label>İnş.Gereci:</label><input type="number" id="p_arac" value="2400" oninput="hesapla()"></div>
     </div>
 
-    <div class="section yapim-box">
-        <h3 style="color:#2ecc71; margin-top:0;">Yapım / Geliştirme</h3>
-        <label>Şu Anki Seviye:</label>
-        <input type="number" id="yapim-mevcut" value="0" min="0">
-        
-        <label>Hedef Seviye:</label>
-        <input type="number" id="yapim-hedef" placeholder="Hedef kaç?" min="1">
-        <button class="btn-yapim" onclick="yapimHesapla()">İnşaat Giderini Gör</button>
+    <div class="result-box res-yapim">
+        <div style="font-weight:bold; color:#2980b9; margin-bottom:5px;">İnşaat İçin Gereken:</div>
+        <div id="yapimMiktar"></div>
+        <div class="total-price color-yapim" id="yapimToplam">Toplam: $0</div>
     </div>
 
-    <div id="sonuc-ekrani">İşlem bekleniyor...</div>
+    <div class="result-box res-yikim">
+        <div style="font-weight:bold; color:#c0392b; margin-bottom:5px;">Yıkımdan Gelecek İade:</div>
+        <div id="yikimMiktar"></div>
+        <div class="total-price color-yikim" id="yikimToplam">İade Değeri: $0</div>
+    </div>
 </div>
 
 <script>
-    function yikimHesapla() {
-        const bina = document.getElementById('bina-tipi').value;
-        const lvl = parseInt(document.getElementById('yikim-seviye').value);
-        
-        if(!lvl) { alert("Seviye girmelisin!"); return; }
-        
-        // Sim Companies: Yıkımda seviye başı sabit bir geri ödeme (temsili)
-        let iade = (bina === "bakkal") ? lvl * 250 : lvl * 1000;
-        document.getElementById('sonuc-ekrani').innerHTML = `${bina.toUpperCase()} için Seviye ${lvl} yıkım iadesi: $${iade}`;
+    const binalar = {
+        bakkal: { beton: 12, tugla: 165, kereste: 48, arac: 3 },
+        fabrika: { beton: 56, tugla: 770, kereste: 224, arac: 14 }
+    };
+
+    function hesapla() {
+        const binaTuru = document.getElementById('binaSec').value;
+        const temel = binalar[binaTuru];
+
+        // Fiyatlar
+        const f = {
+            beton: parseFloat(document.getElementById('p_beton').value) || 0,
+            tugla: parseFloat(document.getElementById('p_tugla').value) || 0,
+            kereste: parseFloat(document.getElementById('p_kereste').value) || 0,
+            arac: parseFloat(document.getElementById('p_arac').value) || 0
+        };
+
+        // --- YAPIM HESABI ---
+        const mevcut = parseInt(document.getElementById('mevcutLvl').value) || 0;
+        const hedef = parseInt(document.getElementById('hedefLvl').value) || 0;
+        let yap = { b: 0, t: 0, k: 0, a: 0 };
+
+        if (hedef > mevcut) {
+            for (let i = mevcut; i < hedef; i++) {
+                // Mevcut 1'den 2'ye geçerken i=1 olur, 1*temel kullanılır.
+                const katsayi = (i === 0) ? 1 : i; 
+                yap.b += katsayi * temel.beton;
+                yap.t += katsayi * temel.tugla;
+                yap.k += katsayi * temel.kereste;
+                yap.a += katsayi * temel.arac;
+            }
+        }
+        renderSonuc('yapimMiktar', 'yapimToplam', yap, f);
+
+        // --- YIKIM HESABI ---
+        // Mantık: 3sv yıkılıyorsa, 3'ten 4'e çıkarken gereken miktar iade edilir.
+        const yikimLvl = parseInt(document.getElementById('yikimLvl').value) || 0;
+        let yik = {
+            b: yikimLvl * temel.beton,
+            t: yikimLvl * temel.tugla,
+            k: yikimLvl * temel.kereste,
+            a: yikimLvl * temel.arac
+        };
+        renderSonuc('yikimMiktar', 'yikimToplam', yik, f);
     }
 
-    function yapimHesapla() {
-        const bina = document.getElementById('bina-tipi').value;
-        const mevcut = parseInt(document.getElementById('yapim-mevcut').value);
-        const hedef = parseInt(document.getElementById('yapim-hedef').value);
+    function renderSonuc(miktarId, toplamId, miktar, fiyat) {
+        const toplam = (miktar.b * fiyat.beton) + (miktar.t * fiyat.tugla) + (miktar.k * fiyat.kereste) + (miktar.a * fiyat.arac);
         
-        if(!hedef || hedef <= mevcut) { 
-            alert("Hedef seviye, mevcut seviyeden yüksek olmalı!"); 
-            return; 
-        }
-
-        // Sim Companies: Seviye atladıkça maliyet katlanır (temsili formül)
-        let toplamMaliyet = 0;
-        let birimMaliyet = (bina === "bakkal") ? 500 : 2000;
-
-        for(let i = mevcut + 1; i <= hedef; i++) {
-            toplamMaliyet += (i * birimMaliyet);
-        }
-
-        document.getElementById('sonuc-ekrani').innerHTML = 
-            `${bina.toUpperCase()} Seviye ${mevcut} → ${hedef} için gereken: $${toplamMaliyet}`;
+        document.getElementById(miktarId).innerHTML = `
+            <div class="res-row"><span>Beton:</span> <b>${miktar.b.toLocaleString()}</b></div>
+            <div class="res-row"><span>Tuğla:</span> <b>${miktar.t.toLocaleString()}</b></div>
+            <div class="res-row"><span>Kereste:</span> <b>${miktar.k.toLocaleString()}</b></div>
+            <div class="res-row"><span>İnş.Ger:</span> <b>${miktar.a.toLocaleString()}</b></div>
+        `;
+        document.getElementById(toplamId).innerText = `Değer: $${toplam.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
     }
+
+    hesapla();
 </script>
 
 </body>
