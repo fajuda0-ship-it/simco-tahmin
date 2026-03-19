@@ -1,134 +1,32 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimCo Fabrika Planlayıcı (Yükseltme & Yıkım)</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h2 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 25px; }
-        
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .input-group { background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px solid #e9ecef; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #495057; font-size: 14px; }
-        input { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 8px; box-sizing: border-box; }
-
-        .price-section { margin-top: 20px; background: #fff3cd; padding: 15px; border-radius: 12px; border: 1px solid #ffeeba; }
-        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        .result-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
-        .res-box { padding: 15px; border-radius: 12px; color: white; }
-        .upgrade-box { background: #2980b9; }
-        .scrap-box { background: #c0392b; }
-        
-        .res-title { font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; margin-bottom: 10px; text-align: center; }
-        .res-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
-        .total-money { font-size: 18px; font-weight: bold; text-align: center; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.5); padding-top: 10px; }
-        
-        .info-text { font-size: 11px; color: #7f8c8d; text-align: center; margin-top: 20px; line-height: 1.4; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <h2>🏗️ Fabrika Strateji Merkezi</h2>
-
-    <div class="grid-container">
-        <div class="input-group">
-            <label>Mevcut Seviye:</label>
-            <input type="number" id="mevcutLvl" value="3" min="1" oninput="hesapla()">
-        </div>
-        <div class="input-group">
-            <label>Hedef Seviye:</label>
-            <input type="number" id="hedefLvl" value="4" min="2" oninput="hesapla()">
-        </div>
-    </div>
-
-    <div class="price-section">
-        <label style="color: #856404;">💰 Güncel Birim Fiyatlar (Elle Giriniz):</label>
-        <div class="price-grid">
-            <input type="number" id="p_beton" placeholder="Betonarme" value="216" oninput="hesapla()">
-            <input type="number" id="p_tugla" placeholder="Tuğla" value="2.5" oninput="hesapla()">
-            <input type="number" id="p_kereste" placeholder="Kereste" value="10.5" oninput="hesapla()">
-            <input type="number" id="p_arac" placeholder="İnş. Gereci" value="2400" oninput="hesapla()">
-        </div>
-    </div>
-
-    <div class="result-container">
-        <div class="res-box upgrade-box">
-            <div class="res-title">⬆️ Yükseltme Maliyeti</div>
-            <div id="u_liste"></div>
-            <div class="total-money" id="u_toplam"></div>
-        </div>
-
-        <div class="res-box scrap-box">
-            <div class="res-title">💣 Yıkım Kazancı</div>
-            <div id="s_liste"></div>
-            <div class="total-money" id="s_toplam"></div>
-        </div>
-    </div>
-
-    <div class="info-text">
-        <strong>Yıkım Kuralı:</strong> Bir binayı yıktığınızda, o binayı mevcut seviyesine yükseltmek için kullanılan malzemelerin (mevcutLvl * temel) %100'ünü geri alırsınız.
-    </div>
+<div class="building-selection">
+    <img src="image_f149ed.png" alt="Bina İkonu" id="building-img" width="100">
+    <select id="building-select">
+        <option value="inşaat-birimi">İnşaat Birimi</option>
+        <option value="elektrik-santrali">Elektrik Santrali</option>
+        </select>
 </div>
 
-<script>
-    // Fabrika Temel Birimleri (Lvl 1 -> 2 için gereken)
-    const fabrikaTemel = { beton: 56, tugla: 770, kereste: 224, arac: 14 };
+<hr>
 
-    function hesapla() {
-        const mevcut = parseInt(document.getElementById('mevcutLvl').value) || 0;
-        const hedef = parseInt(document.getElementById('hedefLvl').value) || 0;
+<div class="action-section" id="demolition-section">
+    <h3>Bina Yıkımı</h3>
+    <label>Mevcut Seviye:</label>
+    <input type="number" id="demo-current-lvl" min="1" placeholder="Örn: 5">
+    <button onclick="calculateDemolition()">Yıkım Maliyetini Hesapla</button>
+</div>
 
-        // Fiyatlar
-        const fB = parseFloat(document.getElementById('p_beton').value) || 0;
-        const fT = parseFloat(document.getElementById('p_tugla').value) || 0;
-        const fK = parseFloat(document.getElementById('p_kereste').value) || 0;
-        const fA = parseFloat(document.getElementById('p_arac').value) || 0;
+<hr>
 
-        // 1. YÜKSELTME HESABI (Mevcut'tan Hedef'e kadar olan toplam)
-        let uB = 0, uT = 0, uK = 0, uA = 0;
-        if (hedef > mevcut) {
-            for (let i = mevcut; i < hedef; i++) {
-                uB += i * fabrikaTemel.beton;
-                uT += i * fabrikaTemel.tugla;
-                uK += i * fabrikaTemel.kereste;
-                uA += i * fabrikaTemel.arac;
-            }
-        }
-        const uToplam = (uB * fB) + (uT * fT) + (uK * fK) + (uA * fA);
+<div class="action-section" id="construction-section">
+    <h3>Bina Yapımı / Geliştirme</h3>
+    <label>Mevcut Seviye:</label>
+    <input type="number" id="const-current-lvl" min="0" value="0">
+    
+    <label>Hedef Seviye:</label>
+    <input type="number" id="const-target-lvl" min="1" placeholder="Örn: 10">
+    
+    <button onclick="calculateConstruction()">Yapım Maliyetini Hesapla</button>
+</div>
 
-        // 2. YIKIM HESABI (Sadece Mevcut seviyenin geri dönüşü)
-        // Kural: Lvl 3 fabrikayı yıkarsan 3 * temel birim alırsın.
-        let sB = mevcut * fabrikaTemel.beton;
-        let sT = mevcut * fabrikaTemel.tugla;
-        let sK = mevcut * fabrikaTemel.kereste;
-        let sA = mevcut * fabrikaTemel.arac;
-        const sToplam = (sB * fB) + (sT * fT) + (sK * fK) + (sA * fA);
-
-        // Listeleri Güncelle
-        document.getElementById('u_liste').innerHTML = `
-            <div class="res-row"><span>Beton:</span> <span>${uB}</span></div>
-            <div class="res-row"><span>Tuğla:</span> <span>${uT}</span></div>
-            <div class="res-row"><span>Kereste:</span> <span>${uK}</span></div>
-            <div class="res-row"><span>Gereç:</span> <span>${uA}</span></div>
-        `;
-        document.getElementById('u_toplam').innerText = `$${uToplam.toLocaleString()}`;
-
-        document.getElementById('s_liste').innerHTML = `
-            <div class="res-row"><span>Beton:</span> <span>${sB}</span></div>
-            <div class="res-row"><span>Tuğla:</span> <span>${sT}</span></div>
-            <div class="res-row"><span>Kereste:</span> <span>${sK}</span></div>
-            <div class="res-row"><span>Gereç:</span> <span>${sA}</span></div>
-        `;
-        document.getElementById('s_toplam').innerText = `$${sToplam.toLocaleString()}`;
-    }
-
-    // İlk çalışma
-    hesapla();
-</script>
-
-</body>
-</html>
+<div id="result-display">
+    </div>
