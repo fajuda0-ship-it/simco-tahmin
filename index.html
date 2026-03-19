@@ -1,32 +1,88 @@
-<div class="building-selection">
-    <img src="image_f149ed.png" alt="Bina İkonu" id="building-img" width="100">
-    <select id="building-select">
-        <option value="inşaat-birimi">İnşaat Birimi</option>
-        <option value="elektrik-santrali">Elektrik Santrali</option>
-        </select>
-</div>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sim Companies Hesaplayıcı</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: auto; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .section { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        h3 { margin-top: 0; color: #333; font-size: 1.1em; }
+        label { display: block; margin: 10px 0 5px; font-size: 0.9em; }
+        select, input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-yikim { background-color: #e74c3c; color: white; }
+        .btn-yapim { background-color: #2ecc71; color: white; }
+        #sonuc { margin-top: 20px; padding: 15px; background: #eef; border-radius: 5px; font-weight: bold; text-align: center; }
+        .bina-resmi { display: block; margin: 0 auto 10px; width: 100px; }
+    </style>
+</head>
+<body>
 
-<hr>
-
-<div class="action-section" id="demolition-section">
-    <h3>Bina Yıkımı</h3>
-    <label>Mevcut Seviye:</label>
-    <input type="number" id="demo-current-lvl" min="1" placeholder="Örn: 5">
-    <button onclick="calculateDemolition()">Yıkım Maliyetini Hesapla</button>
-</div>
-
-<hr>
-
-<div class="action-section" id="construction-section">
-    <h3>Bina Yapımı / Geliştirme</h3>
-    <label>Mevcut Seviye:</label>
-    <input type="number" id="const-current-lvl" min="0" value="0">
-    
-    <label>Hedef Seviye:</label>
-    <input type="number" id="const-target-lvl" min="1" placeholder="Örn: 10">
-    
-    <button onclick="calculateConstruction()">Yapım Maliyetini Hesapla</button>
-</div>
-
-<div id="result-display">
+<div class="container">
+    <div class="header">
+        <img src="image_f149ed.png" alt="Bina İkonu" class="bina-resmi">
+        <h2>İnşaat Paneli</h2>
     </div>
+
+    <div class="section">
+        <label>İşlem Yapılacak Bina:</label>
+        <select id="bina">
+            <option value="1">İnşaat Birimi</option>
+            <option value="2">Enerji Santrali</option>
+            <option value="3">Su İstasyonu</option>
+        </select>
+    </div>
+
+    <div class="section" style="border-left: 5px solid #e74c3c;">
+        <h3>Bina Yıkımı</h3>
+        <label>Mevcut Bina Seviyesi:</label>
+        <input type="number" id="yikim-seviye" min="1" placeholder="Yıkılacak seviye...">
+        <button class="btn-yikim" onclick="hesaplaYikim()">Yıkım İadesini Hesapla</button>
+    </div>
+
+    <div class="section" style="border-left: 5px solid #2ecc71;">
+        <h3>Bina Yapımı / Geliştirme</h3>
+        <label>Mevcut Seviye (Yoksa 0):</label>
+        <input type="number" id="yapim-mevcut" value="0" min="0">
+        
+        <label>Hedef Seviye:</label>
+        <input type="number" id="yapim-hedef" min="1" placeholder="Çıkılacak seviye...">
+        <button class="btn-yapim" onclick="hesaplaYapim()">İnşaat Maliyetini Hesapla</button>
+    </div>
+
+    <div id="sonuc">Sonuçlar burada görünecek.</div>
+</div>
+
+<script>
+    function hesaplaYikim() {
+        let lvl = parseInt(document.getElementById('yikim-seviye').value);
+        if(!lvl) { alert("Lütfen seviye girin"); return; }
+        
+        // Örnek Sim Companies Yıkım Mantığı (Burayı formülünle güncelleyebiliriz)
+        let iade = lvl * 500; 
+        document.getElementById('sonuc').innerHTML = `Seviye ${lvl} bina yıkıldığında tahmini iade: $${iade}`;
+    }
+
+    function hesaplaYapim() {
+        let mevcut = parseInt(document.getElementById('yapim-mevcut').value);
+        let hedef = parseInt(document.getElementById('yapim-hedef').value);
+        
+        if(!hedef || hedef <= mevcut) { 
+            alert("Hedef seviye mevcut seviyeden büyük olmalıdır!"); 
+            return; 
+        }
+
+        // Örnek Yapım Mantığı (Her seviye artışında maliyet artar)
+        let maliyet = 0;
+        for(let i = mevcut + 1; i <= hedef; i++) {
+            maliyet += (i * 1000); 
+        }
+        
+        document.getElementById('sonuc').innerHTML = `Seviye ${mevcut}'den ${hedef}'e geliştirme maliyeti: $${maliyet}`;
+    }
+</script>
+
+</body>
+</html>
