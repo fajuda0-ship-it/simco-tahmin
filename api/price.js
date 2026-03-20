@@ -1,36 +1,24 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  
-  try {
-    // Simco'yu kandırmak için gerçek bir tarayıcı gibi davranıyoruz (User-Agent)
-    const response = await fetch('https://api.simcotools.com/v1/realms/0/market/prices', {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
-      }
-    });
+function calculateProduction() {
+    const cooSkill = parseFloat(document.getElementById('coo-skill').value) || 0;
+    const rawAdmin = parseFloat(document.getElementById('raw-admin').value) || 0;
+    const labor = parseFloat(document.getElementById('labor-cost').value) || 0;
+    const inputs = parseFloat(document.getElementById('input-cost').value) || 0;
 
-    if (!response.ok) {
-      return res.status(200).json({ price: "Erişim Engellendi", code: response.status });
-    }
+    // COO Etkisi: Her beceri puanı yönetim giderini yaklaşık %1 (göreceli) düşürür
+    // Oyun içi tam formül değişkendir ama temel mantık:
+    const adminReduction = cooSkill * 0.15; // Örnek katsayı
+    const netAdmin = Math.max(0, rawAdmin - adminReduction);
 
-    const data = await response.json();
-    const list = Array.isArray(data) ? data : (data.contents || []);
+    // Gerçek Maliyet Hesaplama
+    const totalLaborWithAdmin = labor + (labor * (netAdmin / 100));
+    const finalUnitCost = inputs + totalLaborWithAdmin;
 
-    if (list.length === 0) {
-      return res.status(200).json({ price: "Veri Gelmedi", debug: "Simco bos liste yolladi" });
-    }
-
-    const item = list.find(i => String(i.resourceId) === "114" && String(i.quality) === "0");
-
-    if (item) {
-      res.status(200).json({ price: item.price });
-    } else {
-      res.status(200).json({ price: "Bulunamadı" });
-    }
-  } catch (e) {
-    res.status(200).json({ price: "Hata", detail: e.message });
-  }
+    // Ekrana Yazdır
+    document.getElementById('final-cost').innerText = "$" + finalUnitCost.toFixed(2);
+    document.getElementById('admin-saving').innerText = `COO ile Net Yönetim Gideri: %${netAdmin.toFixed(2)}`;
 }
+
+// Tüm inputlara dinleyici ekle
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', calculateProduction);
+});
