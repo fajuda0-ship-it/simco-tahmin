@@ -1,57 +1,64 @@
-// Enerji Santrali için senin verdiğin resmi veriler
+// Enerji Santrali - Senin verdiğin canlı verilere göre sabitler
 const BinaVerileri = {
     enerji: {
-        saatlikTabanUretim: 2382.03, // Seviye 1 ve %0 bonus için
-        birimIscilik: 0.17,
-        hamMadde: 0 // Enerji üretimi girdi istemez
+        tabanUretim: 2382.03, // Seviye 1 ve %0 bonus için saatlik miktar
+        birimIscilik: 0.173,   // Yuvarlanmamış gerçek işçilik (0.17 + 0.003 gibi düşün)
+        hamMadde: 0           // Enerji için girdi maliyeti yoktur
     }
 };
 
 function hesapla() {
-    // 1. Girdileri Al
+    // 1. Kullanıcı Girdilerini Al
     const lv = parseInt(document.getElementById('bina-lv').value) || 1;
-    const bonus = parseFloat(document.getElementById('uretim-bonusu').value) / 100 || 0;
+    const bonusYuzde = parseFloat(document.getElementById('uretim-bonusu').value) || 0;
     const hamAdmin = parseFloat(document.getElementById('ham-admin').value) || 0;
     const cooBecerisi = parseFloat(document.getElementById('coo-skill').value) || 0;
     const hedefAdet = parseFloat(document.getElementById('hedef-adet').value) || 0;
 
     const aktifBina = BinaVerileri.enerji;
 
-    // 2. Net Yönetim Gideri Hesabı (Harsh Etkisi)
-    // SimCo algoritması: Her yönetim puanı ham admini belli bir katsayıyla düşürür.
-    // %22.35'ten %14.98'e düşüş (30 puan için) baz alınmıştır.
+    // 2. Üretim Hızı Hesaplama (Mantık: Taban * Seviye * (1 + Bonus))
+    // Örn: %2 bonus için 1.02 ile çarpıyoruz
+    const saatlikUretim = (aktifBina.tabanUretim * lv) * (1 + (bonusYuzde / 100));
+    
+    // 3. Zaman Hesaplama (Hedef Adet / Saatlik Üretim)
+    const gerekenSure = hedefAdet / saatlikUretim;
+
+    // 4. Yönetim Gideri Hesaplama (Harsh Sachdev Etkisi)
+    // %22.35'i %14.98'e çeken Harsh'ın katsayısını uyguluyoruz
     const indirimKatsayisi = 0.2456; 
     const netAdminOrani = Math.max(0, hamAdmin - (cooBecerisi * indirimKatsayisi));
     
-    // 3. Üretim Hızı Hesabı
-    // Bonus ve Seviye üretimi doğrudan artırır
-    const guncelSaatlikUretim = (aktifBina.saatlikTabanUretim * lv) * (1 + bonus);
-    const gerekenSure = hedefAdet / guncelSaatlikUretim;
-
-    // 4. Maliyet Hesabı
+    // 5. Birim ve Toplam Maliyet
     const birimYonetimMaliyeti = aktifBina.birimIscilik * (netAdminOrani / 100);
-    const birimToplamMaliyet = aktifBina.birimIscilik + birimYonetimMaliyeti + aktifBina.hamMadde;
-    const toplamKasaCikisi = birimToplamMaliyet * hedefAdet;
+    const toplamBirimMaliyet = aktifBina.birimIscilik + birimYonetimMaliyeti + aktifBina.hamMadde;
+    const toplamKasaCikisi = toplamBirimMaliyet * hedefAdet;
 
-    // 5. Ekranı Güncelle
-    document.getElementById('res-birim-maliyet').innerText = "$" + birimToplamMaliyet.toFixed(3);
+    // 6. Sonuçları Ekrana Bas
+    document.getElementById('res-birim-maliyet').innerText = "$" + toplamBirimMaliyet.toFixed(3);
     document.getElementById('res-net-admin').innerText = "%" + netAdminOrani.toFixed(2);
     document.getElementById('res-sure').innerText = formatSure(gerekenSure);
-    document.getElementById('res-toplam-maliyet').innerText = "$" + toplamKasaCikisi.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('res-toplam-maliyet').innerText = "$" + toplamKasaCikisi.toLocaleString(undefined, {minimumFractionDigits: 2});
 }
 
-// Saat cinsinden gelen süreyi "1g 4s" formatına çevirir
+// Süre formatlayıcı (Saat -> Gün Saat Dakika)
 function formatSure(saat) {
-    if (saat < 24) return saat.toFixed(1) + " Saat";
-    const gun = Math.floor(saat / 24);
-    const kalanSaat = Math.round(saat % 24);
-    return gun + " Gün " + kalanSaat + " Saat";
+    if (saat <= 0) return "0 dk";
+    const d = Math.floor(saat / 24);
+    const h = Math.floor(saat % 24);
+    const m = Math.round((saat % 1) * 60);
+    
+    let sonuc = "";
+    if (d > 0) sonuc += d + "g ";
+    if (h > 0) sonuc += h + "s ";
+    if (m > 0 || sonuc === "") sonuc += m + "dk";
+    return sonuc;
 }
 
-// Tüm inputlara "değişiklik" dinleyicisi ekle (Anlık hesaplama için)
-document.querySelectorAll('input, select').forEach(el => {
+// Dinleyicileri Kur
+document.querySelectorAll('input').forEach(el => {
     el.addEventListener('input', hesapla);
 });
 
-// İlk açılışta bir kez hesapla
+// Sayfa yüklendiğinde çalıştır
 hesapla();
