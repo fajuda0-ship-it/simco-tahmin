@@ -2,24 +2,50 @@ am5.ready(async function() {
 
     // 1. CSV Verisini Çekme ve İşleme
     async function getCSVData() {
-        const response = await fetch('data.csv'); // Dosya adının data.csv olduğundan emin ol
-        const data = await response.text();
-        const rows = data.split('\n').slice(1); // Başlığı atla
-
-        return rows.map(row => {
-            const cols = row.split(',');
-            if (cols.length < 19) return null; // Eksik satırları atla
+        try {
+            // DOSYA ADI BURADA: Senin attığın dosya ismiyle birebir aynı yaptık
+            const response = await fetch('sim-companies-income-statement.csv');
             
-            return {
-                date: new Date(cols[0]).getTime(), // Timestamp'i milisaniyeye çevirir
-                netIncome: parseFloat(cols[18])   // NetIncome sütunu (son sütun)
-            };
-        }).filter(item => item !== null);
+            if (!response.ok) {
+                throw new Error("CSV dosyası bulunamadı! Lütfen dosya adının doğru olduğundan emin ol.");
+            }
+
+            const data = await response.text();
+            // Satırları ayır ve boş satırları temizle
+            const rows = data.split('\n').filter(row => row.trim() !== "");
+            
+            // İlk satır başlıktır, onu atlayıp verileri işle
+            const chartData = rows.slice(1).map(row => {
+                const cols = row.split(',');
+                
+                // NetIncome genellikle son sütundur (18. index)
+                // Timestamp ise ilk sütundur (0. index)
+                const timestamp = new Date(cols[0]).getTime();
+                const netIncome = parseFloat(cols[18]);
+
+                if (isNaN(timestamp) || isNaN(netIncome)) return null;
+
+                return {
+                    date: timestamp,
+                    netIncome: netIncome
+                };
+            }).filter(item => item !== null);
+
+            // Grafik için veriyi tarihe göre sıralayalım (Eskiden yeniye)
+            return chartData.sort((a, b) => a.date - b.date);
+
+        } catch (error) {
+            console.error("Hata oluştu:", error.message);
+            alert("Veri yüklenemedi: " + error.message);
+            return [];
+        }
     }
 
-    const chartData = await getCSVData();
+    const data = await getCSVData();
 
-    // 2. Grafik Kurulumu
+    if (data.length === 0) return; // Veri yoksa devam etme
+
+    // 2. Grafik Kurulumu (amCharts 5)
     var root = am5.Root.new("chartdiv");
 
     root.setThemes([am5themes_Animated.new(root)]);
@@ -32,7 +58,7 @@ am5.ready(async function() {
         pinchZoomX: true
     }));
 
-    // İmleç (Cursor) ekleme
+    // İmleç
     var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
         behavior: "zoomX"
     }));
@@ -43,7 +69,8 @@ am5.ready(async function() {
         maxDeviation: 0.2,
         baseInterval: { timeUnit: "day", count: 1 },
         renderer: am5xy.AxisRendererX.new(root, {
-            minorGridEnabled: true
+            minorGridEnabled: true,
+            minGridDistance: 70
         }),
         tooltip: am5.Tooltip.new(root, {})
     }));
@@ -52,7 +79,7 @@ am5.ready(async function() {
         renderer: am5xy.AxisRendererY.new(root, {})
     }));
 
-    // 4. Veri Serisi (Sütun Grafiği)
+    // 4. Veri Serisi (Sütun)
     var series = chart.series.push(am5xy.ColumnSeries.new(root, {
         name: "Net Gelir",
         xAxis: xAxis,
@@ -64,18 +91,18 @@ am5.ready(async function() {
         })
     }));
 
-    // Gelir durumuna göre renk değiştirme (Kâr: Yeşil, Zarar: Kırmızı)
+    // Dinamik Renklendirme: Kar (Yeşil), Zarar (Kırmızı)
     series.columns.template.adapters.add("fill", function(fill, target) {
         if (target.dataItem && target.dataItem.get("valueY") < 0) {
-            return am5.color(0xff5252); // Kırmızı
+            return am5.color(0xff5252); 
         } else {
-            return am5.color(0x69f0ae); // Yeşil
+            return am5.color(0x69f0ae);
         }
     });
 
-    series.data.setAll(chartData);
+    series.data.setAll(data);
 
-    // Animasyonlar
+    // Başlangıç animasyonları
     series.appear(1000);
     chart.appear(1000, 100);
 
