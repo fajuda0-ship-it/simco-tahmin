@@ -1,143 +1,32 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimCo İnşaat & Yıkım Planlayıcı</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        h2 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 10px; }
-        .bina-img { display: block; margin: 0 auto; width: 80px; }
-        
-        .section-title { font-weight: bold; margin-top: 20px; color: #34495e; border-left: 4px solid #3498db; padding-left: 10px; }
-        .yikim-title { border-left-color: #e74c3c; color: #c0392b; }
-        
-        label { display: block; margin-top: 10px; font-size: 14px; color: #7f8c8d; }
-        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #dcdde1; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-        
-        .price-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; background: #f9f9f9; padding: 10px; border-radius: 8px; }
-        
-        .result-box { margin-top: 25px; padding: 15px; border-radius: 10px; }
-        .res-yapim { background: #ebf5fb; border: 1px solid #d6eaf8; }
-        .res-yikim { background: #fdf2f2; border: 1px solid #fadbd8; margin-top: 15px; }
-        
-        .res-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; }
-        .total-price { font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; padding-top: 5px; border-top: 1px solid rgba(0,0,0,0.1); }
-        .color-yapim { color: #2980b9; }
-        .color-yikim { color: #c0392b; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <img src="image_f149ed.png" alt="Bina" class="bina-img">
-    <h2>🏗️ Bina Planlayıcı</h2>
-
-    <label>Bina Seç:</label>
-    <select id="binaSec" onchange="hesapla()">
-        <option value="bakkal">Bakkal (Grocery Store)</option>
-        <option value="fabrika">Fabrika (Factory)</option>
-    </select>
-
-    <div class="section-title">Yapım / Geliştirme</div>
-    <div style="display: flex; gap: 10px;">
-        <div style="flex: 1;">
-            <label>Mevcut Seviye:</label>
-            <input type="number" id="mevcutLvl" value="1" min="0" oninput="hesapla()">
+<div class="p-6 bg-slate-800 rounded-xl text-white max-w-lg mx-auto shadow-2xl">
+    <h2 class="text-xl font-bold mb-4 border-b pb-2">Üretim & COO Hesaplayıcı</h2>
+    
+    <div class="space-y-4">
+        <div>
+            <label class="block text-sm opacity-70">COO Yönetim Becerisi (Management)</label>
+            <input type="number" id="coo-skill" class="w-full p-2 bg-slate-700 rounded border border-slate-600" value="0">
         </div>
-        <div style="flex: 1;">
-            <label>Hedef Seviye:</label>
-            <input type="number" id="hedefLvl" value="2" min="1" oninput="hesapla()">
+        
+        <div>
+            <label class="block text-sm opacity-70">Ham Yönetim Gideri (%) (Profilinizde yazan)</label>
+            <input type="number" id="raw-admin" class="w-full p-2 bg-slate-700 rounded border border-slate-600" value="20">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm opacity-70">İşçilik Maliyeti ($)</label>
+                <input type="number" id="labor-cost" class="w-full p-2 bg-slate-700 rounded border border-slate-600" placeholder="Örn: 15.50">
+            </div>
+            <div>
+                <label class="block text-sm opacity-70">Ham Madde Toplam ($)</label>
+                <input type="number" id="input-cost" class="w-full p-2 bg-slate-700 rounded border border-slate-600" placeholder="Örn: 1200">
+            </div>
         </div>
     </div>
 
-    <div class="section-title yikim-title">Yıkım</div>
-    <label>Yıkılacak Mevcut Seviye:</label>
-    <input type="number" id="yikimLvl" value="1" min="1" oninput="hesapla()">
-
-    <div class="section-title">Birim Fiyatlar ($)</div>
-    <div class="price-inputs">
-        <div><label>Beton:</label><input type="number" id="p_beton" value="216" oninput="hesapla()"></div>
-        <div><label>Tuğla:</label><input type="number" id="p_tugla" value="2.50" oninput="hesapla()"></div>
-        <div><label>Kereste:</label><input type="number" id="p_kereste" value="10.50" oninput="hesapla()"></div>
-        <div><label>İnş.Gereci:</label><input type="number" id="p_arac" value="2400" oninput="hesapla()"></div>
-    </div>
-
-    <div class="result-box res-yapim">
-        <div style="font-weight:bold; color:#2980b9; margin-bottom:5px;">İnşaat İçin Gereken:</div>
-        <div id="yapimMiktar"></div>
-        <div class="total-price color-yapim" id="yapimToplam">Toplam: $0</div>
-    </div>
-
-    <div class="result-box res-yikim">
-        <div style="font-weight:bold; color:#c0392b; margin-bottom:5px;">Yıkımdan Gelecek İade:</div>
-        <div id="yikimMiktar"></div>
-        <div class="total-price color-yikim" id="yikimToplam">İade Değeri: $0</div>
+    <div class="mt-6 p-4 bg-slate-900 rounded-lg border-l-4 border-green-500">
+        <div class="text-sm opacity-70">Gerçek Birim Maliyetiniz:</div>
+        <div id="final-cost" class="text-3xl font-black text-green-400">$0.00</div>
+        <div id="admin-saving" class="text-xs text-blue-400 mt-1">COO Tasarrufu: %0</div>
     </div>
 </div>
-
-<script>
-    const binalar = {
-        bakkal: { beton: 12, tugla: 165, kereste: 48, arac: 3 },
-        fabrika: { beton: 56, tugla: 770, kereste: 224, arac: 14 }
-    };
-
-    function hesapla() {
-        const binaTuru = document.getElementById('binaSec').value;
-        const temel = binalar[binaTuru];
-
-        // Fiyatlar
-        const f = {
-            beton: parseFloat(document.getElementById('p_beton').value) || 0,
-            tugla: parseFloat(document.getElementById('p_tugla').value) || 0,
-            kereste: parseFloat(document.getElementById('p_kereste').value) || 0,
-            arac: parseFloat(document.getElementById('p_arac').value) || 0
-        };
-
-        // --- YAPIM HESABI ---
-        const mevcut = parseInt(document.getElementById('mevcutLvl').value) || 0;
-        const hedef = parseInt(document.getElementById('hedefLvl').value) || 0;
-        let yap = { b: 0, t: 0, k: 0, a: 0 };
-
-        if (hedef > mevcut) {
-            for (let i = mevcut; i < hedef; i++) {
-                // Mevcut 1'den 2'ye geçerken i=1 olur, 1*temel kullanılır.
-                const katsayi = (i === 0) ? 1 : i; 
-                yap.b += katsayi * temel.beton;
-                yap.t += katsayi * temel.tugla;
-                yap.k += katsayi * temel.kereste;
-                yap.a += katsayi * temel.arac;
-            }
-        }
-        renderSonuc('yapimMiktar', 'yapimToplam', yap, f);
-
-        // --- YIKIM HESABI ---
-        // Mantık: 3sv yıkılıyorsa, 3'ten 4'e çıkarken gereken miktar iade edilir.
-        const yikimLvl = parseInt(document.getElementById('yikimLvl').value) || 0;
-        let yik = {
-            b: yikimLvl * temel.beton,
-            t: yikimLvl * temel.tugla,
-            k: yikimLvl * temel.kereste,
-            a: yikimLvl * temel.arac
-        };
-        renderSonuc('yikimMiktar', 'yikimToplam', yik, f);
-    }
-
-    function renderSonuc(miktarId, toplamId, miktar, fiyat) {
-        const toplam = (miktar.b * fiyat.beton) + (miktar.t * fiyat.tugla) + (miktar.k * fiyat.kereste) + (miktar.a * fiyat.arac);
-        
-        document.getElementById(miktarId).innerHTML = `
-            <div class="res-row"><span>Beton:</span> <b>${miktar.b.toLocaleString()}</b></div>
-            <div class="res-row"><span>Tuğla:</span> <b>${miktar.t.toLocaleString()}</b></div>
-            <div class="res-row"><span>Kereste:</span> <b>${miktar.k.toLocaleString()}</b></div>
-            <div class="res-row"><span>İnş.Ger:</span> <b>${miktar.a.toLocaleString()}</b></div>
-        `;
-        document.getElementById(toplamId).innerText = `Değer: $${toplam.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-    }
-
-    hesapla();
-</script>
-
-</body>
-</html>
