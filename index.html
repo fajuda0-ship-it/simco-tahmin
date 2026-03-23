@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB Dijital - Bina Yükseltme Aracı</title>
+    <title>SAB Dijital - HARİTA KURMA YARDIMCISI</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: #0b0e11; color: #ffffff; display: flex; justify-content: center; padding: 40px; }
         .card { background: #161a1e; padding: 25px; border-radius: 12px; width: 420px; border: 1px solid #2b3139; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
@@ -22,17 +22,11 @@
 <body>
 
 <div class="card">
-    <h2>BİNA YÜKSELTME ARACI</h2>
+    <h2>HARİTA KURMA YARDIMCISI</h2>
     
     <div class="group">
-        <label>Üretilecek Ürün</label>
-        <select id="prod">
-            <option value="roket_motoru">Roket Motoru</option>
-            <option value="itici_gaz">İtici Gaz</option>
-            <option value="uydu">Uydu</option>
-            <option value="luks_jet">Lüks Jet</option>
-            <option value="suborbital_roket">Suborbital Roket</option>
-        </select>
+        <label>Seçili Ürün</label>
+        <input type="text" value="Roket Motoru" readonly style="color: #00d2ff; font-weight: bold;">
     </div>
 
     <div class="group">
@@ -58,10 +52,10 @@
         </select>
     </div>
 
-    <button onclick="hesapla()">STRATEJİYİ OLUŞTUR</button>
+    <button onclick="hesapla()">HESAPLA</button>
 
     <div id="results">
-        <div class="res-line">Ürün: <span id="rName" class="val"></span></div>
+        <div class="res-line">Ürün: <span class="val">Roket Motoru</span></div>
         <div class="res-line">Toplam Gereken Seviye: <span id="rTotal" class="val"></span></div>
         <div class="res-line">Bina Başı Ortalama: <span id="rPer" class="val"></span></div>
         <div id="rAdvice" class="bot-msg"></div>
@@ -69,36 +63,26 @@
 </div>
 
 <script>
-const db = {
-    "roket_motoru": { n: "Roket Motoru", b: 0.31 },
-    "itici_gaz": { n: "İtici Gaz", b: 3.5 },
-    "uydu": { n: "Uydu", b: 0.12 },
-    "luks_jet": { n: "Lüks Jet", b: 0.05 },
-    "suborbital_roket": { n: "Suborbital Roket", b: 0.08 }
-};
-
 function hesapla() {
-    const pKey = document.getElementById('prod').value;
+    const bazProd = 0.31; // Roket Motoru Lvl 1 Baz Üretim
     const target = parseFloat(document.getElementById('target').value);
     const slots = parseInt(document.getElementById('slots').value);
     const bonus = parseFloat(document.getElementById('bonus').value) / 100;
     const isBot = document.getElementById('robots').value === "yes";
     
-    const base = db[pKey].b;
     const hrTarget = target / 24;
-    const realCap = base * (1 + bonus);
+    const realCap = bazProd * (1 + bonus);
     
     const totalLvl = hrTarget / realCap;
     const perBld = Math.ceil(totalLvl / slots);
 
     document.getElementById('results').style.display = "block";
-    document.getElementById('rName').innerText = db[pKey].n;
     document.getElementById('rTotal').innerText = Math.ceil(totalLvl) + " Seviye";
-    document.getElementById('rPer').innerText = perBld + ". Seviye (Her biri)";
+    document.getElementById('rPer').innerText = perBld + ". Seviye (Her bina)";
 
     let msg = isBot 
-        ? "🤖 Robotlar aktif: İşçi maliyetinden tasarruf ediliyor, kâr marjın korundu." 
-        : "⚠️ Robot yok: Bina seviyeleri arttıkça artan işçi maliyeti kârını ciddi eritebilir!";
+        ? "🤖 Robotlar aktif: İşçi maliyeti düşük tutuluyor." 
+        : "⚠️ Robot yok: Bina seviyeleri yükseldikçe işçi maliyeti kârı eritebilir!";
     document.getElementById('rAdvice').innerText = msg;
 }
 </script>
