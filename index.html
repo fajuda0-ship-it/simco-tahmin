@@ -2,88 +2,91 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB Dijital - HARİTA KURMA YARDIMCISI</title>
+    <title>SAB Dijital - Maliyet Analizi</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background: #0b0e11; color: #ffffff; display: flex; justify-content: center; padding: 40px; }
-        .card { background: #161a1e; padding: 25px; border-radius: 12px; width: 420px; border: 1px solid #2b3139; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        h2 { color: #00d2ff; text-align: center; margin-bottom: 25px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #2b3139; padding-bottom: 15px; }
-        .group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 8px; font-size: 13px; color: #848e9c; }
-        input, select { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #474d57; background: #1e2329; color: white; outline: none; transition: 0.2s; }
-        input:focus { border-color: #00d2ff; }
-        button { width: 100%; padding: 14px; background: #00d2ff; border: none; color: #0b0e11; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; font-size: 15px; }
-        button:hover { background: #0099cc; }
-        #results { margin-top: 25px; padding: 20px; border-radius: 8px; background: #0b0e11; display: none; border-left: 4px solid #00d2ff; }
-        .res-line { margin-bottom: 10px; font-size: 15px; }
-        .val { color: #00d2ff; font-weight: bold; font-size: 18px; }
-        .bot-msg { font-size: 12px; margin-top: 15px; color: #f0b90b; padding-top: 10px; border-top: 1px dashed #474d57; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0e11; color: #e0e0e0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: #161a1e; padding: 25px; border-radius: 12px; width: 500px; border: 1px solid #2b3139; }
+        h2 { color: #00d2ff; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .section-title { font-size: 14px; color: #848e9c; margin-top: 20px; border-left: 3px solid #00d2ff; padding-left: 10px; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        label { font-size: 12px; display: block; margin-bottom: 4px; }
+        input { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #1e2329; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #00d2ff; border: none; color: #0b0e11; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; }
+        #results { margin-top: 20px; padding: 15px; border-radius: 8px; background: #0b0e11; display: none; }
+        .profit { color: #00ff88; font-weight: bold; font-size: 20px; }
+        .loss { color: #ff4444; font-weight: bold; font-size: 20px; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>HARİTA KURMA YARDIMCISI</h2>
+<div class="container">
+    <h2>MALİYET SİMÜLATÖRÜ</h2>
     
-    <div class="group">
-        <label>Seçili Ürün</label>
-        <input type="text" value="Roket Motoru" readonly style="color: #00d2ff; font-weight: bold;">
+    <div class="section-title">Alt Ürün Birim Maliyetleri</div>
+    <div class="input-grid">
+        <div><label>Alüminyum ($)</label><input type="number" id="aluPrice" value="23"></div>
+        <div><label>Çelik ($)</label><input type="number" id="steelPrice" value="12.4"></div>
+        <div><label>E-Bilgisayar ($)</label><input type="number" id="compPrice" value="1040"></div>
     </div>
 
-    <div class="group">
-        <label>Günlük Hedef Miktar (Adet)</label>
-        <input type="number" id="target" value="1000">
+    <div class="section-title">Operasyonel Giderler (1 Adet İçin)</div>
+    <div class="input-grid">
+        <div><label>İşçi Birim Mal. ($)</label><input type="number" id="labour" value="1973.31"></div>
+        <div><label>Yönetici Birim Mal. ($)</label><input type="number" id="admin" value="322.93"></div>
     </div>
 
-    <div class="group">
-        <label>Bina Slot Sayısı</label>
-        <input type="number" id="slots" value="12">
+    <div class="section-title">Piyasa</div>
+    <div class="input-grid">
+        <div><label>Borsa Satış Fiyatı ($)</label><input type="number" id="marketPrice" value="12400"></div>
+        <div><label>COO Beceri Puanı</label><input type="number" id="cooSkill" value="0"></div>
     </div>
 
-    <div class="group">
-        <label>Üretim Hızı Bonusu (%)</label>
-        <input type="number" id="bonus" value="1" step="0.5">
-    </div>
-
-    <div class="group">
-        <label>Robot Atanmış mı?</label>
-        <select id="robots">
-            <option value="yes">Evet, Robot Var</option>
-            <option value="no">Hayır, Robot Yok</option>
-        </select>
-    </div>
-
-    <button onclick="hesapla()">HESAPLA</button>
+    <button onclick="calculateProfit()">KÂR/ZARAR HESAPLA</button>
 
     <div id="results">
-        <div class="res-line">Ürün: <span class="val">Roket Motoru</span></div>
-        <div class="res-line">Toplam Gereken Seviye: <span id="rTotal" class="val"></span></div>
-        <div class="res-line">Bina Başı Ortalama: <span id="rPer" class="val"></span></div>
-        <div id="rAdvice" class="bot-msg"></div>
+        <div class="summary-item">Hammadde Toplamı: <span id="resRaw"></span></div>
+        <div class="summary-item">Üretim Maliyeti (Birim): <span id="resTotalCost"></span></div>
+        <hr style="border: 0.5px solid #333;">
+        <div class="summary-item" style="margin-top:10px;">Birim Başı Net Kâr: <span id="resNet"></span></div>
+        <div id="cooAdvice" style="font-size: 11px; color: #f0b90b; margin-top: 10px;"></div>
     </div>
 </div>
 
 <script>
-function hesapla() {
-    const bazProd = 0.31; // Roket Motoru Lvl 1 Baz Üretim
-    const target = parseFloat(document.getElementById('target').value);
-    const slots = parseInt(document.getElementById('slots').value);
-    const bonus = parseFloat(document.getElementById('bonus').value) / 100;
-    const isBot = document.getElementById('robots').value === "yes";
+function calculateProfit() {
+    // Reçete: 10 Alu, 20 Çelik, 8 Bilgisayar
+    const alu = parseFloat(document.getElementById('aluPrice').value) * 10;
+    const steel = parseFloat(document.getElementById('steelPrice').value) * 20;
+    const comp = parseFloat(document.getElementById('compPrice').value) * 8;
     
-    const hrTarget = target / 24;
-    const realCap = bazProd * (1 + bonus);
+    const labour = parseFloat(document.getElementById('labour').value);
+    const admin = parseFloat(document.getElementById('admin').value);
+    const market = parseFloat(document.getElementById('marketPrice').value);
+    const coo = parseInt(document.getElementById('cooSkill').value);
+
+    const rawTotal = alu + steel + comp;
     
-    const totalLvl = hrTarget / realCap;
-    const perBld = Math.ceil(totalLvl / slots);
+    // COO becerisi her puan için yönetim giderini yaklaşık %1 düşürür (Basit simülasyon)
+    const adminDiscount = coo * 0.01; 
+    const finalAdmin = admin * (1 - adminDiscount);
+    
+    const totalCost = rawTotal + labour + finalAdmin;
+    const netProfit = market - totalCost;
 
     document.getElementById('results').style.display = "block";
-    document.getElementById('rTotal').innerText = Math.ceil(totalLvl) + " Seviye";
-    document.getElementById('rPer').innerText = perBld + ". Seviye (Her bina)";
+    document.getElementById('resRaw').innerText = "$" + rawTotal.toLocaleString();
+    document.getElementById('resTotalCost').innerText = "$" + totalCost.toFixed(2);
+    
+    const netSpan = document.getElementById('resNet');
+    netSpan.innerText = "$" + netProfit.toFixed(2);
+    netSpan.className = netProfit >= 0 ? "profit" : "loss";
 
-    let msg = isBot 
-        ? "🤖 Robotlar aktif: İşçi maliyeti düşük tutuluyor." 
-        : "⚠️ Robot yok: Bina seviyeleri yükseldikçe işçi maliyeti kârı eritebilir!";
-    document.getElementById('rAdvice').innerText = msg;
+    if(coo > 0) {
+        document.getElementById('cooAdvice').innerText = "💡 COO sayesinde yönetim giderinden $" + (admin - finalAdmin).toFixed(2) + " tasarruf edildi.";
+    } else {
+        document.getElementById('cooAdvice').innerText = "⚠️ Yönetici becerisi girilmedi. İyi bir COO maliyeti ciddi oranda düşürebilir.";
+    }
 }
 </script>
 
