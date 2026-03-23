@@ -2,19 +2,96 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Basit Grafik</title>
+    <title>SAB Dijital - Bina Yükseltme Aracı</title>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; }
-        #chartdiv { width: 100%; height: 500px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; display: flex; justify-content: center; padding: 20px; }
+        .container { background: #1e1e1e; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 450px; border: 1px solid #333; }
+        h2 { color: #00a8ff; text-align: center; border-bottom: 2px solid #00a8ff; padding-bottom: 10px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #bbb; }
+        input, select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #2d2d2d; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #00a8ff; border: none; color: white; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #0086cc; }
+        #results { margin-top: 20px; padding: 15px; border-radius: 8px; background: #252525; display: none; border-left: 5px solid #00a8ff; }
+        .highlight { color: #00a8ff; font-weight: bold; }
+        .warning { color: #ff9f43; font-size: 13px; margin-top: 10px; font-style: italic; }
     </style>
 </head>
 <body>
-    <h2 style="text-align:center">Günlük Değer Artışı</h2>
-    <div id="chartdiv"></div>
 
-    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-    <script src="app.js"></script>
+<div class="container">
+    <h2>BİNA YÜKSELTME ARACI</h2>
+    
+    <div class="input-group">
+        <label>Hedef Günlük Üretim (Adet)</label>
+        <input type="number" id="target" value="1000">
+    </div>
+
+    <div class="input-group">
+        <label>Bina Slot Sayısı</label>
+        <input type="number" id="slots" value="12">
+    </div>
+
+    <div class="input-group">
+        <label>Üretim Hızı Bonusu (%)</label>
+        <input type="number" id="bonus" value="1" step="0.1">
+    </div>
+
+    <div class="input-group">
+        <label>Robot Atanmış mı?</label>
+        <select id="robots">
+            <option value="yes">Evet</option>
+            <option value="no">Hayır</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Baz Üretim (Lvl 1 Saatlik)</label>
+        <input type="number" id="baseProd" value="0.31" step="0.01">
+    </div>
+
+    <button onclick="calculateUpgrade()">HESAPLA</button>
+
+    <div id="results">
+        <p>Gereken Toplam Seviye: <span id="resTotalLvl" class="highlight"></span></p>
+        <p>Bina Başına Seviye: <span id="resPerBld" class="highlight"></span></p>
+        <div id="robotAdvice" class="warning"></div>
+    </div>
+</div>
+
+<script>
+function calculateUpgrade() {
+    const target = parseFloat(document.getElementById('target').value);
+    const slots = parseInt(document.getElementById('slots').value);
+    const bonus = parseFloat(document.getElementById('bonus').value) / 100;
+    const baseProd = parseFloat(document.getElementById('baseProd').value);
+    const hasRobots = document.getElementById('robots').value === "yes";
+
+    // Saatlik gereken üretim
+    const hourlyTarget = target / 24;
+    
+    // Bonuslu 1 seviye bina üretimi
+    const realProdPerLvl = baseProd * (1 + bonus);
+    
+    // Toplam gereken level
+    const totalLvlNeeded = hourlyTarget / realProdPerLvl;
+    const levelPerBld = totalLvlNeeded / slots;
+
+    // Sonuçları göster
+    document.getElementById('results').style.display = "block";
+    document.getElementById('resTotalLvl').innerText = Math.ceil(totalLvlNeeded) + " Lvl";
+    document.getElementById('resPerBld').innerText = "En az " + Math.ceil(levelPerBld) + ". Seviye";
+
+    // Robot Uyarısı
+    let advice = "";
+    if(!hasRobots) {
+        advice = "⚠️ Dikkat: Robot kullanmadığın için işçi maliyetin ürün başına ~$63 daha fazla!";
+    } else {
+        advice = "✅ Robot kullanımı sayesinde maliyet tasarrufu yapıyorsun.";
+    }
+    document.getElementById('robotAdvice').innerText = advice;
+}
+</script>
+
 </body>
 </html>
