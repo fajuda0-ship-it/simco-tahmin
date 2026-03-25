@@ -2,92 +2,167 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>SAB Dijital - Maliyet Analizi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAB Dijital - Dinamik Strateji Paneli</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0e11; color: #e0e0e0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: #161a1e; padding: 25px; border-radius: 12px; width: 500px; border: 1px solid #2b3139; }
-        h2 { color: #00d2ff; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .section-title { font-size: 14px; color: #848e9c; margin-top: 20px; border-left: 3px solid #00d2ff; padding-left: 10px; }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        label { font-size: 12px; display: block; margin-bottom: 4px; }
-        input { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #1e2329; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #00d2ff; border: none; color: #0b0e11; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; }
-        #results { margin-top: 20px; padding: 15px; border-radius: 8px; background: #0b0e11; display: none; }
-        .profit { color: #00ff88; font-weight: bold; font-size: 20px; }
-        .loss { color: #ff4444; font-weight: bold; font-size: 20px; }
-        .summary-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        
+        .main-wrapper { 
+            display: flex; 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 950px; 
+        }
+
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+            flex: 2;
+        }
+
+        .strategy-panel {
+            background: #1c2833;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            flex: 1;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            height: fit-content;
+            border-left: 4px solid #f1c40f;
+        }
+
+        h2 { color: #27ae60; text-align: center; margin-top: 0; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .strategy-panel h3 { color: #f1c40f; font-size: 1rem; text-align: center; margin-top: 0; border-bottom: 1px solid #555; padding-bottom: 10px; }
+
+        .row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .row input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; text-align: center; }
+        .header-text { font-size: 11px; color: #7f8c8d; text-align: center; font-weight: bold; }
+
+        .strat-row { margin-bottom: 20px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 2px solid #2ecc71; }
+        .strat-label { font-size: 10px; color: #bdc3c7; display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; }
+        .strat-name { font-size: 12px; color: #f1c40f; font-weight: bold; display: block; margin-bottom: 5px; }
+        .strat-value { font-size: 18px; font-weight: bold; color: #2ecc71; display: block; }
+
+        .summary-box { background: #f9f9f9; padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #27ae60; }
+        .res-line { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+        
+        .net-kar-box { margin-top: 15px; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; }
+        .win { background: #eafaf1; color: #27ae60; border: 1px solid #2ecc71; }
+        .loss { background: #fdf2f2; color: #e74c3c; border: 1px solid #e74c3c; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>MALİYET SİMÜLATÖRÜ</h2>
-    
-    <div class="section-title">Alt Ürün Birim Maliyetleri</div>
-    <div class="input-grid">
-        <div><label>Alüminyum ($)</label><input type="number" id="aluPrice" value="23"></div>
-        <div><label>Çelik ($)</label><input type="number" id="steelPrice" value="12.4"></div>
-        <div><label>E-Bilgisayar ($)</label><input type="number" id="compPrice" value="1040"></div>
+<div class="main-wrapper">
+    <!-- SOL PANEL -->
+    <div class="card">
+        <h2>🏛️ İhale Kâr Hesabı Aracı</h2>
+        <div class="row">
+            <div class="header-text">Kaynak İsmi</div>
+            <div class="header-text">Adet</div>
+            <div class="header-text">Teklif ($)</div>
+            <div class="header-text">Maliyet ($)</div>
+        </div>
+
+        <div class="row">
+            <input type="text" id="n1" value="Petrol Q3" oninput="hesapla()">
+            <input type="number" id="a1" value="6626" oninput="hesapla()">
+            <input type="number" id="t1" value="35.25" oninput="hesapla()">
+            <input type="number" id="m1" placeholder="Maliyet" oninput="hesapla()">
+        </div>
+
+        <div class="row">
+            <input type="text" id="n2" value="Demir Q0" oninput="hesapla()">
+            <input type="number" id="a2" value="79506" oninput="hesapla()">
+            <input type="number" id="t2" value="7.60" oninput="hesapla()">
+            <input type="number" id="m2" placeholder="Maliyet" oninput="hesapla()">
+        </div>
+
+        <div class="row">
+            <input type="text" id="n3" value="Metan Q0" oninput="hesapla()">
+            <input type="number" id="a3" value="13251" oninput="hesapla()">
+            <input type="number" id="t3" value="24.25" oninput="hesapla()">
+            <input type="number" id="m3" placeholder="Maliyet" oninput="hesapla()">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <label style="font-size: 11px; font-weight: bold;">Teminat Bedeli ($):</label>
+            <input type="number" id="depozito" value="114258" oninput="hesapla()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+        </div>
+
+        <div class="summary-box">
+            <div class="res-line"><span>Toplam Ödül:</span> <b id="topOdul">$0</b></div>
+            <div class="res-line"><span>Toplam Maliyet:</span> <b id="topMaliyet">$0</b></div>
+            <div class="res-line" style="color: #2980b9;"><span>Nakit İhtiyacı:</span> <b id="nakit">$0</b></div>
+        </div>
+
+        <div id="sonucKutusu" class="net-kar-box win">
+            <div id="netKar" style="font-size: 22px;">$0.00</div>
+        </div>
     </div>
 
-    <div class="section-title">Operasyonel Giderler (1 Adet İçin)</div>
-    <div class="input-grid">
-        <div><label>İşçi Birim Mal. ($)</label><input type="number" id="labour" value="1973.31"></div>
-        <div><label>Yönetici Birim Mal. ($)</label><input type="number" id="admin" value="322.93"></div>
-    </div>
+    <!-- SAĞ PANEL (DİNAMİK) -->
+    <div class="strategy-panel">
+        <h3>📊 BORSANIN %3 EKSİĞİ</h3>
+        <p style="font-size: 10px; color: #bdc3c7; text-align: center; margin-bottom: 20px;">(%3 İndirimli Ürün Maliyetleri)</p>
 
-    <div class="section-title">Piyasa</div>
-    <div class="input-grid">
-        <div><label>Borsa Satış Fiyatı ($)</label><input type="number" id="marketPrice" value="12400"></div>
-        <div><label>COO Beceri Puanı</label><input type="number" id="cooSkill" value="0"></div>
-    </div>
+        <div class="strat-row">
+            <span class="strat-label">%3 ALTI</span>
+            <span class="strat-name" id="label1">PETROL Q3</span>
+            <span class="strat-value" id="s1">$0.00</span>
+        </div>
 
-    <button onclick="calculateProfit()">KÂR/ZARAR HESAPLA</button>
+        <div class="strat-row">
+            <span class="strat-label">%3 ALTI</span>
+            <span class="strat-name" id="label2">DEMİR Q0</span>
+            <span class="strat-value" id="s2">$0.00</span>
+        </div>
 
-    <div id="results">
-        <div class="summary-item">Hammadde Toplamı: <span id="resRaw"></span></div>
-        <div class="summary-item">Üretim Maliyeti (Birim): <span id="resTotalCost"></span></div>
-        <hr style="border: 0.5px solid #333;">
-        <div class="summary-item" style="margin-top:10px;">Birim Başı Net Kâr: <span id="resNet"></span></div>
-        <div id="cooAdvice" style="font-size: 11px; color: #f0b90b; margin-top: 10px;"></div>
+        <div class="strat-row">
+            <span class="strat-label">%3 ALTI</span>
+            <span class="strat-name" id="label3">METAN Q0</span>
+            <span class="strat-value" id="s3">$0.00</span>
+        </div>
     </div>
 </div>
 
 <script>
-function calculateProfit() {
-    // Reçete: 10 Alu, 20 Çelik, 8 Bilgisayar
-    const alu = parseFloat(document.getElementById('aluPrice').value) * 10;
-    const steel = parseFloat(document.getElementById('steelPrice').value) * 20;
-    const comp = parseFloat(document.getElementById('compPrice').value) * 8;
-    
-    const labour = parseFloat(document.getElementById('labour').value);
-    const admin = parseFloat(document.getElementById('admin').value);
-    const market = parseFloat(document.getElementById('marketPrice').value);
-    const coo = parseInt(document.getElementById('cooSkill').value);
+    function hesapla() {
+        const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+        const getName = (id) => document.getElementById(id).value || "Kaynak";
 
-    const rawTotal = alu + steel + comp;
-    
-    // COO becerisi her puan için yönetim giderini yaklaşık %1 düşürür (Basit simülasyon)
-    const adminDiscount = coo * 0.01; 
-    const finalAdmin = admin * (1 - adminDiscount);
-    
-    const totalCost = rawTotal + labour + finalAdmin;
-    const netProfit = market - totalCost;
+        // İsimleri ve %3 Verilerini Güncelle
+        for(let i=1; i<=3; i++) {
+            const name = getName('n' + i);
+            const price = getVal('t' + i);
+            document.getElementById('label' + i).innerText = name.toUpperCase();
+            document.getElementById('s' + i).innerText = "$" + (price * 0.97).toFixed(4);
+        }
 
-    document.getElementById('results').style.display = "block";
-    document.getElementById('resRaw').innerText = "$" + rawTotal.toLocaleString();
-    document.getElementById('resTotalCost').innerText = "$" + totalCost.toFixed(2);
-    
-    const netSpan = document.getElementById('resNet');
-    netSpan.innerText = "$" + netProfit.toFixed(2);
-    netSpan.className = netProfit >= 0 ? "profit" : "loss";
+        // Genel Hesaplamalar
+        const a1 = getVal('a1'), t1 = getVal('t1'), m1 = getVal('m1');
+        const a2 = getVal('a2'), t2 = getVal('t2'), m2 = getVal('m2');
+        const a3 = getVal('a3'), t3 = getVal('t3'), m3 = getVal('m3');
+        const depozito = getVal('depozito');
 
-    if(coo > 0) {
-        document.getElementById('cooAdvice').innerText = "💡 COO sayesinde yönetim giderinden $" + (admin - finalAdmin).toFixed(2) + " tasarruf edildi.";
-    } else {
-        document.getElementById('cooAdvice').innerText = "⚠️ Yönetici becerisi girilmedi. İyi bir COO maliyeti ciddi oranda düşürebilir.";
+        const toplamOdul = (a1 * t1) + (a2 * t2) + (a3 * t3);
+        const toplamMaliyet = (a1 * m1) + (a2 * m2) + (a3 * m3);
+        const kar = toplamOdul - toplamMaliyet;
+        const nakitIhtiyac = toplamMaliyet + depozito;
+
+        document.getElementById('topOdul').innerText = "$" + toplamOdul.toLocaleString();
+        document.getElementById('topMaliyet').innerText = "$" + toplamMaliyet.toLocaleString();
+        document.getElementById('nakit').innerText = "$" + nakitIhtiyac.toLocaleString();
+        document.getElementById('netKar').innerText = "$" + kar.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        const kutu = document.getElementById('sonucKutusu');
+        kutu.className = kar >= 0 ? "net-kar-box win" : "net-kar-box loss";
     }
-}
+
+    hesapla();
 </script>
 
 </body>
