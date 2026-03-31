@@ -41,6 +41,14 @@
         <option value="tarla">Tarla (Plantation)</option>
         <option value="muteahhit">Genel Müteahhit (General Contractor)</option>
         <option value="elektronik">Elektronik Fabrikası (Electronics Factory)</option>
+        <option value="ciftlik">Çiftlik (Farm)</option>
+        <option value="yiyecek">Yiyecek İşleme Merkezi (Food Processing)</option>
+        <option value="yemek_servisi">Yemek Servisi (Catering)</option>
+        <option value="degirmen">Değirmen (Mill)</option>
+        <option value="icecek">İçecek Fabrikası (Beverage Factory)</option>
+        <option value="firin">Fırın (Bakery)</option>
+        <option value="beton_santrali">Beton Santrali (Concrete Plant)</option>
+        <option value="insaat_fabrikasi">İnşaat Fabrikası (Construction Factory)</option>
     </select>
 
     <div class="section-title">Yapım / Geliştirme</div>
@@ -80,7 +88,15 @@
         fabrika: { beton: 56, tugla: 770, kereste: 224, arac: 14, driveId: "" },
         tarla: { beton: 8, tugla: 110, kereste: 32, arac: 2, driveId: "" },
         muteahhit: { beton: 56, tugla: 770, kereste: 224, arac: 14, driveId: "" },
-        elektronik: { beton: 96, tugla: 1320, kereste: 384, arac: 24, driveId: "" }
+        elektronik: { beton: 96, tugla: 1320, kereste: 384, arac: 24, driveId: "" },
+        ciftlik: { beton: 12, tugla: 165, kereste: 48, arac: 3, driveId: "" },
+        yiyecek: { beton: 100, tugla: 1375, kereste: 400, arac: 25, driveId: "" },
+        yemek_servisi: { beton: 120, tugla: 1650, kereste: 480, arac: 30, driveId: "" },
+        degirmen: { beton: 32, tugla: 440, kereste: 128, arac: 8, driveId: "" },
+        icecek: { beton: 16, tugla: 220, kereste: 64, arac: 4, driveId: "" },
+        firin: { beton: 44, tugla: 605, kereste: 176, arac: 11, driveId: "" },
+        beton_santrali: { beton: 68, tugla: 935, kereste: 272, arac: 17, driveId: "" },
+        insaat_fabrikasi: { beton: 84, tugla: 1155, kereste: 336, arac: 21, driveId: "" }
     };
 
     function hesapla() {
@@ -109,8 +125,8 @@
         if (hedef > mevcut) {
             for (let i = mevcut; i < hedef; i++) {
                 let katsayi = 0;
-                // Bu binalarda Seviye 1 ve 2 aynı maliyetle başlıyor
-                if (['tarla', 'muteahhit', 'fabrika', 'elektronik'].includes(binaTuru)) {
+                // Listeye eklediğimiz neredeyse tüm binalar 1'den 2'ye geçerken maliyet artışı yaşamıyor.
+                if (['tarla', 'muteahhit', 'fabrika', 'elektronik', 'ciftlik', 'yiyecek', 'yemek_servisi', 'degirmen', 'icecek', 'firin', 'beton_santrali', 'insaat_fabrikasi'].includes(binaTuru)) {
                     katsayi = (i === 0 || i === 1) ? 1 : i;
                 } else {
                     katsayi = (i === 0) ? 1 : i;
