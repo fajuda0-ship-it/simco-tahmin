@@ -40,6 +40,7 @@
         <option value="fabrika">Fabrika (Factory)</option>
         <option value="tarla">Tarla (Plantation)</option>
         <option value="muteahhit">Genel Müteahhit (General Contractor)</option>
+        <option value="elektronik">Elektronik Fabrikası (Electronics Factory)</option>
     </select>
 
     <div class="section-title">Yapım / Geliştirme</div>
@@ -78,7 +79,8 @@
         bakkal: { beton: 12, tugla: 165, kereste: 48, arac: 3, driveId: "1iT1XOz2N5Eoz5kczQ1cfV_6cd5GTzQwo" },
         fabrika: { beton: 56, tugla: 770, kereste: 224, arac: 14, driveId: "" },
         tarla: { beton: 8, tugla: 110, kereste: 32, arac: 2, driveId: "" },
-        muteahhit: { beton: 56, tugla: 770, kereste: 224, arac: 14, driveId: "" }
+        muteahhit: { beton: 56, tugla: 770, kereste: 224, arac: 14, driveId: "" },
+        elektronik: { beton: 96, tugla: 1320, kereste: 384, arac: 24, driveId: "" }
     };
 
     function hesapla() {
@@ -107,8 +109,8 @@
         if (hedef > mevcut) {
             for (let i = mevcut; i < hedef; i++) {
                 let katsayi = 0;
-                // Genel Müteahhit, Fabrika ve Tarla için 1->2 geçişi Seviye 1 ile aynı maliyettedir.
-                if (binaTuru === 'tarla' || binaTuru === 'muteahhit' || binaTuru === 'fabrika') {
+                // Bu binalarda Seviye 1 ve 2 aynı maliyetle başlıyor
+                if (['tarla', 'muteahhit', 'fabrika', 'elektronik'].includes(binaTuru)) {
                     katsayi = (i === 0 || i === 1) ? 1 : i;
                 } else {
                     katsayi = (i === 0) ? 1 : i;
