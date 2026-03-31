@@ -3,147 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAB Dijital - Mobil Uyumlu İhale Paneli</title>
+    <title>SimCo İnşaat & Yıkım Planlayıcı</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #f4f7f6; display: flex; justify-content: center; padding: 10px; margin: 0; }
-        
-        /* ANA TAŞIYICI: Mobilde alt alta, PC'de yan yana */
-        .main-wrapper { 
-            display: flex; 
-            flex-direction: column; /* Mobilde alt alta başla */
-            gap: 15px; 
-            width: 100%; 
-            max-width: 950px; 
-        }
-
-        /* PC Ekranları için (768px'den genişse) yan yana diz */
-        @media (min-width: 768px) {
-            .main-wrapper { flex-direction: row; padding: 20px; }
-            body { padding: 20px; }
-        }
-
-        .card, .strategy-panel { border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); padding: 20px; }
-        
-        .card { background: white; flex: 2; }
-        .strategy-panel { background: #1c2833; color: white; flex: 1; border-left: 4px solid #f1c40f; }
-
-        h2 { color: #27ae60; text-align: center; margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .strategy-panel h3 { color: #f1c40f; font-size: 1rem; text-align: center; margin-top: 0; border-bottom: 1px solid #555; padding-bottom: 10px; }
-
-        /* Mobilde inputların taşmaması için grid yapısı */
-        .row { display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr; gap: 5px; margin-bottom: 10px; align-items: center; }
-        
-        /* Mobilde yazıların küçülmemesi için input fontlarını koru */
-        .row input { width: 100%; padding: 8px 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; text-align: center; }
-        .header-text { font-size: 9px; color: #7f8c8d; text-align: center; font-weight: bold; text-transform: uppercase; }
-
-        .strat-row { margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 2px solid #2ecc71; }
-        .strat-label { font-size: 9px; color: #bdc3c7; display: block; margin-bottom: 2px; }
-        .strat-name { font-size: 11px; color: #f1c40f; font-weight: bold; display: block; }
-        .strat-value { font-size: 16px; font-weight: bold; color: #2ecc71; display: block; }
-
-        .summary-box { background: #f9f9f9; padding: 12px; border-radius: 10px; margin-top: 15px; }
-        .res-line { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
-        
-        .net-kar-box { margin-top: 15px; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; }
-        .win { background: #eafaf1; color: #27ae60; border: 1px solid #2ecc71; }
-        .loss { background: #fdf2f2; color: #e74c3c; border: 1px solid #e74c3c; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 10px; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 450px; position: relative; }
+        h2 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 10px; font-size: 1.5rem; }
+        .bina-konteynir { display: flex; justify-content: center; align-items: center; background: #fdfdfd; border: 1px dashed #ddd; border-radius: 10px; margin-bottom: 15px; height: 120px; overflow: hidden; }
+        .bina-img { height: 100%; width: auto; object-fit: contain; }
+        .section-title { font-weight: bold; margin-top: 20px; color: #34495e; border-left: 4px solid #3498db; padding-left: 10px; font-size: 14px; }
+        .yikim-title { border-left-color: #e74c3c; color: #c0392b; }
+        label { display: block; margin-top: 10px; font-size: 13px; color: #7f8c8d; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #dcdde1; border-radius: 8px; font-size: 14px; }
+        .price-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; background: #f9f9f9; padding: 10px; border-radius: 8px; }
+        .result-box { margin-top: 20px; padding: 12px; border-radius: 10px; }
+        .res-yapim { background: #ebf5fb; border: 1px solid #d6eaf8; }
+        .res-yikim { background: #fdf2f2; border: 1px solid #fadbd8; margin-top: 10px; }
+        .res-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; }
+        .total-price { font-size: 16px; font-weight: bold; text-align: center; margin-top: 8px; padding-top: 5px; border-top: 1px solid rgba(0,0,0,0.1); }
+        .color-yapim { color: #2980b9; }
+        .color-yikim { color: #c0392b; }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-    <!-- SOL PANEL -->
-    <div class="card">
-        <h2>🏛️ İhale Hesaplayıcı</h2>
-        <div class="row">
-            <div class="header-text">Kaynak</div>
-            <div class="header-text">Adet</div>
-            <div class="header-text">Teklif</div>
-            <div class="header-text">Maliyet</div>
-        </div>
-
-        <div class="row">
-            <input type="text" id="n1" value="Petrol Q3" oninput="hesapla()">
-            <input type="number" id="a1" value="6626" oninput="hesapla()">
-            <input type="number" id="t1" value="35.25" oninput="hesapla()">
-            <input type="number" id="m1" placeholder="Maliyet" oninput="hesapla()">
-        </div>
-
-        <div class="row">
-            <input type="text" id="n2" value="Demir Q0" oninput="hesapla()">
-            <input type="number" id="a2" value="79506" oninput="hesapla()">
-            <input type="number" id="t2" value="7.60" oninput="hesapla()">
-            <input type="number" id="m2" placeholder="Maliyet" oninput="hesapla()">
-        </div>
-
-        <div class="row">
-            <input type="text" id="n3" value="Metan Q0" oninput="hesapla()">
-            <input type="number" id="a3" value="13251" oninput="hesapla()">
-            <input type="number" id="t3" value="24.25" oninput="hesapla()">
-            <input type="number" id="m3" placeholder="Maliyet" oninput="hesapla()">
-        </div>
-
-        <div style="margin-top: 10px;">
-            <label style="font-size: 11px; font-weight: bold;">Teminat Bedeli ($):</label>
-            <input type="number" id="depozito" value="114258" oninput="hesapla()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
-        </div>
-
-        <div class="summary-box">
-            <div class="res-line"><span>Toplam Ödül:</span> <b id="topOdul">$0</b></div>
-            <div class="res-line"><span>Toplam Maliyet:</span> <b id="topMaliyet">$0</b></div>
-            <div class="res-line" style="color: #2980b9;"><span>Nakit İhtiyacı:</span> <b id="nakit">$0</b></div>
-        </div>
-
-        <div id="sonucKutusu" class="net-kar-box win">
-            <div id="netKar" style="font-size: 20px;">$0.00</div>
-        </div>
+<div class="card">
+    <div class="bina-konteynir">
+        <img id="binaGorsel" src="" alt="Görsel Bekleniyor..." class="bina-img">
     </div>
 
-    <!-- SAĞ PANEL -->
-    <div class="strategy-panel">
-        <h3>📊 BORSA STRATEJİSİ</h3>
-        <p style="font-size: 10px; color: #bdc3c7; text-align: center; margin-bottom: 15px;">(%3 Hedef Alım Fiyatı)</p>
+    <h2>🏗️ SimCo Planlayıcı</h2>
 
-        <div class="strat-row"><span class="strat-label">HEDEF</span><span class="strat-name" id="label1">PETROL Q3</span><span class="strat-value" id="s1">$0.00</span></div>
-        <div class="strat-row"><span class="strat-label">HEDEF</span><span class="strat-name" id="label2">DEMİR Q0</span><span class="strat-value" id="s2">$0.00</span></div>
-        <div class="strat-row"><span class="strat-label">HEDEF</span><span class="strat-name" id="label3">METAN Q0</span><span class="strat-value" id="s3">$0.00</span></div>
+    <label>Bina Seç:</label>
+    <select id="binaSec" onchange="hesapla()">
+        <option value="bakkal">Bakkal (Grocery Store)</option>
+        <option value="fabrika">Fabrika (Factory)</option>
+        <option value="tarla">Tarla (Plantation)</option>
+    </select>
+
+    <div class="section-title">Yapım / Geliştirme</div>
+    <div style="display: flex; gap: 8px;">
+        <div style="flex: 1;"><label>Mevcut Seviye:</label><input type="number" id="mevcutLvl" value="1" min="0" oninput="hesapla()"></div>
+        <div style="flex: 1;"><label>Hedef Seviye:</label><input type="number" id="hedefLvl" value="2" min="1" oninput="hesapla()"></div>
+    </div>
+
+    <div class="section-title yikim-title">Yıkım</div>
+    <label>Yıkılacak Seviye:</label>
+    <input type="number" id="yikimLvl" value="1" min="1" oninput="hesapla()">
+
+    <div class="section-title">Birim Fiyatlar ($)</div>
+    <div class="price-inputs">
+        <div><label>Beton:</label><input type="number" id="p_beton" value="216" oninput="hesapla()"></div>
+        <div><label>Tuğla:</label><input type="number" id="p_tugla" value="2.50" oninput="hesapla()"></div>
+        <div><label>Kereste:</label><input type="number" id="p_kereste" value="10.50" oninput="hesapla()"></div>
+        <div><label>İnş.Gereci:</label><input type="number" id="p_arac" value="2400" oninput="hesapla()"></div>
+    </div>
+
+    <div class="result-box res-yapim">
+        <div style="font-weight:bold; color:#2980b9; margin-bottom:5px; font-size: 13px;">İnşaat İçin Gereken:</div>
+        <div id="yapimMiktar"></div>
+        <div class="total-price color-yapim" id="yapimToplam">Toplam: $0</div>
+    </div>
+
+    <div class="result-box res-yikim">
+        <div style="font-weight:bold; color:#c0392b; margin-bottom:5px; font-size: 13px;">Yıkımdan İade Değeri:</div>
+        <div id="yikimMiktar"></div>
+        <div class="total-price color-yikim" id="yikimToplam">İade: $0</div>
     </div>
 </div>
 
 <script>
-    function hesapla() {
-        const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
-        const getName = (id) => document.getElementById(id).value || "Kaynak";
+    const binalar = {
+        bakkal: { beton: 12, tugla: 165, kereste: 48, arac: 3, driveId: "1iT1XOz2N5Eoz5kczQ1cfV_6cd5GTzQwo" },
+        fabrika: { beton: 56, tugla: 770, kereste: 224, arac: 14, driveId: "" },
+        tarla: { beton: 8, tugla: 110, kereste: 32, arac: 2, driveId: "" }
+    };
 
-        for(let i=1; i<=3; i++) {
-            const name = getName('n' + i);
-            const price = getVal('t' + i);
-            document.getElementById('label' + i).innerText = name.toUpperCase();
-            document.getElementById('s' + i).innerText = "$" + (price * 0.97).toFixed(4);
+    function hesapla() {
+        const binaTuru = document.getElementById('binaSec').value;
+        const temel = binalar[binaTuru];
+        
+        // Görsel güncelleme
+        const gorselElement = document.getElementById('binaGorsel');
+        if (temel.driveId) {
+            gorselElement.src = "https://lh3.googleusercontent.com/u/0/d/" + temel.driveId;
+        } else {
+            gorselElement.src = "";
+            gorselElement.alt = binaTuru.toUpperCase() + " görseli yok";
         }
 
-        const a1 = getVal('a1'), t1 = getVal('t1'), m1 = getVal('m1');
-        const a2 = getVal('a2'), t2 = getVal('t2'), m2 = getVal('m2');
-        const a3 = getVal('a3'), t3 = getVal('t3'), m3 = getVal('m3');
-        const depozito = getVal('depozito');
+        const f = {
+            beton: parseFloat(document.getElementById('p_beton').value) || 0,
+            tugla: parseFloat(document.getElementById('p_tugla').value) || 0,
+            kereste: parseFloat(document.getElementById('p_kereste').value) || 0,
+            arac: parseFloat(document.getElementById('p_arac').value) || 0
+        };
 
-        const toplamOdul = (a1 * t1) + (a2 * t2) + (a3 * t3);
-        const toplamMaliyet = (a1 * m1) + (a2 * m2) + (a3 * m3);
-        const kar = toplamOdul - toplamMaliyet;
-        const nakitIhtiyac = toplamMaliyet + depozito;
+        const mevcut = parseInt(document.getElementById('mevcutLvl').value) || 0;
+        const hedef = parseInt(document.getElementById('hedefLvl').value) || 0;
+        let yap = { b: 0, t: 0, k: 0, a: 0 };
 
-        document.getElementById('topOdul').innerText = "$" + toplamOdul.toLocaleString();
-        document.getElementById('topMaliyet').innerText = "$" + toplamMaliyet.toLocaleString();
-        document.getElementById('nakit').innerText = "$" + nakitIhtiyac.toLocaleString();
-        document.getElementById('netKar').innerText = "$" + kar.toLocaleString(undefined, {minimumFractionDigits: 2});
+        if (hedef > mevcut) {
+            for (let i = mevcut; i < hedef; i++) {
+                let katsayi = 0;
+                if (binaTuru === 'tarla') {
+                    // Tarla Mantığı: 0->1 ve 1->2 için 1 katı, sonrası seviye kadar.
+                    katsayi = (i === 0 || i === 1) ? 1 : i;
+                } else {
+                    // Standart: 0->1 için 1 katı, sonrası seviye kadar.
+                    katsayi = (i === 0) ? 1 : i;
+                }
+                yap.b += katsayi * temel.beton;
+                yap.t += katsayi * temel.tugla;
+                yap.k += katsayi * temel.kereste;
+                yap.a += katsayi * temel.arac;
+            }
+        }
+        renderSonuc('yapimMiktar', 'yapimToplam', yap, f);
 
-        const kutu = document.getElementById('sonucKutusu');
-        kutu.className = kar >= 0 ? "net-kar-box win" : "net-kar-box loss";
+        const yikimLvl = parseInt(document.getElementById('yikimLvl').value) || 0;
+        let yik = {
+            b: yikimLvl * temel.beton,
+            t: yikimLvl * temel.tugla,
+            k: yikimLvl * temel.kereste,
+            a: yikimLvl * temel.arac
+        };
+        renderSonuc('yikimMiktar', 'yikimToplam', yik, f);
     }
-    hesapla();
-</script>
 
+    function renderSonuc(miktarId, toplamId, miktar, fiyat) {
+        const toplam = (miktar.b * fiyat.beton) + (miktar.t * fiyat.tugla) + (miktar.k * fiyat.kereste) + (miktar.a * fiyat.arac);
+        document.getElementById(miktarId).innerHTML = `
+            <div class="res-row"><span>Beton:</span> <b>${miktar.b.toLocaleString()}</b></div>
+            <div class="res-row"><span>Tuğla:</span> <b>${miktar.t.toLocaleString()}</b></div>
+            <div class="res-row"><span>Kereste:</span> <b>${miktar.k.toLocaleString()}</b></div>
+            <div class="res-row"><span>İnş.Ger:</span> <b>${miktar.a.toLocaleString()}</b></div>
+        `;
+        document.getElementById(toplamId).innerText = `Değer: $${toplam.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    }
+
+    window.onload = hesapla;
+</script>
 </body>
 </html>
